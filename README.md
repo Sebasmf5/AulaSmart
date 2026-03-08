@@ -24,7 +24,7 @@ La rama **main** cuenta con las siguientes reglas de protección configuradas en
 * **Verificación de Plantilla**: Todo PR debe completar el formato de `PULL_REQUEST_TEMPLATE.md` definido en el repositorio.
 
 ## Autores
-* Sebastián Morales Flórez - Ingeniería de Sistemas,
+* Sebastián Morales Flórez - 230231002 Ingeniería de Sistemas,
 * José Sebastian Arenas Moncada - Ingeniería de Sistemas,
-* Angela Patricia Aponte Escudero
+* Angela Patricia Aponte Escudero - 230231005 - Ingeniería de Sistemas
 * Jhon Edward Steven Loaiza - Ingeniería de Sistemas, 
