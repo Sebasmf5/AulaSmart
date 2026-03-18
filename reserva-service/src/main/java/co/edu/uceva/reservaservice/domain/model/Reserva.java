@@ -22,9 +22,6 @@ public class Reserva {
     @Column(name = "codigo _aula", nullable = false)
     private Long codigoAula;
 
-    @Column(name = "codigo_curso")
-    private String codCurso;
-
     @Column(name = "hora_inicio, nullable = false")
     private LocalDateTime horaInicio;
 
@@ -35,8 +32,21 @@ public class Reserva {
     @Column(nullable = false)
     private EstadosReserva estado;
 
+    @Column(name = "id_solicitante", nullable = false)
+    private Long idSolicitante;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol_solicitante", nullable = false)
+    private RolUsuario rolSolicitante;
+
+    // Ej: "Ingeniería de Sistemas" o el ID del programa
+    @Column(name = "codigo_programa")
+    private String codigoPrograma;
+
+    // Ej: "1" o "A"
+    @Column(name = "grupo")
+    private String grupo;
+
     @Version
     private Long version;
-
-
 }
