@@ -4,11 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="" />
+    <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/model/EstadosReserva.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/model/Reserva.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Enum" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -41,7 +53,7 @@
     <configuration name="ReservaServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="reserva-service" />
-      <option name="SPRING_BOOT_MAIN_CLASS" value="co.edu.uceva.reservaservice.delevery.rest.ReservaServiceApplication" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="co.edu.uceva.reservaservice.domain.ReservaServiceApplication" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -63,7 +75,8 @@
       <option name="presentableId" value="Default" />
       <updated>1773542133464</updated>
       <workItem from="1773542134552" duration="3227000" />
-      <workItem from="1773714748406" duration="616000" />
+      <workItem from="1773714748406" duration="3097000" />
+      <workItem from="1773753586637" duration="1856000" />
     </task>
     <servers />
   </component>
