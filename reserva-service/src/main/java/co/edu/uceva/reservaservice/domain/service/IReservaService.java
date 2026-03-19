@@ -3,8 +3,8 @@ package co.edu.uceva.reservaservice.domain.service;
 
 import co.edu.uceva.reservaservice.domain.model.Reserva;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.awt.print.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,12 +16,11 @@ public interface IReservaService {
     //create
     Reserva addReserva(Reserva reserva);
     //read
-    List<Reserva> getReservas();
-    Optional findReservaById(int id);
+    Optional<Reserva> findReservaById(Long id);
     //update
     Reserva updateReserva(Reserva reserva);
     //delete
-    void deleteReserva(int id);
+    void deleteReserva(Reserva reserva);
     List<Reserva> findAll();
     Page<Reserva> findAll(Pageable pageable);
 }
