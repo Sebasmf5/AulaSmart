@@ -5,8 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/service/IReservaService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/repository/IReservaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/repository/IReservaRepository.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -25,6 +25,10 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
 }</component>
@@ -78,7 +82,7 @@
       <workItem from="1773714748406" duration="3097000" />
       <workItem from="1773753586637" duration="1856000" />
       <workItem from="1773798460511" duration="4687000" />
-      <workItem from="1773882495326" duration="2225000" />
+      <workItem from="1773882495326" duration="5294000" />
     </task>
     <servers />
   </component>
