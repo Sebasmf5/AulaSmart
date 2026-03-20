@@ -12,11 +12,21 @@
         </processorPath>
         <module name="reserva-service" />
       </profile>
+      <profile name="Annotation profile for usuarios-service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/springframework/boot/spring-boot-configuration-processor/unknown/spring-boot-configuration-processor-unknown.jar" />
+        </processorPath>
+        <module name="usuarios-service" />
+      </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="reserva-service" options="-parameters" />
+      <module name="usuarios-service" options="-parameters" />
     </option>
   </component>
 </project>
