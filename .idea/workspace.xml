@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/model/Usuario.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/repository/IUsuarioRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/service/IUsuarioService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/service/UsuarioServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/delivery/rest/UsuarioRestController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/resources/banner.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/usuarios-service/src/main/resources/import.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/usuarios-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/UsuariosServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/UsuariosServiceApplication.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/model/Usuario.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/model/Usuario.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/service/IUsuarioService.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/service/IUsuarioService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/service/UsuarioServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/domain/service/UsuarioServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -53,8 +54,13 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.UsuariosServiceApplication.executor": "Run",
     "git-widget-placeholder": "AUS-16-Gestion-de-usuarios",
     "ignore.virus.scanning.warn.message": "true",
     "jdk.selected.JAVA_MODULE": "openjdk-23",
@@ -66,9 +72,14 @@
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
   }
 }]]></component>
-  <component name="RunManager" selected="Spring Boot.ReservaServiceApplication">
+  <component name="RunManager" selected="Spring Boot.UsuariosServiceApplication">
     <configuration name="ReservaServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
       <module name="reserva-service" />
@@ -107,7 +118,8 @@
       <workItem from="1773753586637" duration="1856000" />
       <workItem from="1773950309408" duration="2000" />
       <workItem from="1773971155876" duration="3145000" />
-      <workItem from="1774054844586" duration="2197000" />
+      <workItem from="1774054844586" duration="7073000" />
+      <workItem from="1774099506423" duration="6138000" />
     </task>
     <servers />
   </component>
