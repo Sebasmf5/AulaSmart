@@ -61,7 +61,7 @@ public class ReservaRestController {
     @PostMapping("/reservas")
     public ResponseEntity<Map<String, Object>> addReserva(@Valid @RequestBody Reserva reserva, BindingResult result) {
         if (result.hasErrors()) {
-            System.out.printf("Error en el cuerpo de solicitud: %s", result.getAllErrors());
+            System.out.printf("Error en el cuerpo de solicidtud: %s", result.getAllErrors());
         }
         Map<String, Object> response = new HashMap<>();
         Reserva nuevaReserva = reservaService.addReserva(reserva);
