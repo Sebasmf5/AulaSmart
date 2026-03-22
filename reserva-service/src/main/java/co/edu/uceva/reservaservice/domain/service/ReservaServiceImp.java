@@ -17,7 +17,7 @@ import java.util.Optional;
 public class ReservaServiceImp implements IReservaService{
 
     //inyectar la dependencia del repositorio
-    IReservaRepository reservaRepository;
+    private final IReservaRepository reservaRepository;
 
     @Override
     @Transactional
