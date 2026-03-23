@@ -27,9 +27,10 @@ public class ReservaServiceImp implements IReservaService{
         boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
                 reserva.getCodigoAula(),
                 reserva.getHoraInicio(),
-                reserva.getHoraFin(),
-                reserva.getId()
+                reserva.getHoraFin()
         );
+
+        System.out.println(estaOcupado);
         if(estaOcupado){
             throw new ReservaSolapadaException();
         }
@@ -46,11 +47,11 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
-        boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
+        boolean estaOcupado = reservaRepository.existeCruceDeHorariosUpdate(
                 reserva.getCodigoAula(),
                 reserva.getHoraInicio(),
                 reserva.getHoraFin(),
-                reserva.getId()
+                reserva.getIdReserva()
         );
 
         if(estaOcupado){

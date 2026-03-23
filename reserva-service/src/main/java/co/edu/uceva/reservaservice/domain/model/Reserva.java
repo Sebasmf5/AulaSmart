@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class Reserva {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long idReserva;
 
     @Column(name = "codigo_aula", nullable = false)
     @NotNull(message = "El código del aula es obligatorio")

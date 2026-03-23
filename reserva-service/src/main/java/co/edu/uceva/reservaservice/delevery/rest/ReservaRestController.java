@@ -83,8 +83,8 @@ public class ReservaRestController {
      */
     @DeleteMapping("/reservas")
     public ResponseEntity<Map<String, Object>> delete(@RequestBody Reserva reserva) {
-        reservaService.findReservaById(reserva.getId())
-                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getId()));
+        reservaService.findReservaById(reserva.getIdReserva())
+                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
         reservaService.deleteReserva(reserva);
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "la reserva ha sido eliminado con éxito!");
@@ -101,8 +101,8 @@ public class ReservaRestController {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
-        reservaService.findReservaById(reserva.getId())
-                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getId()));
+        reservaService.findReservaById(reserva.getIdReserva())
+                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
         Map<String, Object> response = new HashMap<>();
         Reserva reservaActualizado = reservaService.updateReserva(reserva);
         response.put(MENSAJE, "La reserva ha sido actualizado con éxito!");
