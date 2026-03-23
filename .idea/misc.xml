@@ -5,13 +5,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/reserva-service/pom.xml" />
-        <option value="$PROJECT_DIR$/aula-service/pom.xml" />
       </list>
-    </option>
-    <option name="ignoredFiles">
-      <set>
-        <option value="$PROJECT_DIR$/reserva-service/pom.xml" />
-      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_23" default="true" project-jdk-name="corretto-23" project-jdk-type="JavaSDK">

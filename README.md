@@ -1,7 +1,7 @@
 # AulaSmart - Gestión de Aulas UCEVA
 
 ## Descripción del Proyecto
-AulaSmart es una aplicación móvil desarrollada para la Unidad Central del Valle del Cauca (UCEVA) producto de la integración de las materias del séptimo semestre de ingeniería de sistemas, diseñada para optimizar la gestión y consulta de la disponibilidad de espacios físicos dentro del campus. El sistema permite a estudiantes y docentes visualizar en tiempo real qué aulas están ocupadas, qué asignatura se está impartiendo y quién es el docente responsable, facilitando la movilidad académica y el aprovechamiento de la infraestructura universitaria.
+AulaSmart es una aplicación móvil desarrollada para la Unidad Central del Valle del Cauca (UCEVA), diseñada para optimizar la gestión y consulta de la disponibilidad de espacios físicos dentro del campus. El sistema permite a estudiantes y docentes visualizar en tiempo real qué aulas están ocupadas, qué asignatura se está impartiendo y quién es el docente responsable, facilitando la movilidad académica y el aprovechamiento de la infraestructura universitaria.
 
 ## Reglas de Colaboración
 Para mantener la integridad del código y asegurar entregas de alta calidad, el equipo adopta el flujo de trabajo **GitFlow**. Se establecen las siguientes reglas de obligatorio cumplimiento para todos los desarrolladores:
@@ -27,4 +27,4 @@ La rama **main** cuenta con las siguientes reglas de protección configuradas en
 * Sebastián Morales Flórez - 230231002 Ingeniería de Sistemas,
 * José Sebastian Arenas Moncada - Ingeniería de Sistemas,
 * Angela Patricia Aponte Escudero - 230231005 - Ingeniería de Sistemas
-* Jhon Edward Steven gLoaiza - Ingeniería de Sistemas, 
+* Jhon Edward Steven Loaiza - Ingeniería de Sistemas, 
