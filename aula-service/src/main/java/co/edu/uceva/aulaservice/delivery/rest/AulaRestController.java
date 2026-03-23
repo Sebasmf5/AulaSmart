@@ -1,8 +1,14 @@
 package co.edu.uceva.aulaservice.delivery.rest;
 
+import co.edu.uceva.aulaservice.domain.exception.AulaNoEncontradaException;
+import co.edu.uceva.aulaservice.domain.exception.NoHayAulasException;
+import co.edu.uceva.aulaservice.domain.exception.PaginaSinAulasException;
 import co.edu.uceva.aulaservice.domain.service.IAulaService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -17,86 +23,44 @@ import java.util.Map;
 @RequestMapping("/api/v1/aula-service")
 public class AulaRestController {
 
-        //declaramos final el servicio para que no se pueda modificar y lo inyectamos por el constructor
-        private final IAulaService aulaService;
+    // Declaramos como final el servicio para mejorar la inmutabilidad
+    private final IAulaService aulaService;
 
+    // Constantes para los mensajes de respuesta
     private static final String MENSAJE = "mensaje";
+    private static final String AULA = "aula";
+    private static final String AULAS = "aulas";
 
-        public AulaRestController(IAulaService aulaService) {
-            this.aulaService = aulaService;
-        }
+    // Inyección de dependencia del servicio que proporciona servicios de CRUD
+    public AulaRestController(IAulaService aulaService) {
+        this.aulaService = aulaService;
+    }
 
     /**
-     * 🔹 Listar todas las aulas
+     * Listar todos los aulas.
      */
     @GetMapping("/aulas")
-    public ResponseEntity<List<Aula>> obtenerTodas() {
+    public ResponseEntity<Map<String, Object>> getAulas() {
         List<Aula> aulas = aulaService.findAll();
         if (aulas.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            throw new NoHayAulasException();
         }
-        return ResponseEntity.ok(aulas);
-    }
-
-    /**
-     * 🔹 Listar aulas por paginación
-     */
-    @GetMapping("/aula/page/{page}")
-    public ResponseEntity<List<Aula>> obtenerPaginado(@PathVariable Integer page) {
-        List<Aula> aulas = aulaService.findAll(PageRequest.of(page, 4)).getContent();
-        if (aulas.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(aulas);
-    }
-    /**
-     * 🔹 Crear aula (carga inicial desde JSON o manual)
-     */
-    @PostMapping("aula" )
-    public Aula crear(@RequestBody Aula aula) {
-        return aulaService.save(aula);
-
-    }
-
-    //pruebas
-    @PostMapping("/aulas")
-    public List<Aula> crearMasivo(@RequestBody List<Aula> aulas) {
-        return aulas.stream()
-                .map(aulaService::save)
-                .toList();
-    }
-
-    /**
-     * 🔹 Eliminar aula
-     */
-    @DeleteMapping("aula/{id}")
-    public void eliminar(@PathVariable Long id) {
-        aulaService.delete(aulaService.findById(id).orElseThrow(() -> new RuntimeException("Aula no encontrada con id: " + id)));
-    }
-
-    /**
-     * 🔹 Actualizar aula
-     */
-    @PutMapping("/aulas")
-    public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Aula aula, BindingResult result) {
-        if (result.hasErrors()) {
-            throw new ValidationException(result);
-        }
-        aulaService.findById(aula.getId());
         Map<String, Object> response = new HashMap<>();
-        Aula aulaActualizada = aulaService.update(aula);
-        response.put(MENSAJE, "El aula ha sido actualizada con éxito!");
-        response.put("aula", aulaActualizada);
+        response.put(AULAS, aulas);
         return ResponseEntity.ok(response);
     }
 
-
     /**
-     * 🔹 Obtener aula por ID
+     * Listar aulas con paginación.
      */
-    @GetMapping("aula/{id}")
-    public Aula obtenerPorId(@PathVariable Long id) {
-        return aulaService.findById(id).orElseThrow(() -> new RuntimeException("Aula no encontrada con id: " + id));
+    @GetMapping("/aula/page/{page}")
+    public ResponseEntity<Object> index(@PathVariable Integer page) {
+        Pageable pageable = PageRequest.of(page, 4);
+        Page<Aula> aulas = aulaService.findAll(pageable);
+        if (aulas.isEmpty()) {
+            throw new PaginaSinAulasException(page);
         }
+        return ResponseEntity.ok(aulas);
+    }
 
 }
