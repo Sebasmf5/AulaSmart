@@ -1,4 +1,4 @@
-package co.edu.uceva.reservaservice.domain;
+package co.edu.uceva.reservaservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

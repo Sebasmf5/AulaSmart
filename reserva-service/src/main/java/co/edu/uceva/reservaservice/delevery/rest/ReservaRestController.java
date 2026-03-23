@@ -22,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/reservas")
-@RequiredArgsConstructor
+@RequestMapping("/api/v1/reserva-service")
 public class ReservaRestController {
 
     private static final String RESERVAS = "reservas";
@@ -32,6 +31,10 @@ public class ReservaRestController {
 
     private final IReservaService reservaService;
 
+    // Inyección de dependencia del servicio que proporciona servicios de CRUD
+    public ReservaRestController(IReservaService reservaService) {
+        this.reservaService = reservaService;
+    }
     /**
      * Listar todas las reservas.
      */
@@ -49,7 +52,7 @@ public class ReservaRestController {
     /**
      * Listar reservas con paginación.
      */
-    @GetMapping("/reserva/page/{page}")
+    @GetMapping("/reservas/page/{page}")
     public ResponseEntity<Object> index(@PathVariable Integer page) {
         Pageable pageable = PageRequest.of(page, 4);
         Page<Reserva> reservas = reservaService.findAll(pageable);
