@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/rest/ReservaRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/rest/ReservaRestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/ReservaServiceApplication.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/ReservaServiceApplication.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/resources/application.properties" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -94,7 +91,7 @@
       <workItem from="1773714748406" duration="3097000" />
       <workItem from="1773753586637" duration="1856000" />
       <workItem from="1774207556879" duration="7164000" />
-      <workItem from="1774234292242" duration="4478000" />
+      <workItem from="1774234292242" duration="4941000" />
     </task>
     <servers />
   </component>

@@ -117,7 +117,7 @@ public class ReservaRestController {
         Reserva reserva = reservaService.findReservaById(id)
                 .orElseThrow(() -> new ReservaNoEncontradaException(id));
         Map<String, Object> response = new HashMap<>();
-        response.put(MENSAJE, "El producto ha sido encontrado con éxito!");
+        response.put(MENSAJE, "La reserva ha sido encontrado con éxito!");
         response.put(RESERVA, reserva);
         return ResponseEntity.ok(response);
     }
