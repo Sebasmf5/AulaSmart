@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_21_03_2026_21_56_[Changes]/shelved.patch" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_21_03_2026_21_56__Changes_.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/excepcion/GlobalExceptionHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/HorarioInvalidoException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/NoHayReservasException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/PaginaSinReservasException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/ReservaExistenteException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/ReservaNoEncontradaException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/ValidationException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/rest/ReservaRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/rest/ReservaRestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/model/Reserva.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/model/Reserva.java" afterDir="false" />
-    </list>
+    <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -87,7 +74,7 @@
       <workItem from="1773542134552" duration="3227000" />
       <workItem from="1773714748406" duration="3097000" />
       <workItem from="1773753586637" duration="1856000" />
-      <workItem from="1774207556879" duration="6289000" />
+      <workItem from="1774207556879" duration="6927000" />
     </task>
     <servers />
   </component>
