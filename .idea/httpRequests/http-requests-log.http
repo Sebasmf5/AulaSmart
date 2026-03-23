@@ -1,0 +1,1220 @@
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 249
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 0,
+  "nombreAula": "hola",
+  "codigoEdificio": "mundo",
+  "nombreEdificio": "si",
+  "capacidad": 10,
+  "codigoDependencia": "ses",
+  "nombreDependencia": "daw",
+  "codigoTipoAula": "sd",
+  "nombreTipoAula": "adsa",
+  "version": 0
+}
+
+<> 2026-03-22T160709.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 236
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 0,
+  "codigoAula": 0,
+  "nombreAula": "",
+  "codigoEdificio": "",
+  "nombreEdificio": "",
+  "capacidad": 0,
+  "codigoDependencia": "",
+  "nombreDependencia": "",
+  "codigoTipoAula": "",
+  "nombreTipoAula": "",
+  "version": 0
+}
+
+<> 2026-03-22T160636.500.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 6837
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+[
+  {"codigoAula":1,"nombreAula":"Sala 101","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":25,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":2,"nombreAula":"Laboratorio Química","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":3,"nombreAula":"Sala 102","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":4,"nombreAula":"Laboratorio Física","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":5,"nombreAula":"Auditorio Principal","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":50,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":6,"nombreAula":"Sala 201","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":24,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":7,"nombreAula":"Laboratorio Computación 1","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":35,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":8,"nombreAula":"Sala 202","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":26,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":9,"nombreAula":"Taller Electrónica","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":10,"nombreAula":"Sala 301","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":22,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":11,"nombreAula":"Laboratorio Matemáticas","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":12,"nombreAula":"Auditorio Secundario","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":40,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":13,"nombreAula":"Sala 302","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":27,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":14,"nombreAula":"Laboratorio Biología","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":15,"nombreAula":"Sala 303","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":25,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":16,"nombreAula":"Laboratorio Computación 2","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":34,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":17,"nombreAula":"Sala 401","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":26,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":18,"nombreAula":"Taller Robótica","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":19,"nombreAula":"Sala 402","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":28,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":20,"nombreAula":"Laboratorio Física 2","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":21,"nombreAula":"Auditorio Tercero","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":45,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":22,"nombreAula":"Sala 403","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":27,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":23,"nombreAula":"Taller Química","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":24,"nombreAula":"Sala 404","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":25,"nombreAula":"Laboratorio Biología 2","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":33,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":26,"nombreAula":"Sala 405","codigoEdificio":"ED2","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":27,"nombreAula":"Auditorio Cuarto","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":48,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":28,"nombreAula":"Sala 406","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":29,"nombreAula":"Laboratorio Física 3","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":30,"nombreAula":"Sala 407","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"}
+]
+
+<> 2026-03-19T234017.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 274
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 1,
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T225654.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 274
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 2,
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T225624.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 274
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 2,
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T225600.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T225548.404.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 6837
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+[
+  {"codigoAula":1,"nombreAula":"Sala 101","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":25,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":2,"nombreAula":"Laboratorio Química","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":3,"nombreAula":"Sala 102","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":4,"nombreAula":"Laboratorio Física","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":5,"nombreAula":"Auditorio Principal","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":50,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":6,"nombreAula":"Sala 201","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":24,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":7,"nombreAula":"Laboratorio Computación 1","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":35,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":8,"nombreAula":"Sala 202","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":26,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":9,"nombreAula":"Taller Electrónica","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":10,"nombreAula":"Sala 301","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":22,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":11,"nombreAula":"Laboratorio Matemáticas","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":12,"nombreAula":"Auditorio Secundario","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":40,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":13,"nombreAula":"Sala 302","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":27,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":14,"nombreAula":"Laboratorio Biología","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":15,"nombreAula":"Sala 303","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":25,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":16,"nombreAula":"Laboratorio Computación 2","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":34,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":17,"nombreAula":"Sala 401","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":26,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":18,"nombreAula":"Taller Robótica","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":19,"nombreAula":"Sala 402","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":28,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":20,"nombreAula":"Laboratorio Física 2","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":21,"nombreAula":"Auditorio Tercero","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":45,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":22,"nombreAula":"Sala 403","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":27,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":23,"nombreAula":"Taller Química","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":24,"nombreAula":"Sala 404","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":25,"nombreAula":"Laboratorio Biología 2","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":33,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":26,"nombreAula":"Sala 405","codigoEdificio":"ED2","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":27,"nombreAula":"Auditorio Cuarto","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":48,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":28,"nombreAula":"Sala 406","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":29,"nombreAula":"Laboratorio Física 3","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":30,"nombreAula":"Sala 407","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"}
+]
+
+<> 2026-03-19T225538.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/2
+Content-Type: application/json
+Content-Length: 281
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 2,
+  "codigoAula": "25",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T225338.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/2
+Content-Type: application/json
+Content-Length: 270
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": "25",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T225150.500.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 6837
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+[
+  {"codigoAula":1,"nombreAula":"Sala 101","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":25,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":2,"nombreAula":"Laboratorio Química","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":3,"nombreAula":"Sala 102","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":4,"nombreAula":"Laboratorio Física","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":5,"nombreAula":"Auditorio Principal","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":50,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":6,"nombreAula":"Sala 201","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":24,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":7,"nombreAula":"Laboratorio Computación 1","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":35,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":8,"nombreAula":"Sala 202","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":26,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":9,"nombreAula":"Taller Electrónica","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":10,"nombreAula":"Sala 301","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":22,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":11,"nombreAula":"Laboratorio Matemáticas","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":12,"nombreAula":"Auditorio Secundario","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":40,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":13,"nombreAula":"Sala 302","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":27,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":14,"nombreAula":"Laboratorio Biología","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":15,"nombreAula":"Sala 303","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":25,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":16,"nombreAula":"Laboratorio Computación 2","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":34,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":17,"nombreAula":"Sala 401","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":26,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":18,"nombreAula":"Taller Robótica","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":19,"nombreAula":"Sala 402","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":28,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":20,"nombreAula":"Laboratorio Física 2","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":21,"nombreAula":"Auditorio Tercero","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":45,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":22,"nombreAula":"Sala 403","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":27,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":23,"nombreAula":"Taller Química","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":24,"nombreAula":"Sala 404","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":25,"nombreAula":"Laboratorio Biología 2","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":33,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":26,"nombreAula":"Sala 405","codigoEdificio":"ED2","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":27,"nombreAula":"Auditorio Cuarto","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":48,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":28,"nombreAula":"Sala 406","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":29,"nombreAula":"Laboratorio Física 3","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":30,"nombreAula":"Sala 407","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"}
+]
+
+<> 2026-03-19T225142.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224939.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224928.405.json
+
+###
+
+GET http://localhost:8080/api/v1/aula-service/aulas
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-03-19T224911.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224902.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224847.404.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 6837
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+[
+  {"codigoAula":1,"nombreAula":"Sala 101","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":25,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":2,"nombreAula":"Laboratorio Química","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":3,"nombreAula":"Sala 102","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":4,"nombreAula":"Laboratorio Física","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":5,"nombreAula":"Auditorio Principal","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":50,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":6,"nombreAula":"Sala 201","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":24,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":7,"nombreAula":"Laboratorio Computación 1","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":35,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":8,"nombreAula":"Sala 202","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":26,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":9,"nombreAula":"Taller Electrónica","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":10,"nombreAula":"Sala 301","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":22,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":11,"nombreAula":"Laboratorio Matemáticas","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":12,"nombreAula":"Auditorio Secundario","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":40,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":13,"nombreAula":"Sala 302","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":27,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":14,"nombreAula":"Laboratorio Biología","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":15,"nombreAula":"Sala 303","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":25,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":16,"nombreAula":"Laboratorio Computación 2","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":34,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":17,"nombreAula":"Sala 401","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":26,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":18,"nombreAula":"Taller Robótica","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":19,"nombreAula":"Sala 402","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":28,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":20,"nombreAula":"Laboratorio Física 2","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":21,"nombreAula":"Auditorio Tercero","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":45,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":22,"nombreAula":"Sala 403","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":27,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":23,"nombreAula":"Taller Química","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":24,"nombreAula":"Sala 404","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":25,"nombreAula":"Laboratorio Biología 2","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":33,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":26,"nombreAula":"Sala 405","codigoEdificio":"ED2","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":27,"nombreAula":"Auditorio Cuarto","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":48,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":28,"nombreAula":"Sala 406","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":29,"nombreAula":"Laboratorio Física 3","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":30,"nombreAula":"Sala 407","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"}
+]
+
+<> 2026-03-19T224837.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224806.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224759.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/1
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224748.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/2
+Content-Type: application/json
+Content-Length: 263
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 1,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "100",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224714.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/2
+Content-Type: application/json
+Content-Length: 253
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 99,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+}
+
+<> 2026-03-19T224628.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/2
+Content-Type: application/json
+Content-Length: 253
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 99,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+}
+
+<> 2026-03-19T224625.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas/2
+Content-Type: application/json
+Content-Length: 253
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 99,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+}
+
+<> 2026-03-19T224557.404.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 268
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 99,
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T224531.500.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 6837
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+[
+  {"codigoAula":1,"nombreAula":"Sala 101","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":25,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":2,"nombreAula":"Laboratorio Química","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":3,"nombreAula":"Sala 102","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":4,"nombreAula":"Laboratorio Física","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":5,"nombreAula":"Auditorio Principal","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":50,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":6,"nombreAula":"Sala 201","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":24,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":7,"nombreAula":"Laboratorio Computación 1","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":35,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":8,"nombreAula":"Sala 202","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":26,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":9,"nombreAula":"Taller Electrónica","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":10,"nombreAula":"Sala 301","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":22,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":11,"nombreAula":"Laboratorio Matemáticas","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":12,"nombreAula":"Auditorio Secundario","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":40,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":13,"nombreAula":"Sala 302","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":27,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":14,"nombreAula":"Laboratorio Biología","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":15,"nombreAula":"Sala 303","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":25,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":16,"nombreAula":"Laboratorio Computación 2","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":34,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":17,"nombreAula":"Sala 401","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":26,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":18,"nombreAula":"Taller Robótica","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":19,"nombreAula":"Sala 402","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":28,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":20,"nombreAula":"Laboratorio Física 2","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":21,"nombreAula":"Auditorio Tercero","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":45,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":22,"nombreAula":"Sala 403","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":27,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":23,"nombreAula":"Taller Química","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":24,"nombreAula":"Sala 404","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":25,"nombreAula":"Laboratorio Biología 2","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":33,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":26,"nombreAula":"Sala 405","codigoEdificio":"ED2","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":27,"nombreAula":"Auditorio Cuarto","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":48,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":28,"nombreAula":"Sala 406","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":29,"nombreAula":"Laboratorio Física 3","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":30,"nombreAula":"Sala 407","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"}
+]
+
+<> 2026-03-19T224455.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/2
+Content-Type: application/json
+Content-Length: 270
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": "25",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T222806.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/2
+Content-Type: application/json
+Content-Length: 270
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": "25",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T222656.200.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/2
+Content-Type: application/json
+Content-Length: 275
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": "tralelo",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T222608.400.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/1
+Content-Type: application/json
+Content-Length: 275
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": "tralelo",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T222554.400.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/1
+Content-Type: application/json
+Content-Length: 286
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 1,
+  "codigoAula": "tralelo",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea",
+  "version": 0
+}
+
+<> 2026-03-19T222443.400.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/1
+Content-Type: application/json
+Content-Length: 270
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "id": 1,
+  "codigoAula": "tralelo",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea"
+}
+
+<> 2026-03-19T222403.400.json
+
+###
+
+PUT http://localhost:8080/api/v1/aula-service/aula/1
+Content-Type: application/json
+Content-Length: 259
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": "tralelo",
+  "nombreAula": "tralalela",
+  "codigoEdificio": "ed7",
+  "nombreEdificio": "saltamontes",
+  "capacidad": 50,
+  "codigoDependencia": "123",
+  "nombreDependencia": "321",
+  "codigoTipoAula": "tecnica",
+  "nombreTipoAula": "nidea"
+}
+
+<> 2026-03-19T222323.400.json
+
+###
+
+DELETE http://localhost:8080/api/v1/aula-service/aula/1
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+content-length: 0
+
+###
+
+GET http://localhost:8080/api/v1/aula-service/aula/2
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-03-19T221932.200.json
+
+###
+
+GET http://localhost:8080/api/v1/aula-service/aulas
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-03-19T221844.200.json
+
+###
+
+GET http://localhost:8080/api/v1/aula-service/aula/page/2
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-03-19T221827.200.json
+
+###
+
+GET http://localhost:8080/api/v1/aula-service/aulas
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-03-19T221710.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 6837
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+[
+  {"codigoAula":1,"nombreAula":"Sala 101","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":25,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":2,"nombreAula":"Laboratorio Química","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":3,"nombreAula":"Sala 102","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":4,"nombreAula":"Laboratorio Física","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":5,"nombreAula":"Auditorio Principal","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":50,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":6,"nombreAula":"Sala 201","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":24,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":7,"nombreAula":"Laboratorio Computación 1","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":35,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":8,"nombreAula":"Sala 202","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":26,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":9,"nombreAula":"Taller Electrónica","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":10,"nombreAula":"Sala 301","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":22,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":11,"nombreAula":"Laboratorio Matemáticas","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":28,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":12,"nombreAula":"Auditorio Secundario","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":40,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":13,"nombreAula":"Sala 302","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":27,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":14,"nombreAula":"Laboratorio Biología","codigoEdificio":"ED1","nombreEdificio":"Bloque B","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":15,"nombreAula":"Sala 303","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":25,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":16,"nombreAula":"Laboratorio Computación 2","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":34,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":17,"nombreAula":"Sala 401","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":26,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":18,"nombreAula":"Taller Robótica","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":19,"nombreAula":"Sala 402","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":28,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":20,"nombreAula":"Laboratorio Física 2","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":21,"nombreAula":"Auditorio Tercero","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":45,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":22,"nombreAula":"Sala 403","codigoEdificio":"ED2","nombreEdificio":"Bloque C","capacidad":27,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":23,"nombreAula":"Taller Química","codigoEdificio":"ED3","nombreEdificio":"Bloque A","capacidad":30,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Taller"},
+  {"codigoAula":24,"nombreAula":"Sala 404","codigoEdificio":"ED3","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":25,"nombreAula":"Laboratorio Biología 2","codigoEdificio":"ED1","nombreEdificio":"Bloque C","capacidad":33,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":26,"nombreAula":"Sala 405","codigoEdificio":"ED2","nombreEdificio":"Bloque A","capacidad":28,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":27,"nombreAula":"Auditorio Cuarto","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":48,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":28,"nombreAula":"Sala 406","codigoEdificio":"ED3","nombreEdificio":"Bloque C","capacidad":30,"codigoDependencia":"DEP3","nombreDependencia":"Informática","codigoTipoAula":"T1","nombreTipoAula":"Teoría"},
+  {"codigoAula":29,"nombreAula":"Laboratorio Física 3","codigoEdificio":"ED1","nombreEdificio":"Bloque A","capacidad":32,"codigoDependencia":"DEP1","nombreDependencia":"Ciencias","codigoTipoAula":"L1","nombreTipoAula":"Laboratorio"},
+  {"codigoAula":30,"nombreAula":"Sala 407","codigoEdificio":"ED2","nombreEdificio":"Bloque B","capacidad":29,"codigoDependencia":"DEP2","nombreDependencia":"Matemáticas","codigoTipoAula":"T1","nombreTipoAula":"Teoría"}
+]
+
+<> 2026-03-19T221440.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T220834.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T220704.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T220518.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T220208.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T220203.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T220042.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T215622.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T215500.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T215200.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aula
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T215121.200.json
+
+###
+
+POST http://localhost:8080/api/v1/aula-service/aulas
+Content-Type: application/json
+Content-Length: 250
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2024.3.6
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "codigoAula": 2,
+  "nombreAula": "Sala 101",
+  "codigoEdificio": "ED1",
+  "nombreEdificio": "Bloque A",
+  "capacidad": 30,
+  "codigoDependencia": "DEP1",
+  "nombreDependencia": "Ciencias",
+  "codigoTipoAula": "T1",
+  "nombreTipoAula": "Teoría"
+}
+
+<> 2026-03-19T214916.400.json
+
+###
+

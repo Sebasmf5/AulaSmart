@@ -1,0 +1,16 @@
+{
+  "aula": {
+    "capacidad": 50,
+    "codigoAula": 25,
+    "codigoDependencia": "123",
+    "codigoEdificio": "ed7",
+    "codigoTipoAula": "tecnica",
+    "id": 2,
+    "nombreAula": "tralalela",
+    "nombreDependencia": "321",
+    "nombreEdificio": "saltamontes",
+    "nombreTipoAula": "nidea",
+    "version": 1
+  },
+  "mensaje": "El aula ha sido actualizada con éxito!"
+}

@@ -1,0 +1,13 @@
+{
+  "capacidad": 30,
+  "codigoAula": 2,
+  "codigoDependencia": "DEP1",
+  "codigoEdificio": "ED1",
+  "codigoTipoAula": "T1",
+  "id": 1,
+  "nombreAula": "Sala 101",
+  "nombreDependencia": "Ciencias",
+  "nombreEdificio": "Bloque A",
+  "nombreTipoAula": "Teoría",
+  "version": 0
+}
