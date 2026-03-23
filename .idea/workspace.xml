@@ -8,7 +8,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/AulaSmart.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/AulaSmart.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/delivery/rest/AulaRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/delivery/rest/AulaRestController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/domain/model/Aula.java" beforeDir="false" afterPath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/domain/model/Aula.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/domain/service/AulaServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/domain/service/AulaServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/domain/service/IAulaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/aula-service/src/main/java/co/edu/uceva/aulaservice/domain/service/IAulaService.java" afterDir="false" />
     </list>
