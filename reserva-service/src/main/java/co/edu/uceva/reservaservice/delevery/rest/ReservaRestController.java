@@ -8,6 +8,7 @@ import co.edu.uceva.reservaservice.domain.model.Reserva;
 import co.edu.uceva.reservaservice.domain.service.IReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.LockMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

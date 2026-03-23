@@ -1,5 +1,6 @@
 package co.edu.uceva.reservaservice.domain.service;
 
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaSolapadaException;
 import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
 import co.edu.uceva.reservaservice.domain.repository.IReservaRepository;
@@ -26,10 +27,11 @@ public class ReservaServiceImp implements IReservaService{
         boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
                 reserva.getCodigoAula(),
                 reserva.getHoraInicio(),
-                reserva.getHoraFin()
+                reserva.getHoraFin(),
+                reserva.getId()
         );
         if(estaOcupado){
-            throw  new RuntimeException("Reserva ya ocupado");
+            throw new ReservaSolapadaException();
         }
         reserva.setEstado(EstadosReserva.CONFIRMADA);
         return reservaRepository.save(reserva);
@@ -44,6 +46,17 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
+        boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
+                reserva.getCodigoAula(),
+                reserva.getHoraInicio(),
+                reserva.getHoraFin(),
+                reserva.getId()
+        );
+
+        if(estaOcupado){
+            throw new ReservaSolapadaException();
+        }
+
         return reservaRepository.save(reserva);
     }
 

@@ -12,11 +12,13 @@ public interface IReservaRepository extends JpaRepository<Reserva, Long> {
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM Reserva r " +
             "WHERE r.codigoAula = :codigoAula " +
             "AND r.estado != 'CANCELADA' " +
+            "AND r.id != :idReserva " +
             "AND r.horaInicio < :horaFin " +
             "AND r.horaFin > :horaInicio")
     boolean existeCruceDeHorarios(
             @Param("codigoAula") Long codigoAula,
             @Param("horaInicio") LocalDateTime horaInicio,
-            @Param("horaFin") LocalDateTime horaFin
+            @Param("horaFin") LocalDateTime horaFin,
+            @Param("id") Long idReserva
     );
 }

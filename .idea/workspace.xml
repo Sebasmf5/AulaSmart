@@ -6,7 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/excepcion/GlobalExceptionHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/excepcion/GlobalExceptionHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/rest/ReservaRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/delevery/rest/ReservaRestController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/HorarioInvalidoException.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/excepcion/ReservaSolapadaException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/repository/IReservaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/repository/IReservaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/service/ReservaServiceImp.java" beforeDir="false" afterPath="$PROJECT_DIR$/reserva-service/src/main/java/co/edu/uceva/reservaservice/domain/service/ReservaServiceImp.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,7 +30,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HttpClientEndpointsTabState">
-    <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;754ef8ee0b67b2f4e119695dd95a9fbec6d5d40e&quot; value=&quot;###&amp;#10;POST http://localhost:8080/api/v1/reservas/reservas&amp;#10;Content-Type: application/json&amp;#10;&amp;#10;{&amp;#10;    &amp;quot;codigoAula&amp;quot;: 101,&amp;#10;    &amp;quot;horaInicio&amp;quot;: &amp;quot;2026-04-20T08:00:00&amp;quot;,&amp;#10;    &amp;quot;horaFin&amp;quot;: &amp;quot;2026-04-20T10:00:00&amp;quot;,&amp;#10;    &amp;quot;estado&amp;quot;: &amp;quot;PENDIENTE&amp;quot;,&amp;#10;    &amp;quot;idSolicitante&amp;quot;: 12345,&amp;#10;    &amp;quot;rolSolicitante&amp;quot;: &amp;quot;ESTUDIANTE&amp;quot;,&amp;#10;    &amp;quot;codigoPrograma&amp;quot;: &amp;quot;IS-7&amp;quot;,&amp;#10;    &amp;quot;grupo&amp;quot;: &amp;quot;A&amp;quot;&amp;#10;}&quot; /&gt;&#10;  &lt;entry key=&quot;b1e281bd85367c5d53562ad2872fbe591d7e1e20&quot; value=&quot;###&amp;#10;GET http://localhost:8080/api/v1/reserva-service/reservas/2&quot; /&gt;&#10;  &lt;entry key=&quot;58a3ecb33224f1ab54087f08907ff59c69278c03&quot; value=&quot;###&amp;#10;POST http://localhost:8080/api/v1/reservas/reservar&amp;#10;Content-Type: application/json&amp;#10;&amp;#10;{&amp;#10;    &amp;quot;codigoAula&amp;quot;: 101,&amp;#10;    &amp;quot;horaInicio&amp;quot;: &amp;quot;2026-04-20T08:00:00&amp;quot;,&amp;#10;    &amp;quot;horaFin&amp;quot;: &amp;quot;2026-04-20T10:00:00&amp;quot;,&amp;#10;    &amp;quot;estado&amp;quot;: &amp;quot;PENDIENTE&amp;quot;,&amp;#10;    &amp;quot;idSolicitante&amp;quot;: 12345,&amp;#10;    &amp;quot;rolSolicitante&amp;quot;: &amp;quot;ESTUDIANTE&amp;quot;,&amp;#10;    &amp;quot;codigoPrograma&amp;quot;: &amp;quot;IS-7&amp;quot;,&amp;#10;    &amp;quot;grupo&amp;quot;: &amp;quot;A&amp;quot;&amp;#10;}&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
+    <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;b1e281bd85367c5d53562ad2872fbe591d7e1e20&quot; value=&quot;###&amp;#10;GET http://localhost:8080/api/v1/reserva-service/reservas/2&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -36,27 +40,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RequestMappingsPanelOrder0": "0",
-    "RequestMappingsPanelOrder1": "1",
-    "RequestMappingsPanelWidth0": "75",
-    "RequestMappingsPanelWidth1": "75",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.ReservaServiceApplication.executor": "Run",
-    "git-widget-placeholder": "feature/AUS-20-gestion-de-reservas",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/7mo Semestre/PIAulaSmart/AulaSmart",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.ReservaServiceApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/AUS-20-gestion-de-reservas&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/7mo Semestre/PIAulaSmart/AulaSmart&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="co.edu.uceva.reservaservice" />
@@ -91,7 +95,8 @@
       <workItem from="1773714748406" duration="3097000" />
       <workItem from="1773753586637" duration="1856000" />
       <workItem from="1774207556879" duration="7164000" />
-      <workItem from="1774234292242" duration="4941000" />
+      <workItem from="1774234292242" duration="5901000" />
+      <workItem from="1774270687092" duration="1598000" />
     </task>
     <servers />
   </component>
