@@ -1,0 +1,12 @@
+co\edu\uceva\aulaservice\domain\exception\AulaNoEncontradaException.class
+co\edu\uceva\aulaservice\domain\AulaServiceApplication.class
+co\edu\uceva\aulaservice\domain\repository\IAulaRepository.class
+co\edu\uceva\aulaservice\delivery\exception\GlobalExceptionHandler.class
+co\edu\uceva\aulaservice\domain\exception\AulaExistenteException.class
+co\edu\uceva\aulaservice\domain\service\IAulaService.class
+co\edu\uceva\aulaservice\domain\exception\PaginaSinAulasException.class
+co\edu\uceva\aulaservice\domain\exception\NoHayAulasException.class
+co\edu\uceva\aulaservice\domain\model\Aula.class
+co\edu\uceva\aulaservice\domain\service\AulaServiceImpl.class
+co\edu\uceva\aulaservice\domain\exception\ValidationException.class
+co\edu\uceva\aulaservice\delivery\rest\AulaRestController.class
