@@ -19,18 +19,28 @@ public class AulaServiceImpl  implements IAulaService {
         this.repository = repository;
     }
 
-
-
     @Override
-    @Transactional(readOnly = true)
-    public List<Aula> findAll() {
-        return repository.findAll();
+    @Transactional
+    public Aula save(Aula aula) {
+        return repository.save(aula);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<Aula> findAll(Pageable pageable) {
-        return repository.findAll(pageable);
+    @Transactional
+    public void delete(Aula aula) {
+        repository.delete(aula);
+    }
+
+    @Override
+    @Transactional
+    public Optional<Aula> findById(Long id) {
+        return repository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public Aula update(Aula aula) {
+        return repository.save(aula);
     }
 
 
