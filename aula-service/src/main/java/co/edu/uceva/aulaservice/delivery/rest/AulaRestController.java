@@ -37,6 +37,67 @@ public class AulaRestController {
     }
 
     /**
+     * Crear un nuevo aula pasando el objeto en el cuerpo de la petición, usando validaciones
+     */
+    @PostMapping("/aulas")
+    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Aula aula, BindingResult result) {
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+        Map<String, Object> response = new HashMap<>();
+        Aula nuevoAula = aulaService.save(aula);
+        response.put(MENSAJE, "El aula ha sido creado con éxito!");
+        response.put(AULA, nuevoAula);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+    /**
+     * Eliminar un aula pasando el objeto en el cuerpo de la petición.
+     */
+    @DeleteMapping("/aulas")
+    public ResponseEntity<Map<String, Object>> delete(@RequestBody Aula aula) {
+        aulaService.findById(aula.getId())
+                .orElseThrow(() -> new AulaNoEncontradaException(aula.getId()));
+        aulaService.delete(aula);
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "El aula ha sido eliminado con éxito!");
+        response.put(AULA, null);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Actualizar un aula pasando el objeto en el cuerpo de la petición.
+     * @param aula: Objeto Aula que se va a actualizar
+     */
+    @PutMapping("/aulas")
+    public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Aula aula, BindingResult result) {
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+        aulaService.findById(aula.getId())
+                .orElseThrow(() -> new AulaNoEncontradaException(aula.getId()));
+        Map<String, Object> response = new HashMap<>();
+        Aula aulaActualizado = aulaService.update(aula);
+        response.put(MENSAJE, "El aula ha sido actualizado con éxito!");
+        response.put(AULA, aulaActualizado);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener un aula por su ID.
+     */
+    @GetMapping("/aulas/{id}")
+    public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "El aula ha sido encontrado con éxito!");
+        response.put(AULA, aula);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Listar todos los aulas.
      */
     @GetMapping("/aulas")
