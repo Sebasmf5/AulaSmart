@@ -1,5 +1,9 @@
 package co.edu.uceva.reservaservice.delevery.rest;
 
+import co.edu.uceva.reservaservice.domain.excepcion.NoHayReservasException;
+import co.edu.uceva.reservaservice.domain.excepcion.PaginaSinReservasException;
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
+import co.edu.uceva.reservaservice.domain.excepcion.ValidationException;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
 import co.edu.uceva.reservaservice.domain.service.IReservaService;
 import jakarta.validation.Valid;
@@ -35,7 +39,7 @@ public class ReservaRestController {
     public ResponseEntity<Map<String, Object>> getReservas() {
         List<Reserva> reservas = reservaService.findAll();
         if (reservas.isEmpty()) {
-            System.out.println("No se encontraron reservas");
+            throw new NoHayReservasException();
         }
         Map<String, Object> response = new HashMap<>();
         response.put(RESERVAS, reservas);
@@ -50,7 +54,7 @@ public class ReservaRestController {
         Pageable pageable = PageRequest.of(page, 4);
         Page<Reserva> reservas = reservaService.findAll(pageable);
         if (reservas.isEmpty()) {
-            System.out.printf("No se encontraron reservas en la pagina: " + page);
+            throw new PaginaSinReservasException(page);
         }
         return ResponseEntity.ok(reservas);
     }
@@ -61,7 +65,7 @@ public class ReservaRestController {
     @PostMapping("/reservas")
     public ResponseEntity<Map<String, Object>> addReserva(@Valid @RequestBody Reserva reserva, BindingResult result) {
         if (result.hasErrors()) {
-            System.out.printf("Error en el cuerpo de solicidtud: %s", result.getAllErrors());
+            throw new ValidationException(result);
         }
         Map<String, Object> response = new HashMap<>();
         Reserva nuevaReserva = reservaService.addReserva(reserva);
@@ -76,11 +80,29 @@ public class ReservaRestController {
     @DeleteMapping("/reservas")
     public ResponseEntity<Map<String, Object>> delete(@RequestBody Reserva reserva) {
         reservaService.findReservaById(reserva.getId())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La reserva no existe"));
+                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getId()));
         reservaService.deleteReserva(reserva);
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "la reserva ha sido eliminado con éxito!");
         response.put(RESERVA, null);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Actualizar una reserva pasando el objeto en el cuerpo de la petición.
+     * @param reserva: Objeto Reserva que se va a actualizar
+     */
+    @PutMapping("/reservas")
+    public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Reserva reserva, BindingResult result) {
+        if (result.hasErrors()) {
+            throw new ValidationException(result);
+        }
+        reservaService.findReservaById(reserva.getId())
+                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getId()));
+        Map<String, Object> response = new HashMap<>();
+        Reserva reservaActualizado = reservaService.updateReserva(reserva);
+        response.put(MENSAJE, "La reserva ha sido actualizado con éxito!");
+        response.put(RESERVA, reservaActualizado);
         return ResponseEntity.ok(response);
     }
 
@@ -90,11 +112,13 @@ public class ReservaRestController {
     @GetMapping("/reservas/{id}")
     public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id) {
         Reserva reserva = reservaService.findReservaById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La reserva no existe"));
+                .orElseThrow(() -> new ReservaNoEncontradaException(id));
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "El producto ha sido encontrado con éxito!");
         response.put(RESERVA, reserva);
         return ResponseEntity.ok(response);
     }
+
+
 
 }
