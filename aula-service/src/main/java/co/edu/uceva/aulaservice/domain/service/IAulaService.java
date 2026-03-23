@@ -9,6 +9,8 @@ import java.util.Optional;
 
 public interface IAulaService {
 
-        List<Aula> findAll();
-        Page<Aula> findAll(Pageable pageable);
+        Aula save(Aula aula);
+        void delete(Aula aula);
+        Optional<Aula> findById(Long id);
+        Aula update(Aula aula);
 }

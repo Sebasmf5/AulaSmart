@@ -44,6 +44,6 @@ public class Aula {
     private String nombreTipoAula;
 
     @Version
-    private Integer version;
+    private int version;
 
 }
