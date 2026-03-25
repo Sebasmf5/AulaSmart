@@ -1,13 +1,13 @@
-package co.edu.uceva.reservaservice.domain;
+package co.edu.uceva.aulaservice.domain;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ReservaServiceApplication {
+public class AulaServiceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ReservaServiceApplication.class, args);
+		SpringApplication.run(AulaServiceApplication.class, args);
 	}
 
 }
