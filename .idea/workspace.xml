@@ -5,11 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f92df814-e14c-49f7-b1bb-39f868a8ab87" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/usuarios-service/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/Auth/config/JwtService.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/Auth/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/Auth/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/Auth/controller/RegisterRequest.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/Auth/controller/TokenResponse.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/Auth/controller/TokenResponse.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/delivery/rest/UsuarioRestController.java" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/java/co/edu/uceva/usuariosservice/delivery/rest/UsuarioRestController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/usuarios-service/src/main/resources/import.sql" beforeDir="false" afterPath="$PROJECT_DIR$/usuarios-service/src/main/resources/import.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -21,6 +24,7 @@
       <list>
         <option value="Enum" />
         <option value="Interface" />
+        <option value="Exception" />
         <option value="Class" />
       </list>
     </option>
@@ -34,14 +38,21 @@
     &quot;assignee&quot;: &quot;JSebasAM&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Sebasmf5/AulaSmart.git&quot;,
-    &quot;accountId&quot;: &quot;da8c8f83-3784-4398-9794-b780b81c86f6&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Sebasmf5/AulaSmart.git",
+    "accountId": "aa825217-c177-401e-b62c-41b315483dfe"
   }
-}</component>
+}]]></component>
+  <component name="HttpClientEndpointsTabState">
+    <option name="cachedRequestData" value="&lt;CachedHttpClientTabRequests&gt;&#10;  &lt;entry key=&quot;fb262eb4ead17083ddbdca10e29008c2bbc45b23&quot; value=&quot;###&amp;#10;POST http://localhost:8080/api/v1/usuario-service/usuarios&amp;#10;Content-Type: application/json&amp;#10;&amp;#10;{&amp;#10;  &amp;quot;nombre&amp;quot;: &amp;quot;Sebastian&amp;quot;,&amp;#10;  &amp;quot;apellido&amp;quot;: &amp;quot;Morales&amp;quot;,&amp;#10;  &amp;quot;email&amp;quot;: &amp;quot;morales@gmail.com&amp;quot;,&amp;#10;  &amp;quot;password&amp;quot;: &amp;quot;pepe&amp;quot;,&amp;#10;  &amp;quot;rol&amp;quot;: &amp;quot;Estudiante&amp;quot;&amp;#10;}&quot; /&gt;&#10;&lt;/CachedHttpClientTabRequests&gt;" />
+  </component>
+  <component name="KubernetesApiPersistence"><![CDATA[{}]]></component>
+  <component name="KubernetesApiProvider"><![CDATA[{
+  "isMigrated": true
+}]]></component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -80,6 +91,11 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\7mo Semestre\PIAulaSmart\AulaSmart\usuarios-service\src\main\java\co\edu\uceva\usuariosservice" />
+    </key>
+  </component>
   <component name="RunManager" selected="Spring Boot.UsuariosServiceApplication">
     <configuration name="ReservaServiceApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -108,8 +124,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.22855.74" />
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.22855.74" />
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
+        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
       </set>
     </attachedChunks>
   </component>
@@ -130,6 +146,7 @@
       <workItem from="1774099506423" duration="7371000" />
       <workItem from="1774137410958" duration="2301000" />
       <workItem from="1774140150008" duration="1804000" />
+      <workItem from="1774408548919" duration="7640000" />
     </task>
     <servers />
   </component>
