@@ -9,7 +9,7 @@ public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long codigo;
 
     @NotEmpty(message = "El nombre no puede estar vacío")
     @Size(min = 2, max = 30, message = "El nombre debe tener entre 2 y 30 caracteres")
@@ -45,8 +45,8 @@ public class Usuario {
 
     // --- Getters y Setters ---
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getCodigo() { return codigo; }
+    public void setCodigo(Long id) { this.codigo = id; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
