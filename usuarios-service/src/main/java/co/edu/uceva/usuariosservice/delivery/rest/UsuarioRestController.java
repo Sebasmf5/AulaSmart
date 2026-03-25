@@ -111,9 +111,9 @@ public class UsuarioRestController {
     public ResponseEntity<Map<String, Object>> delete(@RequestBody Usuario usuario) {
         Map<String, Object> response = new HashMap<>();
         try {
-            Usuario usuarioExistente = usuarioService.findById(usuario.getId());
+            Usuario usuarioExistente = usuarioService.findById(usuario.getCodigo());
             if (usuarioExistente == null) {
-                response.put(MENSAJE, "El usuario ID: " + usuario.getId() + " no existe en la base de datos.");
+                response.put(MENSAJE, "El usuario ID: " + usuario.getCodigo() + " no existe en la base de datos.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
 
@@ -142,8 +142,8 @@ public class UsuarioRestController {
         }
 
         try {
-            if (usuarioService.findById(usuario.getId()) == null) {
-                response.put(MENSAJE, "Error: No se pudo editar, el usuario ID: " + usuario.getId() + " no existe en la base de datos.");
+            if (usuarioService.findById(usuario.getCodigo()) == null) {
+                response.put(MENSAJE, "Error: No se pudo editar, el usuario ID: " + usuario.getCodigo() + " no existe en la base de datos.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
 
