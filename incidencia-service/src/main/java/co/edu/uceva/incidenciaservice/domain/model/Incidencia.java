@@ -39,11 +39,12 @@ public class Incidencia {
     @Column(name = "carta_formal_generada", columnDefinition = "TEXT")
     private String cartaFormalGenerada;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_incidencia", nullable = false)
+    private TipoIncidencia tipoIncidencia;
+
     @Column(name = "fecha_reporte", nullable = false, updatable = false)
     private LocalDateTime fechaReporte;
-
-    @Version
-    private Long version;
 
     @PrePersist
     protected void onCreate() {

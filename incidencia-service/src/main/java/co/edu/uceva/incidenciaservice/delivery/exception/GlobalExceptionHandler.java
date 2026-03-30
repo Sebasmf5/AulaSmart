@@ -2,6 +2,8 @@ package co.edu.uceva.incidenciaservice.delivery.exception;
 
 import co.edu.uceva.incidenciaservice.domain.exception.IncidenciaNoEncontradaException;
 import co.edu.uceva.incidenciaservice.domain.exception.NoHayIncidenciasException;
+import co.edu.uceva.incidenciaservice.domain.exception.PaginaSinIncidenciasException;
+import co.edu.uceva.incidenciaservice.domain.exception.ValidationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -35,6 +38,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(PaginaSinIncidenciasException.class)
+    public ResponseEntity<Map<String, Object>> handlePaginaSinIncidencias(PaginaSinIncidenciasException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put(ERROR, ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Map<String, Object>> handleDataAccessException(DataAccessException ex) {
         Map<String, Object> response = new HashMap<>();
@@ -49,5 +59,16 @@ public class GlobalExceptionHandler {
         response.put(ERROR, "Error inesperado en el servidor: " + ex.getMessage());
         response.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(ValidationException.class)
+    public ResponseEntity<Map<String, Object>> handleValidationException(ValidationException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, ex.getMessage());
+
+        List<String> errores = ex.result.getFieldErrors()
+                        .stream().map(error ->  "El campo " + error.getField() + " " + error.getDefaultMessage()).toList();
+        response.put(ERROR, errores);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

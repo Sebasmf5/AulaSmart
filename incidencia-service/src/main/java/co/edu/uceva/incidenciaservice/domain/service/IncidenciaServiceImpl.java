@@ -2,12 +2,16 @@ package co.edu.uceva.incidenciaservice.domain.service;
 
 import co.edu.uceva.incidenciaservice.domain.model.Incidencia;
 import co.edu.uceva.incidenciaservice.domain.repository.IIncidenciaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class IncidenciaServiceImpl implements IIncidenciaService {
 
     private final IIncidenciaRepository incidenciaRepository;
@@ -22,11 +26,17 @@ public class IncidenciaServiceImpl implements IIncidenciaService {
     }
 
     @Override
+    public Page<Incidencia> findAll(Pageable pageable) {
+        return incidenciaRepository.findAll(pageable);
+    }
+
+    @Override
     public Optional<Incidencia> findById(Long id) {
         return incidenciaRepository.findById(id);
     }
 
     @Override
+    @Transactional
     public Incidencia save(Incidencia incidencia) {
         // TODO: MÁS ADELANTE AQUÍ INYECTAREMOS LA LÓGICA DE GEMINI (SPRING AI)
         // 1. Llamar al aula-service usando FeignClient para saber cómo se llama el aula.
@@ -37,11 +47,13 @@ public class IncidenciaServiceImpl implements IIncidenciaService {
     }
 
     @Override
+    @Transactional
     public Incidencia update(Incidencia incidencia) {
         return incidenciaRepository.save(incidencia);
     }
 
     @Override
+    @Transactional
     public void delete(Incidencia incidencia) {
         incidenciaRepository.delete(incidencia);
     }
