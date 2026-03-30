@@ -14,7 +14,7 @@ public class Aula {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //dependo de stiven
+    // dependo de stiven
     @Column(name = "codigoAula", nullable = false)
     private Long codigoAula;
 
@@ -27,7 +27,7 @@ public class Aula {
     @Column(name = "nombreEdificio", nullable = false)
     private String nombreEdificio;
 
-    //cantidad de sillas del aula
+    // cantidad de sillas del aula
     @Column(name = "capacidad", nullable = false)
     private Integer capacidad;
 
@@ -37,7 +37,7 @@ public class Aula {
     @Column(name = "nombreDependencia", nullable = false)
     private String nombreDependencia;
 
-    @Column(name= "codigoTipoAula", nullable = false)
+    @Column(name = "codigoTipoAula", nullable = false)
     private String codigoTipoAula;
 
     @Column(name = "nombreTipoAula", nullable = false)

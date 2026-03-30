@@ -1,4 +1,4 @@
-package co.edu.uceva.aulaservice.domain;
+package co.edu.uceva.aulaservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
