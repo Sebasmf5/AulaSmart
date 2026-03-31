@@ -37,7 +37,7 @@ public class Usuario {
 
     @NotEmpty(message = "El rol no puede estar vacío")
     @Pattern(
-            regexp = "^(Estudiante|Coordinador|Docente|Administrativo|Decano|Rector|Administrador|Monitor|Directivo)$",
+            regexp = "^(Estudiante|Docente|Administrativo|Monitor)$",
             message = "El rol debe ser uno de los siguientes: Estudiante, Docente, Coordinador, Administrativo, Decano, Rector, Monitor, Directivo o Administrador"
     )
     @Column(nullable = false)

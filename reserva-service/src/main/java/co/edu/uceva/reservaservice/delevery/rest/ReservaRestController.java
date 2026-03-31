@@ -101,6 +101,13 @@ public class ReservaRestController {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
+        if (reserva.getVersion() == null ){
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put(MENSAJE, "El campo 'version' es obligatorio para actualizar una reserva. " +
+                    "Obtén la reserva primero con GET y usa el valor de version que recibes.");
+            errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
         reservaService.findReservaById(reserva.getIdReserva())
                 .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
         Map<String, Object> response = new HashMap<>();
@@ -122,7 +129,4 @@ public class ReservaRestController {
         response.put(RESERVA, reserva);
         return ResponseEntity.ok(response);
     }
-
-
-
 }

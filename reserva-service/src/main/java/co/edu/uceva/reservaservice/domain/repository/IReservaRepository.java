@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public interface IReservaRepository extends JpaRepository<Reserva, Long> {
     //CREAR UNA RESERVA
     // Consulta que devuelve 'true' si encuentra un choque de horarios
+    // Han sido reemplazados por la indice GiST
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM Reserva r " +
             "WHERE r.codigoAula = :codigoAula " +
             "AND r.estado != 'CANCELADA' " +

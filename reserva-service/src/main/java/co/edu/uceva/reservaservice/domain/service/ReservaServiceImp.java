@@ -1,5 +1,6 @@
 package co.edu.uceva.reservaservice.domain.service;
 
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaModificadaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaSolapadaException;
 import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
@@ -7,6 +8,7 @@ import co.edu.uceva.reservaservice.domain.repository.IReservaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,16 +26,6 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva addReserva(Reserva reserva) {
-        // Usamos la consulta SQL para verificar si el aula está libre o se cruza
-        /*boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
-                reserva.getCodigoAula(),
-                reserva.getHoraInicio(),
-                reserva.getHoraFin()
-        );
-
-        if(estaOcupado){
-            throw new ReservaSolapadaException();
-        }*/
         try {
             return reservaRepository.saveAndFlush(reserva);
         } catch (DataIntegrityViolationException e) {
@@ -54,16 +46,6 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
-        /*boolean estaOcupado = reservaRepository.existeCruceDeHorariosUpdate(
-                reserva.getCodigoAula(),
-                reserva.getHoraInicio(),
-                reserva.getHoraFin(),
-                reserva.getIdReserva()
-        );
-        if(estaOcupado){
-            throw new ReservaSolapadaException();
-        }
-        */
         try {
             return reservaRepository.saveAndFlush(reserva);
         } catch (DataIntegrityViolationException e) {
@@ -72,13 +54,17 @@ public class ReservaServiceImp implements IReservaService{
                 throw new ReservaSolapadaException();
             }
             throw e;
+        }catch (ObjectOptimisticLockingFailureException e) {
+            // Alguien más modificó esta reserva antes que tú
+            throw new ReservaModificadaException(reserva.getIdReserva());
         }
     }
 
     @Override
     @Transactional
     public void deleteReserva(Reserva reserva) {
-        reservaRepository.delete(reserva);
+        reserva.setEstado(EstadosReserva.CANCELADA);
+        reservaRepository.save(reserva);
     }
 
     @Override

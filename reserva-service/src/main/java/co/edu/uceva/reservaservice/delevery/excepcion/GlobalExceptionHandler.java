@@ -63,5 +63,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(ReservaModificadaException.class)
+    public ResponseEntity<Map<String, Object>> handleReservaModificadaException(ReservaModificadaException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getMessage());
+        response.put(STATUS, HttpStatus.CONFLICT.value());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
 
 }
