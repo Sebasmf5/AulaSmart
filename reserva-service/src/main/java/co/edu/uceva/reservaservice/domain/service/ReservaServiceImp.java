@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Service
 @RequiredArgsConstructor //esto inyecta el repo actomáticamente
@@ -24,18 +25,24 @@ public class ReservaServiceImp implements IReservaService{
     @Transactional
     public Reserva addReserva(Reserva reserva) {
         // Usamos la consulta SQL para verificar si el aula está libre o se cruza
-        boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
+        /*boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
                 reserva.getCodigoAula(),
                 reserva.getHoraInicio(),
                 reserva.getHoraFin()
         );
 
-        System.out.println(estaOcupado);
         if(estaOcupado){
             throw new ReservaSolapadaException();
+        }*/
+        try {
+            return reservaRepository.saveAndFlush(reserva);
+        } catch (DataIntegrityViolationException e) {
+            String message = e.getMostSpecificCause().getMessage();
+            if (message != null && message.contains("no_solapamiento_reservas")) {
+                throw new ReservaSolapadaException();
+            }
+            throw e;
         }
-        reserva.setEstado(EstadosReserva.CONFIRMADA);
-        return reservaRepository.save(reserva);
     }
 
     @Override
@@ -47,18 +54,25 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
-        boolean estaOcupado = reservaRepository.existeCruceDeHorariosUpdate(
+        /*boolean estaOcupado = reservaRepository.existeCruceDeHorariosUpdate(
                 reserva.getCodigoAula(),
                 reserva.getHoraInicio(),
                 reserva.getHoraFin(),
                 reserva.getIdReserva()
         );
-
         if(estaOcupado){
             throw new ReservaSolapadaException();
         }
-
-        return reservaRepository.save(reserva);
+        */
+        try {
+            return reservaRepository.saveAndFlush(reserva);
+        } catch (DataIntegrityViolationException e) {
+            String message = e.getMostSpecificCause().getMessage();
+            if (message != null && message.contains("no_solapamiento_reservas")) {
+                throw new ReservaSolapadaException();
+            }
+            throw e;
+        }
     }
 
     @Override
