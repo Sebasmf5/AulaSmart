@@ -17,8 +17,8 @@ public class RSA {
      */
     public static RSAKeyPair generateKeyPair(int bitLength) {
         // 1. Generar primos grandes p y q
-        BigInteger p = PrimeGenerator.generatePrime(bitLength, 10).setBit(511);
-        BigInteger q = PrimeGenerator.generatePrime(bitLength, 10).setBit(511);
+        BigInteger p = PrimeGenerator.generatePrime(bitLength, 25);
+        BigInteger q = PrimeGenerator.generatePrime(bitLength, 25);
 
         // 2. Calcular n y phi
         BigInteger n = p.multiply(q);
