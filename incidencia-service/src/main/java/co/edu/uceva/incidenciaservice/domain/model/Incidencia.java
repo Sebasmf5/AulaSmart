@@ -35,7 +35,7 @@ public class Incidencia {
     @Column(name = "url_imagen")
     private String urlImagen;
 
-    // Aquí guardaremos la carta formal devuelta mágicamente por Gemini
+    // Aquí guardaremos la carta formal devuelta por la IA
     @Column(name = "carta_formal_generada", columnDefinition = "TEXT")
     private String cartaFormalGenerada;
 

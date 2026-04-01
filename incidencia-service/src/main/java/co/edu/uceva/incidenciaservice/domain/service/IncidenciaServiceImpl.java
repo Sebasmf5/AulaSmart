@@ -15,9 +15,12 @@ import java.util.Optional;
 public class IncidenciaServiceImpl implements IIncidenciaService {
 
     private final IIncidenciaRepository incidenciaRepository;
+    private final ChatGPTCartaService chatGPTCartaService;
 
-    public IncidenciaServiceImpl(IIncidenciaRepository incidenciaRepository) {
+    public IncidenciaServiceImpl(IIncidenciaRepository incidenciaRepository,
+                                 ChatGPTCartaService chatGPTCartaService) {
         this.incidenciaRepository = incidenciaRepository;
+        this.chatGPTCartaService = chatGPTCartaService;
     }
 
     @Override
@@ -38,11 +41,16 @@ public class IncidenciaServiceImpl implements IIncidenciaService {
     @Override
     @Transactional
     public Incidencia save(Incidencia incidencia) {
-        // TODO: MÁS ADELANTE AQUÍ INYECTAREMOS LA LÓGICA DE GEMINI (SPRING AI)
-        // 1. Llamar al aula-service usando FeignClient para saber cómo se llama el aula.
-        // 2. Comunicarnos con Gemini enviándole la descripción.
-        // 3. Setear 'incidencia.setCartaFormalGenerada(respuestaGemini)'.
-        
+        // Llamamos a la IA (Groq/OpenAI) para generar la carta formal a partir de los puntos clave.
+        // Si la IA falla (rate-limit, error de red, etc.) el método devuelve null
+        // y la incidencia se guarda igualmente sin carta (fallback graceful).
+        String cartaFormal = chatGPTCartaService.generarCartaFormal(
+                incidencia.getDescripcionBreve(),
+                incidencia.getTipoIncidencia().name(),
+                incidencia.getCodigoAula()
+        );
+        incidencia.setCartaFormalGenerada(cartaFormal);
+
         return incidenciaRepository.save(incidencia);
     }
 
