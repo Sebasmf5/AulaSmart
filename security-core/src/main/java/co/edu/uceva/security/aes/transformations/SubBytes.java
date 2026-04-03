@@ -22,47 +22,11 @@ public class SubBytes{
     };
 
     public static void subBytes(byte[][] state) {
-        for (int i = 0; i < state.length; i++) {
-            for (int j = 0; j < state[i].length; j++) {
-                int byteValue = state[i][j] & 0xFF; // Convert to unsigned
-                state[i][j] = (byte) SBOX[byteValue];
+        for (int row = 0; row < state.length; row++) {
+            for (int col = 0; col < state[row].length; col++) {
+                int byteValue = state[row][col] & 0xFF; // Convert to unsigned
+                state[row][col] = (byte) SBOX[byteValue];
             }
-        }
-    }
-
-
-
-
-
-    //Test de la función SubBytes
-    public static void main(String[] args) {
-        byte[][] state = {
-                {(byte)0x00, (byte)0x01, (byte)0x02, (byte)0x03},
-                {(byte)0x10, (byte)0x11, (byte)0x12, (byte)0x13},
-                {(byte)0x20, (byte)0x21, (byte)0x22, (byte)0x23},
-                {(byte)0x30, (byte)0x31, (byte)0x32, (byte)0x33}
-        };
-
-        System.out.println("Estado original:");
-        printState(state);
-
-        subBytes(state);
-
-        System.out.println("\nEstado después de SubBytes:");
-        printState(state);
-
-        // SEGUNDA VEZ
-        subBytes(state);
-        System.out.println("\nEstado después del SEGUNDO SubBytes:");
-        printState(state);
-    }
-
-    private static void printState(byte[][] state) {
-        for (byte[] row : state) {
-            for (byte b : row) {
-                System.out.printf("%02x ", b);
-            }
-            System.out.println();
         }
     }
 }
