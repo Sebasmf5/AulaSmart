@@ -59,19 +59,6 @@ Función: Aplica la subclave de la ronda al bloque mediante XOR.
 Qué hace:
 XOR byte a byte entre el bloque y la subclave.
 
-Paquete: utils
-9. ByteUtils.java
-Función: Funciones auxiliares de manejo de bytes.
-Qué hace:
-XOR de arrays de bytes.
-Conversión entre array lineal <-> matriz 4x4.
-Multiplicación en GF(2^8) para MixColumns.
-
-10. HexUtils.java (opcional)
-Función: Para debug y testing.
-Qué hace:
-Convierte byte[] a hexadecimal y viceversa.
-
 Flujo de trabajo de AES
 
 AES.encrypt(data, key)

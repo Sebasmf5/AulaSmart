@@ -9,7 +9,7 @@ public class InvMixColumns {
             {(byte)0x0b, (byte)0x0d, (byte)0x09, (byte)0x0e}
     };
 
-    public static void apply(byte[][] state) {
+    public static void invMixColumns(byte[][] state) {
         byte[][] temp = new byte[4][4];
         for (int col = 0; col < 4; col++) {
             for (int row = 0; row < 4; row++) {

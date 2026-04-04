@@ -1,4 +1,6 @@
-package co.edu.uceva.security.aes;
+package co.edu.uceva.security.aes.tests;
+
+import co.edu.uceva.security.aes.AESKeyExpansion;
 
 public class TestAESKeyExpansion {
 

@@ -18,4 +18,24 @@ public class AESPadding {
 
         return padded;
     }
+
+    public static byte[] removePadding(byte[] padded) {
+
+        int paddingLength = padded[padded.length - 1] & 0xFF;
+
+        if (paddingLength < 1 || paddingLength > BLOCK_SIZE) {
+            throw new RuntimeException("Padding inválido");
+        }
+
+        for (int i = padded.length - paddingLength; i < padded.length; i++) {
+            if (padded[i] != (byte) paddingLength) {
+                throw new RuntimeException("Padding inválido");
+            }
+        }
+
+        byte[] data = new byte[padded.length - paddingLength];
+        System.arraycopy(padded, 0, data, 0, data.length);
+
+        return data;
+    }
 }
