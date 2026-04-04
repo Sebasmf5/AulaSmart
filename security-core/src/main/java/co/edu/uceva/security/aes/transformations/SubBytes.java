@@ -21,6 +21,10 @@ public class SubBytes{
             0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16  // F
     };
 
+    public static int getSBoxValue(int byteValue) {
+        return SBOX[byteValue & 0xFF]; // Asegura que el valor sea tratado como unsigned
+    }
+
     public static void subBytes(byte[][] state) {
         for (int row = 0; row < state.length; row++) {
             for (int col = 0; col < state[row].length; col++) {
