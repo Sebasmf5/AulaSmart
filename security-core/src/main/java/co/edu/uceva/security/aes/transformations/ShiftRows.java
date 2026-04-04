@@ -25,32 +25,4 @@ public class ShiftRows {
         state[3][2] = state[3][1];
         state[3][1] = temp;
     }
-
-    //test
-
-    public static void main(String[] args) {
-        byte[][] state = {
-            {0x00, 0x01, 0x02, 0x03},
-            {0x10, 0x11, 0x12, 0x13},
-            {0x20, 0x21, 0x22, 0x23},
-            {0x30, 0x31, 0x32, 0x33}
-        };
-
-        System.out.println("Before ShiftRows:");
-        printState(state);
-
-        shiftRows(state);
-
-        System.out.println("After ShiftRows:");
-        printState(state);
-    }
-
-    private static void printState(byte[][] state) {
-        for (byte[] row : state) {
-            for (byte b : row) {
-                System.out.printf("%02x ", b);
-            }
-            System.out.println();
-        }
-    }
 }
