@@ -1,7 +1,5 @@
 package co.edu.uceva.security.aes;
 
-import java.util.Arrays;
-
 public class TestAESKeyExpansion {
 
     public static void main(String[] args) {
