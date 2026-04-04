@@ -12,6 +12,7 @@ public class TestAESKeyExpansion {
         };
 
         // Expandir la clave
+        // rounds, rows, columns
         byte[][][] roundKeys = AESKeyExpansion.expandKey(key);
 
         // Imprimir todas las subclaves
