@@ -98,6 +98,32 @@ public class AulaRestController {
     }
 
     /**
+     * Obtener un aula por su ID.
+     */
+    @GetMapping("/aulas/codigo/{codigo}")
+    public ResponseEntity<Map<String, Object>> findByCodigo(@PathVariable Long codigo) {
+        Aula aula = aulaService.obtenerAula(codigo)
+                .orElseThrow(() -> new AulaNoEncontradaException(codigo));
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "El aula ha sido encontrado con éxito!");
+        response.put(AULA, aula);
+        return ResponseEntity.ok(response);
+    }
+
+    /*
+    * Obtener el tipo de aula por el códigoDelAula, necesario para la reserva de los estudiantes
+    * */
+    @GetMapping("/aulas/tipo/{codigo}")
+    public ResponseEntity<String> getTipoDeAula(@PathVariable Long codigo) {
+        String tipoDeAula = aulaService.obtenerTipoAula(codigo);
+        if (tipoDeAula == null) {
+            throw new AulaNoEncontradaException(codigo);
+        }
+        // Devolvemos el String directamente.
+        return ResponseEntity.ok(tipoDeAula);
+    }
+
+    /**
      * Listar todos los aulas.
      */
     @GetMapping("/aulas")
@@ -110,6 +136,7 @@ public class AulaRestController {
         response.put(AULAS, aulas);
         return ResponseEntity.ok(response);
     }
+
 
     /**
      * Listar aulas con paginación.

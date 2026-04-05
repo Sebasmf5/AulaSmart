@@ -5,7 +5,9 @@ import co.edu.uceva.reservaservice.domain.excepcion.PaginaSinReservasException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ValidationException;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
+import co.edu.uceva.reservaservice.domain.service.IAulaClient;
 import co.edu.uceva.reservaservice.domain.service.IReservaService;
+import feign.FeignException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.LockMode;
@@ -31,10 +33,12 @@ public class ReservaRestController {
     private static final String MENSAJE = "mensaje";
 
     private final IReservaService reservaService;
+    private final IAulaClient iaulaClient;
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
-    public ReservaRestController(IReservaService reservaService) {
+    public ReservaRestController(IReservaService reservaService, IAulaClient iaulaClient) {
         this.reservaService = reservaService;
+        this.iaulaClient = iaulaClient;
     }
     /**
      * Listar todas las reservas.
@@ -63,18 +67,34 @@ public class ReservaRestController {
         return ResponseEntity.ok(reservas);
     }
 
+    // Actualmente SOLO para estudiantes
     /**
      * Reservar pasando el objeto en el cuerpo de la petición, usando validaciones
      */
     @PostMapping("/reservas")
     public ResponseEntity<Map<String, Object>> addReserva(@Valid @RequestBody Reserva reserva, BindingResult result) {
+        Map<String, Object> response = new HashMap<>();
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
-        Map<String, Object> response = new HashMap<>();
-        Reserva nuevaReserva = reservaService.addReserva(reserva);
-        response.put(MENSAJE, "La reserva ha sido creada con éxito!");
-        response.put(RESERVA, nuevaReserva);
+        try {
+            String tipoAula = iaulaClient.getTipoDeAula(reserva.getCodigoAula());
+            switch (Integer.parseInt(tipoAula)) {
+                case 1: break;
+                case 5: break;
+                case 78: break;
+                default:
+                    response.put(MENSAJE, "El tipo de aula recibido no es válido para reservas.");
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+            Reserva nuevaReserva = reservaService.addReserva(reserva);
+            response.put(MENSAJE, "La reserva ha sido creada con éxito!");
+            response.put(RESERVA, nuevaReserva);
+        } catch (FeignException e) {
+            response.put(MENSAJE, "Error: No se pudo validar el aula. Verifique el código.");
+            response.put("ERROR", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

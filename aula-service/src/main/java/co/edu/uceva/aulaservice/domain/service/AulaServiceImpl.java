@@ -37,6 +37,7 @@ public class AulaServiceImpl  implements IAulaService {
         return repository.findById(id);
     }
 
+
     @Override
     @Transactional
     public Aula update(Aula aula) {
@@ -55,6 +56,18 @@ public class AulaServiceImpl  implements IAulaService {
         return repository.findAll(pageable);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public String obtenerTipoAula(Long codigoAula) {
+        return repository.findByCodigoAula(codigoAula)
+                .map(aula -> aula.getCodigoTipoAula().toString())
+                .orElse(null);
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<Aula> obtenerAula(Long codigoAula) {
+        return repository.findByCodigoAula(codigoAula);
+    }
 }
 
