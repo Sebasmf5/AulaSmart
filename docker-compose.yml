@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: aulasmart-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: rootpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - system-network
+
+  usuarios-service:
+    build:
+      context: .
+      dockerfile: usuarios-service/Dockerfile
+    container_name: usarios-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      - postgres
+    networks:
+      - system-network
+
+  reserva-service:
+    build:
+      context: .
+      dockerfile: reserva-service/Dockerfile
+    container_name: reserva-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      - postgres
+    networks:
+      - system-network
+
+  aula-service:
+    build:
+      context: .
+      dockerfile: aula-service/Dockerfile
+    container_name: aula-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      - postgres
+    networks:
+      - system-network
+
+  incidencia-service:
+    build:
+      context: .
+      dockerfile: incidencia-service/Dockerfile
+    container_name: incidencia-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=rootpassword
+    depends_on:
+      - postgres
+    networks:
+      - system-network
+
+networks:
+  system-network:
+    driver: bridge
+
+volumes:
+  pgdata:

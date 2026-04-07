@@ -16,6 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
@@ -72,29 +75,16 @@ public class ReservaRestController {
      * Reservar pasando el objeto en el cuerpo de la petición, usando validaciones
      */
     @PostMapping("/reservas")
+    @PreAuthorize("hasAnyRole('ESTUDIANTE', 'DOCENTE', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> addReserva(@Valid @RequestBody Reserva reserva, BindingResult result) {
         Map<String, Object> response = new HashMap<>();
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
-        try {
-            String tipoAula = iaulaClient.getTipoDeAula(reserva.getCodigoAula());
-            switch (Integer.parseInt(tipoAula)) {
-                case 1: break;
-                case 5: break;
-                case 78: break;
-                default:
-                    response.put(MENSAJE, "El tipo de aula recibido no es válido para reservas.");
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-            }
-            Reserva nuevaReserva = reservaService.addReserva(reserva);
-            response.put(MENSAJE, "La reserva ha sido creada con éxito!");
-            response.put(RESERVA, nuevaReserva);
-        } catch (FeignException e) {
-            response.put(MENSAJE, "Error: No se pudo validar el aula. Verifique el código.");
-            response.put("ERROR", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
-        }
+        validarPermisosDeAula(reserva.getCodigoAula());
+        Reserva nuevaReserva = reservaService.addReserva(reserva);
+        response.put(MENSAJE, "La reserva ha sido creada con éxito!");
+        response.put(RESERVA, nuevaReserva);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -116,7 +106,9 @@ public class ReservaRestController {
      * Actualizar una reserva pasando el objeto en el cuerpo de la petición.
      * @param reserva: Objeto Reserva que se va a actualizar
      */
+
     @PutMapping("/reservas")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ESTUDIANTE', 'DOCENTE')")
     public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Reserva reserva, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
@@ -130,6 +122,8 @@ public class ReservaRestController {
         }
         reservaService.findReservaById(reserva.getIdReserva())
                 .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+        validarPermisosDeAula(reserva.getCodigoAula());
+
         Map<String, Object> response = new HashMap<>();
         Reserva reservaActualizado = reservaService.updateReserva(reserva);
         response.put(MENSAJE, "La reserva ha sido actualizado con éxito!");
@@ -148,5 +142,25 @@ public class ReservaRestController {
         response.put(MENSAJE, "La reserva ha sido encontrado con éxito!");
         response.put(RESERVA, reserva);
         return ResponseEntity.ok(response);
+    }
+
+    // metodo para extraer la información necesaria de los permisos
+    private void validarPermisosDeAula(Long codigo) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String rol = authentication != null && !authentication.getAuthorities().isEmpty()
+                ? authentication.getAuthorities().iterator().next().getAuthority() : "";
+
+        String tipoAula = iaulaClient.getTipoDeAula(codigo);
+        int tipo = Integer.parseInt(tipoAula);
+
+        if ("ROLE_ESTUDIANTE".equals(rol)) {
+            if (tipo != 1 && tipo != 5 && tipo != 78) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "El tipo de aula recibido no es válido para reservas de Estudiante.");
+            }
+        } else if ("ROLE_DOCENTE".equals(rol) || "ROLE_ADMINISTRATIVO".equals(rol)) {
+        } else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Rol no autorizado para reservar.");
+        }
     }
 }
