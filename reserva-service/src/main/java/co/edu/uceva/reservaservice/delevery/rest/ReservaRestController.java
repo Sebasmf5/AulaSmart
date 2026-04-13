@@ -1,16 +1,11 @@
 package co.edu.uceva.reservaservice.delevery.rest;
 
-import co.edu.uceva.reservaservice.domain.excepcion.NoHayReservasException;
-import co.edu.uceva.reservaservice.domain.excepcion.PaginaSinReservasException;
-import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
-import co.edu.uceva.reservaservice.domain.excepcion.ValidationException;
+import co.edu.uceva.reservaservice.domain.excepcion.*;
+import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
 import co.edu.uceva.reservaservice.domain.service.IAulaClient;
 import co.edu.uceva.reservaservice.domain.service.IReservaService;
-import feign.FeignException;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.hibernate.LockMode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +42,7 @@ public class ReservaRestController {
      * Listar todas las reservas.
      */
     @GetMapping("/reservas")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Map<String, Object>> getReservas() {
         List<Reserva> reservas = reservaService.findAll();
         if (reservas.isEmpty()) {
@@ -61,6 +57,7 @@ public class ReservaRestController {
      * Listar reservas con paginación.
      */
     @GetMapping("/reservas/page/{page}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Object> index(@PathVariable Integer page) {
         Pageable pageable = PageRequest.of(page, 4);
         Page<Reserva> reservas = reservaService.findAll(pageable);
@@ -72,10 +69,13 @@ public class ReservaRestController {
 
     // Actualmente SOLO para estudiantes
     /**
-     * Reservar pasando el objeto en el cuerpo de la petición, usando validaciones
+     * Reservar pasando el objeto en el cuerpo de la petición, usando validaciones:
+     *  ESTUDIANTE SOLO puede reservar unos tipos de aula asignados previamente
+     *  DOCENTE puede reservar sin restricción
+     *  Hay unas aulas que requieren previa autorización, por lo que su estado hasta su aprobación sería de PENDIENTE
      */
     @PostMapping("/reservas")
-    @PreAuthorize("hasAnyRole('ESTUDIANTE', 'DOCENTE', 'ADMINISTRATIVO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Map<String, Object>> addReserva(@Valid @RequestBody Reserva reserva, BindingResult result) {
         Map<String, Object> response = new HashMap<>();
         if (result.hasErrors()) {
@@ -83,21 +83,55 @@ public class ReservaRestController {
         }
         validarPermisosDeAula(reserva.getCodigoAula());
         Reserva nuevaReserva = reservaService.addReserva(reserva);
+        if (iaulaClient.getRequiereAutorizacion(nuevaReserva.getCodigoAula())) {
+            nuevaReserva.setEstado(EstadosReserva.PENDIENTE);
+        } else {
+            nuevaReserva.setEstado(EstadosReserva.CONFIRMADA);
+        }
         response.put(MENSAJE, "La reserva ha sido creada con éxito!");
         response.put(RESERVA, nuevaReserva);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PatchMapping("/reservas/aprobar/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
+    public ResponseEntity<Map<String, Object>> updateReserva(@PathVariable Long id) {
+        Reserva reservaExistente = reservaService.findReservaById(id)
+                .orElseThrow(() -> new ReservaNoEncontradaException(id));
+
+        reservaExistente.setEstado(EstadosReserva.CONFIRMADA);
+        Reserva reservaActualizado = reservaService.updateReserva(reservaExistente);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "La reserva ha sido aprobada con éxito!");
+        response.put(RESERVA, reservaActualizado);
+        return ResponseEntity.ok(response);
+    }
+
+
     /**
      * Eliminar una reserva pasando el objeto en el cuerpo de la petición.
+     * Tener en cuenta que un DOCENTE o ESTUDIANTE eliminar su propia reserva
+     * Solo el ADMINISTRATIVO puede eliminar esa reserva
      */
-    @DeleteMapping("/reservas")
-    public ResponseEntity<Map<String, Object>> delete(@RequestBody Reserva reserva) {
-        reservaService.findReservaById(reserva.getIdReserva())
-                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
-        reservaService.deleteReserva(reserva);
+    @DeleteMapping("/reservas/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
+        Reserva reservaExistente = reservaService.findReservaById(id)
+                .orElseThrow(() -> new ReservaNoEncontradaException(id));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String rol = authentication != null && !authentication.getAuthorities().isEmpty()
+                ? authentication.getAuthorities().iterator().next().getAuthority() : "";
+        Long userId = Long.parseLong(authentication.getName());
+
+        if (!"ROLE_ADMINISTRADOR".equals(rol) && !"ROLE_ADMINISTRATIVO".equals(rol) && !reservaExistente.getIdSolicitante().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes eliminar una reserva que no te pertenece.");
+        }
+
+        reservaService.deleteReserva(reservaExistente);
         Map<String, Object> response = new HashMap<>();
-        response.put(MENSAJE, "la reserva ha sido eliminado con éxito!");
+        response.put(MENSAJE, "La reserva ha sido eliminada con éxito!");
         response.put(RESERVA, null);
         return ResponseEntity.ok(response);
     }
@@ -108,7 +142,7 @@ public class ReservaRestController {
      */
 
     @PutMapping("/reservas")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ESTUDIANTE', 'DOCENTE')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Reserva reserva, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
@@ -120,8 +154,18 @@ public class ReservaRestController {
             errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
-        reservaService.findReservaById(reserva.getIdReserva())
+        Reserva reservaExistente = reservaService.findReservaById(reserva.getIdReserva())
                 .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String rol = authentication != null && !authentication.getAuthorities().isEmpty()
+                ? authentication.getAuthorities().iterator().next().getAuthority() : "";
+        Long userId = Long.parseLong(authentication.getName());
+
+        if (!"ROLE_ADMINISTRADOR".equals(rol) && !"ROLE_ADMINISTRATIVO".equals(rol) && !reservaExistente.getIdSolicitante().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No puedes actualizar una reserva que no te pertenece.");
+        }
+
         validarPermisosDeAula(reserva.getCodigoAula());
 
         Map<String, Object> response = new HashMap<>();
@@ -135,6 +179,7 @@ public class ReservaRestController {
      * Obtener una reserva por su ID.
      */
     @GetMapping("/reservas/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id) {
         Reserva reserva = reservaService.findReservaById(id)
                 .orElseThrow(() -> new ReservaNoEncontradaException(id));
@@ -149,16 +194,14 @@ public class ReservaRestController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String rol = authentication != null && !authentication.getAuthorities().isEmpty()
                 ? authentication.getAuthorities().iterator().next().getAuthority() : "";
-
         String tipoAula = iaulaClient.getTipoDeAula(codigo);
         int tipo = Integer.parseInt(tipoAula);
-
+        System.out.println(tipo);
         if ("ROLE_ESTUDIANTE".equals(rol)) {
             if (tipo != 1 && tipo != 5 && tipo != 78) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "El tipo de aula recibido no es válido para reservas de Estudiante.");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "El tipo de aula recibido no es válido para reservas de Estudiante.");
             }
-        } else if ("ROLE_DOCENTE".equals(rol) || "ROLE_ADMINISTRATIVO".equals(rol)) {
+        } else if ("ROLE_ADMINISTRADOR".equals(rol) || "ROLE_DOCENTE".equals(rol) || "ROLE_ADMINISTRATIVO".equals(rol)) {
         } else {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Rol no autorizado para reservar.");
         }

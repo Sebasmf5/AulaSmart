@@ -43,7 +43,6 @@ public class Aula {
     @Column(name = "nombreTipoAula", nullable = false)
     private String nombreTipoAula;
 
-    @Version
-    private int version;
-
+    @Column(name = "requiereAutorizacion", nullable = false)
+    private Boolean requiereAutorizacion;
 }

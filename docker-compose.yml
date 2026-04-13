@@ -26,6 +26,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
     depends_on:
       - postgres
     networks:

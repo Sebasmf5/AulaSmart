@@ -27,8 +27,8 @@ public class AulaServiceImpl  implements IAulaService {
 
     @Override
     @Transactional
-    public void delete(Aula aula) {
-        repository.delete(aula);
+    public void deleteById(Long id) {
+        repository.deleteById(id);
     }
 
     @Override

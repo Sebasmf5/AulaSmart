@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface IAulaService {
         Aula save(Aula aula);
-        void delete(Aula aula);
+        void deleteById(Long id);
         Optional<Aula> findById(Long id);
         Aula update(Aula aula);
         List<Aula> findAll();
