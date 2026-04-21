@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import co.edu.uceva.reservaservice.domain.integration.service.AgregadorReservasService;
+import co.edu.uceva.reservaservice.domain.integration.dto.ReservaDTO;
 
 import java.util.HashMap;
 import java.util.List;
@@ -31,10 +33,12 @@ public class ReservaRestController {
     private static final String MENSAJE = "mensaje";
 
     private final IReservaService reservaService;
+    private final AgregadorReservasService agregadorReservasService;
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
-    public ReservaRestController(IReservaService reservaService) {
+    public ReservaRestController(IReservaService reservaService, AgregadorReservasService agregadorReservasService) {
         this.reservaService = reservaService;
+        this.agregadorReservasService = agregadorReservasService;
     }
     /**
      * Listar todas las reservas.
@@ -42,6 +46,20 @@ public class ReservaRestController {
     @GetMapping("/reservas")
     public ResponseEntity<Map<String, Object>> getReservas() {
         List<Reserva> reservas = reservaService.findAll();
+        if (reservas.isEmpty()) {
+            throw new NoHayReservasException();
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Listar reservas unificadas (AulaSmart + SIGA) por Aula.
+     */
+    @GetMapping("/reservas/aula/{codigoAula}/agregadas")
+    public ResponseEntity<Map<String, Object>> getReservasAgregadas(@PathVariable Long codigoAula) {
+        List<ReservaDTO> reservas = agregadorReservasService.obtenerTodasLasReservas(codigoAula);
         if (reservas.isEmpty()) {
             throw new NoHayReservasException();
         }
