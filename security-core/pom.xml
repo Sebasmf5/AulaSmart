@@ -14,12 +14,39 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
+
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.44</version>
             <scope>compile</scope>
         </dependency>
+
+        <!-- Spring Web (MVC advice, request-scope) – provided por el microservicio consumidor -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>6.1.14</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Spring Data Redis – provided por el microservicio consumidor -->
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>3.3.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Jackson Databind – provided por el microservicio consumidor -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.17.2</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
     <build>
         <plugins>
