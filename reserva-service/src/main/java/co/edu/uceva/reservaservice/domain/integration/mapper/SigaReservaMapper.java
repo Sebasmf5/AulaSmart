@@ -12,27 +12,23 @@ import java.time.format.DateTimeFormatter;
 @Component
 public class SigaReservaMapper {
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public ReservaDTO traducir(SigaReservaDTO sigaReserva) {
         ReservaDTO dto = new ReservaDTO();
         
-        dto.setIdReserva("SIGA-" + sigaReserva.getCod_resv());
-        dto.setCodigoAula(sigaReserva.getCod_aula());
+        dto.setIdReserva("SIGA-" + sigaReserva.getId_unico());
+        dto.setCodigoAula(Long.valueOf(sigaReserva.getCode_location()));
         
-        String fechaInicioStr = sigaReserva.getFec_res() + " " + sigaReserva.getH_ini();
-        dto.setHoraInicio(LocalDateTime.parse(fechaInicioStr, DATE_FORMAT));
+        dto.setHoraInicio(LocalDateTime.parse(sigaReserva.getStart_dt(), DATE_FORMAT));
+        dto.setHoraFin(LocalDateTime.parse(sigaReserva.getEnd_dt(), DATE_FORMAT));
         
-        String fechaFinStr = sigaReserva.getFec_res() + " " + sigaReserva.getH_fin();
-        dto.setHoraFin(LocalDateTime.parse(fechaFinStr, DATE_FORMAT));
+        dto.setEstado(EstadosReserva.CONFIRMADA); // Clases institucionales confirmadas por defecto
         
-        dto.setEstado(sigaReserva.getStatus().equals("A") ? EstadosReserva.CONFIRMADA : EstadosReserva.CANCELADA);
-        
-        // Datos simulados para SIGA ya que no provienen de la app
-        dto.setIdSolicitante(0L); // 0 indica sistema/oficial
-        dto.setRolSolicitante(RolUsuario.ADMINISTRATIVO); 
-        dto.setCodigoPrograma(sigaReserva.getPrograma());
-        dto.setGrupo(sigaReserva.getGrupo());
+        dto.setIdSolicitante(sigaReserva.getCodigo_docente_responsable()); 
+        dto.setRolSolicitante(RolUsuario.DOCENTE); 
+        dto.setCodigoPrograma(sigaReserva.getEvt_title()); // Mapear el título del evento como programa/clase
+        dto.setGrupo(sigaReserva.getNombre_docente_responsable()); // Usar el nombre del docente en este campo
         
         dto.setOrigen("SIGA");
         
