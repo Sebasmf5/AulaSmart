@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface IReservaRepository extends JpaRepository<Reserva, Long> {
+    List<Reserva> findByCodigoAula(Long codigoAula);
     //CREAR UNA RESERVA
     // Consulta que devuelve 'true' si encuentra un choque de horarios
     // Han sido reemplazados por la indice GiST
