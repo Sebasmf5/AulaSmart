@@ -1,0 +1,59 @@
+spring:
+  application:
+    name: incidencia-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/incidenciadb
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 50
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      minimum-idle: 10
+      keepalive-time: 300000
+      validation-timeout: 5000
+      connection-test-query: SELECT 1
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  main:
+    allow-circular-references: true
+  ai:
+    openai:
+      api-key: ${API_KEY_GROQ}
+      base-url: https://api.groq.com/openai
+      chat:
+        options:
+          model: llama-3.1-8b-instant
+          temperature: 0.3
+
+app:
+  version: 0.0.1
+  api:
+    version: v1
+
+server:
+  port: 8087
+
+management:
+  server:
+    port: 8088
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    org.springframework: ERROR
+    web: INFO
+    org.hibernate.SQL: DEBUG
+    root: ERROR
+    com.zaxxer.hikari: ERROR
+    org.hibernate: ERROR

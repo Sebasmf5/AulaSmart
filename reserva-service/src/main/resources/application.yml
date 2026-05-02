@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: reserva-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/reservadb
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 50
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      minimum-idle: 10
+      keepalive-time: 300000
+      validation-timeout: 5000
+      connection-test-query: SELECT 1
+  jpa:
+    show-sql: true
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+
+app:
+  version: 0.0.1
+  api:
+    version: v1
+
+server:
+  port: 8080
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+url:
+  servicio:
+    asistencia: http://localhost:8082
+
+siga:
+  api:
+    url: https://uceva.datasae.co/siga_new/web/app.php/publicomanejoespacios
+
+logging:
+  level:
+    org.springframework: ERROR
+    web: INFO
+    org.hibernate.SQL: DEBUG
+    root: ERROR
+    com.zaxxer.hikari: ERROR
+    org.hibernate: ERROR

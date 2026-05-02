@@ -5,8 +5,8 @@ services:
     image: postgres:15-alpine
     container_name: aulasmart-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -14,21 +14,28 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - system-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   usuarios-service:
     build:
       context: .
       dockerfile: usuarios-service/Dockerfile
-    container_name: usarios-service
+    container_name: usuarios-service
+    restart: unless-stopped
     ports:
-      - "8081:8081"
+      - "8081:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - system-network
 
@@ -37,14 +44,17 @@ services:
       context: .
       dockerfile: reserva-service/Dockerfile
     container_name: reserva-service
+    restart: unless-stopped
     ports:
-      - "8082:8082"
+      - "8082:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - system-network
 
@@ -53,14 +63,17 @@ services:
       context: .
       dockerfile: aula-service/Dockerfile
     container_name: aula-service
+    restart: unless-stopped
     ports:
-      - "8083:8083"
+      - "8083:8082"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - system-network
 
@@ -69,14 +82,30 @@ services:
       context: .
       dockerfile: incidencia-service/Dockerfile
     container_name: incidencia-service
+    restart: unless-stopped
     ports:
-      - "8084:8084"
+      - "8084:8087"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - system-network
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: chat-service/Dockerfile
+    container_name: chat-service
+    restart: unless-stopped
+    ports:
+      - "8085:8084"
+    environment:
+      - GROQ_API_KEY=${API_KEY_GROQ}
     networks:
       - system-network
 
