@@ -1,4 +1,4 @@
-package co.edu.uceva.chatservice.service;
+package co.edu.uceva.chatservice.delivery.service;
 
 import org.springframework.stereotype.Service;
 
