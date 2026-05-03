@@ -30,6 +30,10 @@ app:
   api:
     version: v1
 
+siga:
+  api:
+    url: https://uceva.datasae.co/siga_new/web/app.php/publicomanejoespacios
+
 server:
   port: 8082
 

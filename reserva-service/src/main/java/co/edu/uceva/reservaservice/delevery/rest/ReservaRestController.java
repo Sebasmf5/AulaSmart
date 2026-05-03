@@ -5,6 +5,7 @@ import co.edu.uceva.reservaservice.domain.excepcion.PaginaSinReservasException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ValidationException;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
+import co.edu.uceva.reservaservice.domain.service.IAulaClient;
 import co.edu.uceva.reservaservice.domain.service.IReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,10 +35,12 @@ public class ReservaRestController {
 
     private final IReservaService reservaService;
     private final AgregadorReservasService agregadorReservasService;
+    private final IAulaClient iaulaClient;
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
-    public ReservaRestController(IReservaService reservaService, AgregadorReservasService agregadorReservasService) {
+    public ReservaRestController(IReservaService reservaService, AgregadorReservasService agregadorReservasService, IAulaClient iaulaClient) {
         this.reservaService = reservaService;
+        this.iaulaClient = iaulaClient;
         this.agregadorReservasService = agregadorReservasService;
     }
     /**
@@ -146,5 +149,9 @@ public class ReservaRestController {
         response.put(MENSAJE, "La reserva ha sido encontrado con éxito!");
         response.put(RESERVA, reserva);
         return ResponseEntity.ok(response);
+    }
+
+    public void restriccionReservas(){
+
     }
 }

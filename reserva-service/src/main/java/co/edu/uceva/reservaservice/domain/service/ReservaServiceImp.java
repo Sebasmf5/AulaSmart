@@ -2,8 +2,10 @@ package co.edu.uceva.reservaservice.domain.service;
 
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaModificadaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaSolapadaException;
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoPermitidaException;
 import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
+import co.edu.uceva.reservaservice.domain.model.RolUsuario;
 import co.edu.uceva.reservaservice.domain.repository.IReservaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,10 +28,20 @@ public class ReservaServiceImp implements IReservaService{
     //inyectar la dependencia del repositorio
     private final IReservaRepository reservaRepository;
     private final AgregadorReservasService agregadorReservasService;
+    private final IAulaClient aulaClient;
 
     @Override
     @Transactional
     public Reserva addReserva(Reserva reserva) {
+        // Validar reglas de negocio para ESTUDIANTES
+        if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
+            String tipoAula = aulaClient.getTipoDeAula(reserva.getCodigoAula());
+            // Los estudiantes solo pueden reservar tipo 78 y 79
+            if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
+                throw new ReservaNoPermitidaException("Los estudiantes solo pueden reservar aulas interactivas y audiovisuales");
+            }
+        }
+
         // Validar solapamiento externo (SIGA) antes de intentar guardar
         List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorFecha(
             reserva.getCodigoAula(),
@@ -62,6 +74,8 @@ public class ReservaServiceImp implements IReservaService{
         return inicio1.isBefore(fin2) && fin1.isAfter(inicio2);
     }
 
+
+        // Validar 
     @Override
     @Transactional (readOnly = true)
     public Optional<Reserva> findReservaById(Long id) {
@@ -71,6 +85,12 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
+        if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
+            String tipoAula = aulaClient.getTipoDeAula(reserva.getCodigoAula());
+            if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
+                throw new ReservaNoPermitidaException("Los estudiantes solo pueden reservar aulas interactivas y audiovisuales (Tipos 78 y 79).");
+            }
+        }
         // Validar solapamiento externo (SIGA) antes de intentar actualizar
         List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorFecha(
             reserva.getCodigoAula(),

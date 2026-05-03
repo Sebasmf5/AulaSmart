@@ -96,19 +96,6 @@ services:
     networks:
       - system-network
 
-  chat-service:
-    build:
-      context: .
-      dockerfile: chat-service/Dockerfile
-    container_name: chat-service
-    restart: unless-stopped
-    ports:
-      - "8085:8084"
-    environment:
-      - GROQ_API_KEY=${API_KEY_GROQ}
-    networks:
-      - system-network
-
 networks:
   system-network:
     driver: bridge

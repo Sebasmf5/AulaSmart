@@ -15,7 +15,7 @@ public class Aula {
     private Long id;
 
     // dependo de stiven
-    @Column(name = "codigoAula", nullable = false)
+    @Column(name = "codigoAula", nullable = false, unique = true)
     private Long codigoAula;
 
     @Column(name = "nombreAula", nullable = false)

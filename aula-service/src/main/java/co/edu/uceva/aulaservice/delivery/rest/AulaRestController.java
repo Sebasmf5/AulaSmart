@@ -40,7 +40,7 @@ public class AulaRestController {
      */
     @PostMapping("/aulas")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Aula aula, BindingResult result) {
+    public ResponseEntity<Map<String, Object>>  save(@Valid @RequestBody Aula aula, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
@@ -118,7 +118,7 @@ public class AulaRestController {
     }
 
     /*
-    * Obtener el tipo de aula por el códigoDelAula, necesario para la reserva de los estudiantes
+    * Obtener el tipo de aula p or el códigoDelAula, necesario para la reserva de los estudiantes
     * */
     @GetMapping("/aulas/tipo/{codigo}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
