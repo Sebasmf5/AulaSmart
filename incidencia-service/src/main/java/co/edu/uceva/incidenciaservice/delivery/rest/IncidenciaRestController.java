@@ -37,10 +37,14 @@ public class IncidenciaRestController {
 
     @PostMapping("/incidencias")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Incidencia incidencia, BindingResult result) {
+    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Incidencia incidencia, BindingResult result, org.springframework.security.core.Authentication authentication) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
+        
+        // Extraer el codigo_usuario desde el token JWT (Principal) para evitar inyección desde el cliente
+        String codigoStr = (String) authentication.getPrincipal();
+        incidencia.setCodigoUsuario(Long.valueOf(codigoStr));
         Incidencia nuevaIncidencia = incidenciaService.save(incidencia);
         
         Map<String, Object> response = new HashMap<>();
@@ -61,6 +65,11 @@ public class IncidenciaRestController {
         
         // Aseguramos que el ID de la ruta siga siendo el mismo
         incidencia.setId(incidenciaExistente.getId());
+        
+        // Mantenemos el propietario original y la fecha de reporte original para evitar manipulaciones
+        incidencia.setCodigoUsuario(incidenciaExistente.getCodigoUsuario());
+        incidencia.setFechaReporte(incidenciaExistente.getFechaReporte());
+        
         Incidencia incidenciaActualizada = incidenciaService.update(incidencia);
         
         Map<String, Object> response = new HashMap<>();

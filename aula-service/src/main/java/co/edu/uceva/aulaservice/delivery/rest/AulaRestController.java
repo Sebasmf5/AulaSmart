@@ -15,7 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import javax.swing.text.html.Option;
 
 
 @RestController
@@ -118,7 +122,7 @@ public class AulaRestController {
     }
 
     /*
-    * Obtener el tipo de aula p or el códigoDelAula, necesario para la reserva de los estudiantes
+    * Obtener el tipo de aula por el códigoDelAula, necesario para la reserva de los estudiantes
     * */
     @GetMapping("/aulas/tipo/{codigo}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
@@ -131,19 +135,33 @@ public class AulaRestController {
         return ResponseEntity.ok(tipoDeAula);
     }
 
+    @GetMapping("/aulas/siga/{codigo}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Long> getPasaporteSiga(@PathVariable Long codigo) {
+        Optional<Aula> aula = aulaService.findById(codigo);
+        Long codigoAula = null;
+        if (aula.isPresent()) {
+            codigoAula = aula.get().getCodigoAula();
+        }
+        else {
+            throw new AulaNoEncontradaException(codigo);
+        }
+        // Devolvemos el Long directamente.
+        return ResponseEntity.ok(codigoAula);
+    }
+
     /*
     * Obtener si el aula debe pasar por el administrador para aprobar el aula
     * */
     @GetMapping("aulas/requiere-autorizacion/{codigo}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Boolean> getRequiereAutorizacion(@PathVariable Long codigo) {
-        Aula aula = aulaService.obtenerAula(codigo)
+        Aula aula = aulaService.findById(codigo)
                 .orElseThrow(() -> new AulaCodigoNoEncontrada(codigo));
         Boolean isAutorizable = aula.getRequiereAutorizacion();
         // devolver el valor (true o false)
         return ResponseEntity.ok(isAutorizable);
     }
-
 
     /**
      * Listar todas las aulas.

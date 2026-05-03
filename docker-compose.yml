@@ -52,6 +52,7 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,6 +91,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - API_KEY_GROQ=${API_KEY_GROQ}
+      - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:
       postgres:
         condition: service_healthy

@@ -12,4 +12,7 @@ public interface IAulaClient {
 
     @GetMapping("/api/v1/aula-service/aulas/requiere-autorizacion/{codigo}")
     Boolean getRequiereAutorizacion(@PathVariable("codigo") Long codigo);
+
+    @GetMapping("/api/v1/aula-service/aulas/siga/{codigo}")
+    Integer getSigaDeAula(@PathVariable("codigo") Long codigo);
 }

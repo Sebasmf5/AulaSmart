@@ -59,7 +59,7 @@ public class AulaServiceImpl  implements IAulaService {
     @Override
     @Transactional(readOnly = true)
     public String obtenerTipoAula(Long codigoAula) {
-        return repository.findByCodigoAula(codigoAula)
+        return repository.findById(codigoAula)
                 .map(aula -> aula.getCodigoTipoAula().toString())
                 .orElse(null);
     }

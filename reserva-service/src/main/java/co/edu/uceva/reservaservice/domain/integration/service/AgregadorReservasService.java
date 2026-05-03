@@ -2,6 +2,7 @@ package co.edu.uceva.reservaservice.domain.integration.service;
 
 import co.edu.uceva.reservaservice.domain.integration.client.ISigaClient;
 import co.edu.uceva.reservaservice.domain.integration.dto.ReservaDTO;
+import co.edu.uceva.reservaservice.domain.service.IAulaClient;
 import co.edu.uceva.reservaservice.domain.integration.dto.SigaReservaDTO;
 import co.edu.uceva.reservaservice.domain.integration.mapper.AulaSmartReservaMapper;
 import co.edu.uceva.reservaservice.domain.integration.mapper.SigaReservaMapper;
@@ -21,6 +22,7 @@ public class AgregadorReservasService {
 
     private final IReservaRepository reservaRepository;
     private final ISigaClient sigaClient;
+    private final IAulaClient aulaClient;
     private final SigaReservaMapper sigaMapper;
     private final AulaSmartReservaMapper aulaSmartMapper;
 
@@ -32,10 +34,15 @@ public class AgregadorReservasService {
                 .collect(Collectors.toList());
 
         // 2. Obtener de SIGA
-        List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAula(codigoAula);
-        List<ReservaDTO> listaSiga = reservasSiga.stream()
-                .map(sigaMapper::traducir)
-                .collect(Collectors.toList());
+        Integer codigoSiga = aulaClient.getSigaDeAula(codigoAula);
+        System.out.println(codigoSiga);
+        List<ReservaDTO> listaSiga = new java.util.ArrayList<>();
+        if (codigoSiga != null) {
+            List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAula(codigoSiga.longValue());
+            listaSiga = reservasSiga.stream()
+                    .map(sigaMapper::traducir)
+                    .collect(Collectors.toList());
+        }
 
         // 3. Agregar y retornar
         List<ReservaDTO> todasLasReservas = new ArrayList<>();
@@ -46,7 +53,11 @@ public class AgregadorReservasService {
     }
 
     public List<ReservaDTO> obtenerReservasSigaPorFecha(Long codigoAula, LocalDate fecha) {
-        List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoAula, fecha);
+        Integer codigoSiga = aulaClient.getSigaDeAula(codigoAula);
+        if (codigoSiga == null) {
+            return new java.util.ArrayList<>();
+        }
+        List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoSiga.longValue(), fecha);
         return reservasSiga.stream()
                 .map(sigaMapper::traducir)
                 .collect(Collectors.toList());

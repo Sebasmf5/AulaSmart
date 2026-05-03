@@ -49,7 +49,7 @@ management:
 
 url:
   servicio:
-    asistencia: http://localhost:8082
+    asistencia: ${URL_SERVICIO_ASISTENCIA:http://localhost:8083}
 
 siga:
   api:

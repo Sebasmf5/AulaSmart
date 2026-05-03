@@ -25,6 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import co.edu.uceva.reservaservice.domain.model.RolUsuario;
+
 @RestController
 @RequestMapping("/api/v1/reserva-service")
 public class ReservaRestController {
@@ -92,6 +97,22 @@ public class ReservaRestController {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            String codigoSolicitante = authentication.getPrincipal().toString();
+            reserva.setIdSolicitante(Long.valueOf(codigoSolicitante));
+
+            if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
+                String authority = authentication.getAuthorities().iterator().next().getAuthority(); // Ej: ROLE_ESTUDIANTE
+                String rolStr = authority.replace("ROLE_", "");
+                try {
+                    reserva.setRolSolicitante(RolUsuario.valueOf(rolStr));
+                } catch (IllegalArgumentException e) {
+                    // Si el rol no mapea a RolUsuario
+                }
+            }
+        }
         Map<String, Object> response = new HashMap<>();
         Reserva nuevaReserva = reservaService.addReserva(reserva);
         response.put(MENSAJE, "La reserva ha sido creada con éxito!");
@@ -131,6 +152,23 @@ public class ReservaRestController {
         }
         reservaService.findReservaById(reserva.getIdReserva())
                 .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            String codigoSolicitante = authentication.getPrincipal().toString();
+            reserva.setIdSolicitante(Long.valueOf(codigoSolicitante));
+
+            if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
+                String authority = authentication.getAuthorities().iterator().next().getAuthority(); // Ej: ROLE_ESTUDIANTE
+                String rolStr = authority.replace("ROLE_", "");
+                try {
+                    reserva.setRolSolicitante(RolUsuario.valueOf(rolStr));
+                } catch (IllegalArgumentException e) {
+                    // Si el rol no mapea a RolUsuario
+                }
+            }
+        }
+        
         Map<String, Object> response = new HashMap<>();
         Reserva reservaActualizado = reservaService.updateReserva(reserva);
         response.put(MENSAJE, "La reserva ha sido actualizado con éxito!");
