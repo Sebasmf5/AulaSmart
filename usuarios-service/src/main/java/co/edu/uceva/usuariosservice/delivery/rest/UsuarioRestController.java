@@ -82,8 +82,6 @@ public class UsuarioRestController {
         }
     }
 
-    @GetMapping("/usuarios/tipo/{id}")
-
     @PostMapping("/usuarios")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
     public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
