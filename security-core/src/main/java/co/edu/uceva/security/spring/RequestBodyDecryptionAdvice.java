@@ -7,26 +7,21 @@ import co.edu.uceva.security.protocol.EncryptionContext;
 import co.edu.uceva.security.redis.SessionKeyStore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdviceAdapter;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Intercepta peticiones cuyo cuerpo es {@link EncryptedPayloadDto}.
- *
- * <p>Flujo:<br>
- * 1. Lee el header {@code X-Session-ID}.<br>
- * 2. Recupera la llave AES desde Redis vía {@link SessionKeyStore}.<br>
- * 3. Descifra {@code encryptedData} (Base64 → bytes cifrados → JSON plano).<br>
- * 4. Deserializa el JSON a la clase destino real del controlador.<br>
- * 5. Guarda la llave en {@link EncryptionContext} para que el advice de
- *    respuesta la reutilice sin volver a Redis.</p>
+ * Intercepta peticiones para descifrar el cuerpo si viene como {@link EncryptedPayloadDto}.
  */
 @RestControllerAdvice
 public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
@@ -43,60 +38,75 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
         this.objectMapper      = objectMapper;
     }
 
-    // -------------------------------------------------------------------------
-    // Control: sólo actúa cuando el tipo de parámetro es EncryptedPayloadDto
-    // -------------------------------------------------------------------------
-
     @Override
     public boolean supports(MethodParameter methodParameter,
                             Type targetType,
                             Class<? extends HttpMessageConverter<?>> converterType) {
-        return EncryptedPayloadDto.class.equals(methodParameter.getParameterType());
+        // Soportar todo. Verificaremos el contenido en beforeBodyRead.
+        return true;
     }
 
-    // -------------------------------------------------------------------------
-    // Post-lectura: descifrar y transformar
-    // -------------------------------------------------------------------------
-
     @Override
-    public Object afterBodyRead(Object body,
-                                HttpInputMessage inputMessage,
-                                MethodParameter parameter,
-                                Type targetType,
-                                Class<? extends HttpMessageConverter<?>> converterType) {
-        if (!(body instanceof EncryptedPayloadDto dto)) {
-            return body;
+    public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
+        String bodyString = new String(inputMessage.getBody().readAllBytes(), StandardCharsets.UTF_8);
+
+        // Chequeo rápido para ver si parece un EncryptedPayloadDto
+        if (bodyString.trim().startsWith("{") && bodyString.contains("\"encryptedData\"")) {
+            try {
+                EncryptedPayloadDto dto = objectMapper.readValue(bodyString, EncryptedPayloadDto.class);
+                
+                if (dto.getEncryptedData() != null) {
+                    String headerSessionId = inputMessage.getHeaders().getFirst("X-Session-ID");
+                    String sessionId = resolveSessionId(headerSessionId, dto.getSessionId());
+
+                    byte[] keyBytes = sessionKeyStore.getKey(sessionId);
+                    byte[] cipherBytes = Base64.getDecoder().decode(dto.getEncryptedData());
+                    AES aes = new AES(keyBytes);
+                    byte[] plainBytes = aes.decrypt(cipherBytes);
+
+                    encryptionContext.setCurrentKey(keyBytes);
+                    encryptionContext.setCurrentSessionId(sessionId);
+
+                    return new CustomHttpInputMessage(plainBytes, inputMessage.getHeaders());
+                }
+            } catch (Exception e) {
+                // Si falla, tal vez no era un EncryptedPayloadDto real, procesar como original
+            }
         }
 
+        return new CustomHttpInputMessage(bodyString.getBytes(StandardCharsets.UTF_8), inputMessage.getHeaders());
+    }
+
+    private String resolveSessionId(String headerSessionId, String dtoSessionId) {
         try {
-            // 1. Obtener sessionId del header HTTP
-            String sessionId = inputMessage.getHeaders().getFirst("X-Session-ID");
-            if (sessionId == null || sessionId.isBlank()) {
-                throw new CryptoException("Header X-Session-ID ausente o vacío.");
-            }
+            return JwtSessionIdExtractor.extract(headerSessionId);
+        } catch (CryptoException ignored) {
+            // No hay JWT autenticado, continuar con fallbacks
+        }
+        if (headerSessionId != null && !headerSessionId.isBlank()) return headerSessionId;
+        if (dtoSessionId    != null && !dtoSessionId.isBlank())    return dtoSessionId;
+        throw new CryptoException(
+                "sessionId no disponible: falta JWT con claim sessionId, " +
+                "header X-Session-ID y campo sessionId en el DTO.");
+    }
 
-            // 2. Recuperar llave AES desde Redis
-            byte[] keyBytes = sessionKeyStore.getKey(sessionId);
+    private static class CustomHttpInputMessage implements HttpInputMessage {
+        private final byte[] body;
+        private final HttpHeaders headers;
 
-            // 3. Descifrar payload
-            byte[] cipherBytes  = Base64.getDecoder().decode(dto.getEncryptedData());
-            AES    aes          = new AES(keyBytes);
-            byte[] plainBytes   = aes.decrypt(cipherBytes);
-            String plainJson    = new String(plainBytes, StandardCharsets.UTF_8);
+        public CustomHttpInputMessage(byte[] body, HttpHeaders headers) {
+            this.body = body;
+            this.headers = headers;
+        }
 
-            // 4. Compartir la llave en el contexto de la petición
-            encryptionContext.setCurrentKey(keyBytes);
+        @Override
+        public InputStream getBody() {
+            return new ByteArrayInputStream(body);
+        }
 
-            // 5. Deserializar JSON al tipo real esperado por el controlador
-            Class<?> targetClass = (Class<?>) targetType;
-            return objectMapper.readValue(plainJson, targetClass);
-
-        } catch (CryptoException ce) {
-            throw ce;
-        } catch (IOException e) {
-            throw new CryptoException("Error al deserializar el payload descifrado.", e);
-        } catch (Exception e) {
-            throw new CryptoException("Error en el descifrado del cuerpo de la petición.", e);
+        @Override
+        public HttpHeaders getHeaders() {
+            return headers;
         }
     }
 }

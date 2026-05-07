@@ -17,15 +17,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Intercepta respuestas de controladores que deben ser cifradas.
+ * Intercepta respuestas de controladores y las cifra cuando hay una sesión activa.
  *
- * <p>Flujo:<br>
- * 1. Comprueba que {@link EncryptionContext} tenga una llave activa
- *    (sólo cuando la petición fue descifrada previamente).<br>
- * 2. Serializa el body original a JSON.<br>
- * 3. Cifra con {@code AES} usando la llave del contexto de petición.<br>
- * 4. Envuelve el resultado en {@link EncryptedPayloadDto} con el sessionId
- *    extraído del header {@code X-Session-ID} de la petición.</p>
+ * <h3>Resolución del sessionId (por prioridad):</h3>
+ * <ol>
+ *   <li>{@link EncryptionContext#getCurrentSessionId()} (poblado por el advice de request).</li>
+ *   <li>Claim del JWT en {@code SecurityContextHolder} vía {@link JwtSessionIdExtractor}.</li>
+ *   <li>Header {@code X-Session-ID} de la petición.</li>
+ * </ol>
  */
 @RestControllerAdvice
 public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> {
@@ -46,7 +45,6 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
     @Override
     public boolean supports(MethodParameter returnType,
                             Class<? extends HttpMessageConverter<?>> converterType) {
-        // Se activa cuando el EncryptionContext tiene una llave (i.e., la request fue cifrada)
         return encryptionContext.hasKey();
     }
 
@@ -79,8 +77,8 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
             // 3. Codificar ciphertext en Base64
             String encryptedData = Base64.getEncoder().encodeToString(cipherBytes);
 
-            // 4. Obtener sessionId del header de la petición
-            String sessionId = request.getHeaders().getFirst("X-Session-ID");
+            // 4. Resolver sessionId: contexto → JWT → header
+            String sessionId = resolveSessionId(request);
 
             return new EncryptedPayloadDto(encryptedData, sessionId);
 
@@ -89,5 +87,28 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
         } catch (Exception e) {
             throw new CryptoException("Error al cifrar el cuerpo de la respuesta.", e);
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private String resolveSessionId(ServerHttpRequest request) {
+        // Prioridad 1: ya está en el EncryptionContext (lo puso el DecryptionAdvice)
+        String ctxSessionId = encryptionContext.getCurrentSessionId();
+        if (ctxSessionId != null && !ctxSessionId.isBlank()) return ctxSessionId;
+
+        // Prioridad 2: JWT en SecurityContextHolder
+        String headerSessionId = request.getHeaders().getFirst("X-Session-ID");
+        try {
+            return JwtSessionIdExtractor.extract(headerSessionId);
+        } catch (CryptoException ignored) {
+            // No hay JWT autenticado
+        }
+
+        // Prioridad 3: header HTTP
+        if (headerSessionId != null && !headerSessionId.isBlank()) return headerSessionId;
+
+        throw new CryptoException("No se pudo determinar el sessionId para la respuesta.");
     }
 }

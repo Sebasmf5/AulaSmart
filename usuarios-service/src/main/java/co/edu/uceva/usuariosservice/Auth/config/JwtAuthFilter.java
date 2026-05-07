@@ -82,12 +82,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 if (isTokenValid) {
                     String rol = jwtService.extractRol(jwt);
+                    // Extraer sessionId del JWT para pasarlo como credentials
+                    // (lo consume JwtSessionIdExtractor en security-core)
+                    String sessionId = jwtService.extractSessionId(jwt);
+
                     List<SimpleGrantedAuthority> authorities = List.of(
                             new SimpleGrantedAuthority("ROLE_" + rol)
                     );
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
-                            null,
+                            sessionId,   // sessionId como credentials (puede ser null en tokens antiguos)
                             authorities
                     );
                     authToken.setDetails(

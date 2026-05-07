@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import co.edu.uceva.security.converter.EncryptDatabaseConverter;
 
 import java.time.LocalDateTime;
 
@@ -51,8 +52,9 @@ public class Reserva {
     @Column(name = "codigo_programa")
     private String codigoPrograma;
 
-    @Column(name = "grupo")
+    @Column(name = "grupo", length = 512)
     @NotBlank(message = "El grupo no puede estar vacío")
+    @Convert(converter = EncryptDatabaseConverter.class)
     private String grupo;
 
     @Version

@@ -1,0 +1,4 @@
+CREATE DATABASE usuariosdb;
+CREATE DATABASE auladb;
+CREATE DATABASE incidenciadb;
+CREATE DATABASE reservadb;

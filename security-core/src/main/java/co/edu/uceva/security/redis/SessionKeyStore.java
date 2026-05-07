@@ -1,29 +1,22 @@
 package co.edu.uceva.security.redis;
 
 import co.edu.uceva.security.config.exceptions.CryptoException;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Gestiona la persistencia y recuperación de llaves AES en Redis.
+ * Gestiona la persistencia y recuperación de llaves AES en memoria (sin Redis).
  *
- * <p>Las llaves se almacenan en Base64 bajo la clave "{sessionId}:aes-key"
- * con un TTL configurable (por defecto 30 minutos).</p>
+ * <p>Las llaves se almacenan en memoria para evitar la dependencia de Redis.</p>
  */
 @Component
 public class SessionKeyStore {
 
-    private static final String KEY_PREFIX  = "session:aes:";
-    private static final Duration DEFAULT_TTL = Duration.ofMinutes(30);
-
-    private final StringRedisTemplate redisTemplate;
-
-    public SessionKeyStore(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    private final Map<String, String> keyStore = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // Persistencia
@@ -40,18 +33,14 @@ public class SessionKeyStore {
             throw new CryptoException("La llave AES debe tener exactamente 16 bytes.");
         }
         String encoded = Base64.getEncoder().encodeToString(keyBytes);
-        redisTemplate.opsForValue().set(redisKey(sessionId), encoded, DEFAULT_TTL);
+        keyStore.put(sessionId, encoded);
     }
 
     /**
-     * Sobrecarga: guarda la llave con un TTL personalizado.
+     * Sobrecarga: guarda la llave. El TTL es ignorado en esta implementación en memoria.
      */
     public void storeKey(String sessionId, byte[] keyBytes, Duration ttl) {
-        if (keyBytes.length != 16) {
-            throw new CryptoException("La llave AES debe tener exactamente 16 bytes.");
-        }
-        String encoded = Base64.getEncoder().encodeToString(keyBytes);
-        redisTemplate.opsForValue().set(redisKey(sessionId), encoded, ttl);
+        storeKey(sessionId, keyBytes);
     }
 
     // -------------------------------------------------------------------------
@@ -66,7 +55,7 @@ public class SessionKeyStore {
      * @throws CryptoException si el sessionId no tiene llave registrada
      */
     public byte[] getKey(String sessionId) {
-        String encoded = redisTemplate.opsForValue().get(redisKey(sessionId));
+        String encoded = keyStore.get(sessionId);
         if (encoded == null) {
             throw new CryptoException("No se encontró llave AES para la sesión: " + sessionId);
         }
@@ -81,14 +70,6 @@ public class SessionKeyStore {
      * Elimina la llave AES asociada al sessionId (útil para invalidar sesiones).
      */
     public void deleteKey(String sessionId) {
-        redisTemplate.delete(redisKey(sessionId));
-    }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private String redisKey(String sessionId) {
-        return KEY_PREFIX + sessionId;
+        keyStore.remove(sessionId);
     }
 }

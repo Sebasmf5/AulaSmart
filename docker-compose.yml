@@ -5,8 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: aulasmart-db
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: rootpassword
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: aulaSmart
     ports:
       - "5432:5432"
     volumes:
@@ -21,12 +22,14 @@ services:
       dockerfile: usuarios-service/Dockerfile
     container_name: usarios-service
     ports:
-      - "8081:8081"
+      - "8081:8080"
+    env_file:
+      - usuarios-service/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
-      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
     depends_on:
       - postgres
     networks:
@@ -38,11 +41,14 @@ services:
       dockerfile: reserva-service/Dockerfile
     container_name: reserva-service
     ports:
-      - "8082:8082"
+      - "8082:8080"
+    env_file:
+      - reserva-service/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
     depends_on:
       - postgres
     networks:
@@ -54,11 +60,14 @@ services:
       dockerfile: aula-service/Dockerfile
     container_name: aula-service
     ports:
-      - "8083:8083"
+      - "8083:8080"
+    env_file:
+      - aula-service/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
     depends_on:
       - postgres
     networks:
@@ -70,11 +79,14 @@ services:
       dockerfile: incidencia-service/Dockerfile
     container_name: incidencia-service
     ports:
-      - "8084:8084"
+      - "8084:8080"
+    env_file:
+      - incidencia-service/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=rootpassword
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=redis
     depends_on:
       - postgres
     networks:

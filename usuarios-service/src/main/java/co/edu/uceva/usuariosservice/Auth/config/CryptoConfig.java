@@ -1,0 +1,40 @@
+package co.edu.uceva.usuariosservice.Auth.config;
+
+import co.edu.uceva.security.protocol.KeyExchangeService;
+import co.edu.uceva.security.redis.SessionKeyStore;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.math.BigInteger;
+
+/**
+ * Configuración de los beans de cifrado para usuarios-service.
+ *
+ * <p>Las claves RSA se inyectan desde variables de entorno / application.properties.</p>
+ *
+ * <h3>Propiedades requeridas:</h3>
+ * <pre>
+ * crypto.rsa.private-d=${RSA_MASTER_D}
+ * crypto.rsa.public-n=${RSA_MASTER_N}
+ * crypto.db.master-key=${DB_MASTER_KEY}
+ * </pre>
+ */
+@Configuration
+public class CryptoConfig {
+
+    @Value("${crypto.rsa.private-d}")
+    private String rsaPrivateD;
+
+    @Value("${crypto.rsa.public-n}")
+    private String rsaPublicN;
+
+    @Bean
+    public KeyExchangeService keyExchangeService(SessionKeyStore sessionKeyStore) {
+        return new KeyExchangeService(
+                new BigInteger(rsaPrivateD, 16),  // hex desde el .env
+                new BigInteger(rsaPublicN, 16),   // hex desde el .env
+                sessionKeyStore
+        );
+    }
+}

@@ -3,6 +3,7 @@ package co.edu.uceva.aulaservice.domain.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import co.edu.uceva.security.converter.EncryptDatabaseConverter;
 
 @Entity
 @Table(name = "aulas")
@@ -24,7 +25,8 @@ public class Aula {
     @Column(name = "codigoEdificio", nullable = false)
     private String codigoEdificio;
 
-    @Column(name = "nombreEdificio", nullable = false)
+    @Column(name = "nombreEdificio", nullable = false, length = 512)
+    @Convert(converter = EncryptDatabaseConverter.class)
     private String nombreEdificio;
 
     // cantidad de sillas del aula

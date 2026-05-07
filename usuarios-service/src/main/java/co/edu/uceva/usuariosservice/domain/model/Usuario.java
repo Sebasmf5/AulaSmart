@@ -2,6 +2,7 @@ package co.edu.uceva.usuariosservice.domain.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import co.edu.uceva.security.converter.EncryptDatabaseConverter;
 
 @Entity
 @Table(name = "usuarios")
@@ -23,7 +24,8 @@ public class Usuario {
 
     @NotEmpty(message = "El correo no puede estar vacío")
     @Email(message = "Debe ser un correo válido (ejemplo@uceva.edu.co)")
-    @Column(nullable = false, unique = true) // Agregué unique para evitar correos duplicados
+    @Column(nullable = false, unique = true, length = 512) // mayor longitud para ciphertext en Base64
+    @Convert(converter = EncryptDatabaseConverter.class)
     private String email;
 
     @NotEmpty(message = "La contraseña no puede estar vacía")

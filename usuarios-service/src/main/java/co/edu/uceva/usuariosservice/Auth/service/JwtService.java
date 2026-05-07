@@ -32,6 +32,14 @@ public class JwtService {
         return getAllClaims(token).get("rol", String.class);
     }
 
+    /**
+     * Extrae el sessionId del claim {@code sessionId} del JWT.
+     * Devuelve null si el token no contiene ese claim (compatibilidad con tokens antiguos).
+     */
+    public String extractSessionId(final String token) {
+        return getAllClaims(token).get("sessionId", String.class);
+    }
+
     public boolean isTokenValid(String token, Usuario usuario) {
         final Long codigo = extractCodigo(token);
         return (codigo.equals(usuario.getCodigo())) && !isTokenExpired(token);
@@ -49,16 +57,33 @@ public class JwtService {
         return buildToken(usuario, jwtRefreshExpiration);
     }
 
+    /**
+     * Genera un token con sessionId pre-acordado (para peticiones autenticadas
+     * con E2E encryption activa).
+     */
+    public String generateToken(final Usuario usuario, final String sessionId) {
+        return buildToken(usuario, jwtExpiration, sessionId);
+    }
+
     private String buildToken(final Usuario usuario, final long expiration) {
-        return Jwts.builder()
-                .id(usuario.getCodigo().toString()) // jti
-                .subject(usuario.getEmail())       // sub
-                .claim("nombre", usuario.getNombre() + " " + usuario.getApellido()) // claim personalizado
-                .claim("rol", usuario.getRol())                                     // claim personalizado
+        return buildToken(usuario, expiration, null);
+    }
+
+    private String buildToken(final Usuario usuario, final long expiration, final String sessionId) {
+        var builder = Jwts.builder()
+                .id(usuario.getCodigo().toString())                                 // jti
+                .subject(usuario.getEmail())                                        // sub
+                .claim("nombre", usuario.getNombre() + " " + usuario.getApellido()) // claim
+                .claim("rol", usuario.getRol())                                     // claim
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSignInKey())
-                .compact();
+                .signWith(getSignInKey());
+
+        if (sessionId != null && !sessionId.isBlank()) {
+            builder.claim("sessionId", sessionId);
+        }
+
+        return builder.compact();
     }
 
     private Claims getAllClaims(String token) {
