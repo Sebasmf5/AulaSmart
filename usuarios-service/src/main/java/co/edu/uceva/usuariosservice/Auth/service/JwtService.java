@@ -23,6 +23,10 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long jwtRefreshExpiration;
 
+    public long getJwtExpiration() {
+        return jwtExpiration;
+    }
+
     // Extrae el código (ID) del usuario guardado en el ID del token
     public Long extractCodigo(final String token) {
         return Long.parseLong(getAllClaims(token).getId());

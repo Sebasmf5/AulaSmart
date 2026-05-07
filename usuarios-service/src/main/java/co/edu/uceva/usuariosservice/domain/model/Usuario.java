@@ -2,6 +2,7 @@ package co.edu.uceva.usuariosservice.domain.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuarios")
@@ -43,6 +44,9 @@ public class Usuario {
     @Column(nullable = false)
     private String rol;
 
+    @Column(name = "ultimo_inicio_sesion")
+    private LocalDateTime ultimoInicioSesion;
+
     // --- Getters y Setters ---
 
     public Long getCodigo() { return codigo; }
@@ -62,4 +66,7 @@ public class Usuario {
 
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
+
+    public LocalDateTime getUltimoInicioSesion() { return ultimoInicioSesion; }
+    public void setUltimoInicioSesion(LocalDateTime ultimoInicioSesion) { this.ultimoInicioSesion = ultimoInicioSesion; }
 }

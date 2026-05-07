@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 
@@ -47,10 +48,25 @@ public class AuthService {
         String jwtToken = jwtService.generateToken(usuario);
         String jwtRefreshToken = jwtService.generateRefreshToken(usuario);
 
+        usuario.setUltimoInicioSesion(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+
         revokeAllUsuarioTokens(usuario);
         saveUsuarioToken(usuario, jwtToken);
 
-        return new TokenResponse(jwtToken, jwtRefreshToken);
+        return new TokenResponse(
+                jwtToken,
+                jwtRefreshToken,
+                "Bearer",
+                jwtService.getJwtExpiration(),
+                new TokenResponse.UserInfo(
+                        usuario.getCodigo(),
+                        usuario.getNombre() + " " + usuario.getApellido(),
+                        usuario.getEmail(),
+                        usuario.getRol(),
+                        usuario.getUltimoInicioSesion()
+                )
+        );
     }
 
     public TokenResponse refreshToken(final String authHeader) {
@@ -76,7 +92,19 @@ public class AuthService {
         revokeAllUsuarioTokens(usuario);
         saveUsuarioToken(usuario, accessToken);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(
+                accessToken,
+                refreshToken,
+                "Bearer",
+                jwtService.getJwtExpiration(),
+                new TokenResponse.UserInfo(
+                        usuario.getCodigo(),
+                        usuario.getNombre() + " " + usuario.getApellido(),
+                        usuario.getEmail(),
+                        usuario.getRol(),
+                        usuario.getUltimoInicioSesion() // Aquí usamos el último inicio de sesión actual
+                )
+        );
     }
 
     public TokenResponse authenticate(final AuthRequest request) {
@@ -92,10 +120,25 @@ public class AuthService {
         final String accessToken = jwtService.generateToken(usuario);
         final String refreshToken = jwtService.generateRefreshToken(usuario);
 
+        usuario.setUltimoInicioSesion(LocalDateTime.now());
+        usuarioRepository.save(usuario);
+
         revokeAllUsuarioTokens(usuario);
         saveUsuarioToken(usuario, accessToken);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(
+                accessToken,
+                refreshToken,
+                "Bearer",
+                jwtService.getJwtExpiration(),
+                new TokenResponse.UserInfo(
+                        usuario.getCodigo(),
+                        usuario.getNombre() + " " + usuario.getApellido(),
+                        usuario.getEmail(),
+                        usuario.getRol(),
+                        usuario.getUltimoInicioSesion()
+                )
+        );
     }
 
     private void saveUsuarioToken(Usuario usuario, String jwtToken) {
