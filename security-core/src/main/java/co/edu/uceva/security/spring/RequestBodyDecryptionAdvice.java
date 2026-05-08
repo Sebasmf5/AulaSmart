@@ -6,6 +6,8 @@ import co.edu.uceva.security.models.EncryptedPayloadDto;
 import co.edu.uceva.security.protocol.EncryptionContext;
 import co.edu.uceva.security.redis.SessionKeyStore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -20,15 +22,15 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-/**
- * Intercepta peticiones para descifrar el cuerpo si viene como {@link EncryptedPayloadDto}.
- */
 @RestControllerAdvice
 public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
 
     private final SessionKeyStore   sessionKeyStore;
     private final EncryptionContext encryptionContext;
     private final ObjectMapper      objectMapper;
+
+    @Autowired
+    private HttpServletRequest httpRequest;
 
     public RequestBodyDecryptionAdvice(SessionKeyStore sessionKeyStore,
                                        EncryptionContext encryptionContext,
@@ -42,7 +44,6 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
     public boolean supports(MethodParameter methodParameter,
                             Type targetType,
                             Class<? extends HttpMessageConverter<?>> converterType) {
-        // Soportar todo. Verificaremos el contenido en beforeBodyRead.
         return true;
     }
 
@@ -50,7 +51,13 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
     public HttpInputMessage beforeBodyRead(HttpInputMessage inputMessage, MethodParameter parameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) throws IOException {
         String bodyString = new String(inputMessage.getBody().readAllBytes(), StandardCharsets.UTF_8);
 
-        // Chequeo rápido para ver si parece un EncryptedPayloadDto
+        String path = httpRequest.getRequestURI();
+
+        // Endpoints whitelist que pueden ir en texto plano (como el key-exchange o swagger)
+        if (path.contains("/crypto/key-exchange") || path.contains("/v3/api-docs") || path.contains("/swagger-ui") || path.contains("/actuator")) {
+            return new CustomHttpInputMessage(bodyString.getBytes(StandardCharsets.UTF_8), inputMessage.getHeaders());
+        }
+
         if (bodyString.trim().startsWith("{") && bodyString.contains("\"encryptedData\"")) {
             try {
                 EncryptedPayloadDto dto = objectMapper.readValue(bodyString, EncryptedPayloadDto.class);
@@ -70,24 +77,23 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
                     return new CustomHttpInputMessage(plainBytes, inputMessage.getHeaders());
                 }
             } catch (Exception e) {
-                // Si falla, tal vez no era un EncryptedPayloadDto real, procesar como original
+                throw new CryptoException("Error al descifrar el payload E2E: " + e.getMessage());
             }
         }
 
-        return new CustomHttpInputMessage(bodyString.getBytes(StandardCharsets.UTF_8), inputMessage.getHeaders());
+        // Si llega a este punto es porque el cliente envió JSON en Plain Text en lugar del DTO cifrado.
+        // RECHAZAMOS para forzar que NADA entre en texto plano.
+        throw new CryptoException("E2E Enforced: La petición a " + path + " debe viajar encriptada. Plaintext JSON no está permitido por seguridad.");
     }
 
     private String resolveSessionId(String headerSessionId, String dtoSessionId) {
         try {
             return JwtSessionIdExtractor.extract(headerSessionId);
         } catch (CryptoException ignored) {
-            // No hay JWT autenticado, continuar con fallbacks
         }
         if (headerSessionId != null && !headerSessionId.isBlank()) return headerSessionId;
         if (dtoSessionId    != null && !dtoSessionId.isBlank())    return dtoSessionId;
-        throw new CryptoException(
-                "sessionId no disponible: falta JWT con claim sessionId, " +
-                "header X-Session-ID y campo sessionId en el DTO.");
+        throw new CryptoException("sessionId no disponible: falta JWT o header X-Session-ID.");
     }
 
     private static class CustomHttpInputMessage implements HttpInputMessage {

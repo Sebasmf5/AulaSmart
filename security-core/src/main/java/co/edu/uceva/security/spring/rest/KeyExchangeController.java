@@ -1,4 +1,4 @@
-package co.edu.uceva.incidenciaservice.infrastructure.encryption.rest;
+package co.edu.uceva.security.spring.rest;
 
 import co.edu.uceva.security.models.KeyExchangeDto;
 import co.edu.uceva.security.protocol.KeyExchangeService;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 /**
- * Endpoint público de intercambio de llave AES para incidencia-service.
+ * Endpoint público de intercambio de llave AES unificado desde security-core.
  * Accesible sin JWT ({@code /api/v1/crypto/**} es {@code permitAll}).
  */
 @RestController

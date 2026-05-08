@@ -1,6 +1,7 @@
 package co.edu.uceva.aulaservice.delivery.exception;
 
 import co.edu.uceva.aulaservice.domain.exception.*;
+import co.edu.uceva.security.config.exceptions.CryptoException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -87,6 +88,14 @@ public class GlobalExceptionHandler {
 
         response.put(ERROR, errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
+    @ExceptionHandler(CryptoException.class)
+    public ResponseEntity<Map<String, Object>> handleCryptoException(CryptoException ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put(ERROR, "E2E Security Error");
+        response.put(MENSAJE, ex.getMessage());
+        response.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

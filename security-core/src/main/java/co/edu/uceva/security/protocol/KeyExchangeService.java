@@ -4,7 +4,6 @@ import co.edu.uceva.security.config.exceptions.CryptoException;
 import co.edu.uceva.security.models.KeyExchangeDto;
 import co.edu.uceva.security.redis.SessionKeyStore;
 import co.edu.uceva.security.rsa.RSA;
-import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
 import java.util.Base64;
@@ -22,7 +21,6 @@ import java.util.UUID;
  *
  * <p>El número RSA cifrado se transporta en Base64 (big-endian, sin signo).</p>
  */
-@Service
 public class KeyExchangeService {
 
     private final SessionKeyStore sessionKeyStore;

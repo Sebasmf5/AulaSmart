@@ -29,6 +29,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
     depends_on:
       - postgres
@@ -48,6 +49,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
     depends_on:
       - postgres
@@ -67,6 +69,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
     depends_on:
       - postgres
@@ -86,6 +89,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
     depends_on:
       - postgres
