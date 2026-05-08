@@ -1,6 +1,7 @@
 package co.edu.uceva.security.spring;
 
-import co.edu.uceva.security.aes.AES;
+import co.edu.uceva.security.aes.AESCBC;
+import co.edu.uceva.security.aes.HmacSHA256;
 import co.edu.uceva.security.config.exceptions.CryptoException;
 import co.edu.uceva.security.models.EncryptedPayloadDto;
 import co.edu.uceva.security.protocol.EncryptionContext;
@@ -17,6 +18,18 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
+/**
+ * Interceptor de respuestas salientes que cifra el body con AES-CBC + HMAC-SHA256.
+ *
+ * Flujo:
+ * 1. Serializa la respuesta del controlador a JSON.
+ * 2. Genera un IV aleatorio nuevo para esta respuesta.
+ * 3. Cifra con AES-128-CBC(key, iv).
+ * 4. Calcula HMAC-SHA256(key, iv || ciphertext) para garantizar integridad.
+ * 5. Devuelve EncryptedPayloadDto con encryptedData, iv, hmac, sessionId.
+ *
+ * Endpoints en whitelist (key-exchange, swagger, actuator) pasan sin cifrar.
+ */
 @RestControllerAdvice
 public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> {
 
@@ -35,7 +48,6 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
     @Override
     public boolean supports(MethodParameter returnType,
                             Class<? extends HttpMessageConverter<?>> converterType) {
-        // Enforce everywhere to ensure no plain text leaks
         return true;
     }
 
@@ -49,16 +61,22 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
 
         if (body == null) return null;
 
+        // Si ya es un DTO encriptado o el DTO de key-exchange → pasar sin procesar
         if (body instanceof EncryptedPayloadDto || body instanceof co.edu.uceva.security.models.KeyExchangeDto) {
             return body;
         }
 
+        // Whitelist de endpoints que responden en texto plano
         String path = request.getURI().getPath();
-        if (path.contains("/v3/api-docs") || path.contains("/swagger-ui") || path.contains("/actuator") || path.contains("/crypto/key-exchange")) {
+        if (path.contains("/v3/api-docs")
+                || path.contains("/swagger-ui")
+                || path.contains("/actuator")
+                || path.contains("/crypto/key-exchange")) {
             return body;
         }
 
         try {
+            // 1. Serializar respuesta a bytes JSON
             byte[] plainBytes;
             if (body instanceof String) {
                 plainBytes = ((String) body).getBytes(StandardCharsets.UTF_8);
@@ -66,17 +84,30 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
                 plainBytes = objectMapper.writeValueAsBytes(body);
             }
 
+            // 2. Obtener la llave AES y sessionId del contexto actual
             String sessionId = resolveSessionId(request);
-            byte[] keyBytes = encryptionContext.getCurrentKey();
+            byte[] keyBytes  = encryptionContext.getCurrentKey();
             if (keyBytes == null) {
                 keyBytes = sessionKeyStore.getKey(sessionId);
             }
 
-            AES aes = new AES(keyBytes);
-            byte[] cipherBytes = aes.encrypt(plainBytes);
+            // 3. Generar IV aleatorio para esta respuesta (nunca reutilizar IV)
+            byte[] iv = AESCBC.generateIV();
 
+            // 4. Cifrar con AES-128-CBC
+            AESCBC aesCbc = new AESCBC(keyBytes);
+            byte[] cipherBytes = aesCbc.encrypt(plainBytes, iv);
+
+            // 5. Calcular HMAC-SHA256 sobre (IV || ciphertext) para autenticar la respuesta
+            byte[] hmacInput = concat(iv, cipherBytes);
+            byte[] hmacBytes = HmacSHA256.compute(keyBytes, hmacInput);
+
+            // 6. Codificar todo en Base64 y construir el DTO de respuesta
             String encryptedData = Base64.getEncoder().encodeToString(cipherBytes);
-            return new EncryptedPayloadDto(encryptedData, sessionId);
+            String ivB64         = Base64.getEncoder().encodeToString(iv);
+            String hmacB64       = Base64.getEncoder().encodeToString(hmacBytes);
+
+            return new EncryptedPayloadDto(encryptedData, ivB64, hmacB64, sessionId);
 
         } catch (CryptoException ce) {
             throw ce;
@@ -84,6 +115,10 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
             throw new CryptoException("Error al cifrar el cuerpo de la respuesta: " + e.getMessage(), e);
         }
     }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     private String resolveSessionId(ServerHttpRequest request) {
         String ctxSessionId = encryptionContext.getCurrentSessionId();
@@ -96,6 +131,13 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
 
         if (headerSessionId != null && !headerSessionId.isBlank()) return headerSessionId;
 
-        throw new CryptoException("E2E Enforced: No se pudo determinar el sessionId para la respuesta en " + request.getURI().getPath());
+        throw new CryptoException("E2E Enforced: No se pudo determinar el sessionId para cifrar la respuesta en " + request.getURI().getPath());
+    }
+
+    private byte[] concat(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length];
+        System.arraycopy(a, 0, result, 0, a.length);
+        System.arraycopy(b, 0, result, a.length, b.length);
+        return result;
     }
 }
