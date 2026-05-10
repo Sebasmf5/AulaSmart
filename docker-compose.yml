@@ -32,7 +32,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -51,7 +51,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
     depends_on:
       postgres:
@@ -71,7 +71,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
@@ -90,7 +90,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SUPER_SECRET}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - API_KEY_GROQ=${API_KEY_GROQ}
       - GROQ_API_KEY=${GROQ_API_KEY}
     depends_on:

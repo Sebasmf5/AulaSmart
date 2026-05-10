@@ -2,6 +2,7 @@ package co.edu.uceva.aulaservice.domain.service;
 
 import co.edu.uceva.aulaservice.domain.repository.IAulaRepository;
 import co.edu.uceva.aulaservice.domain.model.Aula;
+import co.edu.uceva.aulaservice.domain.repository.IBloqueRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,8 +15,10 @@ import java.util.Optional;
 public class AulaServiceImpl  implements IAulaService {
 
     IAulaRepository repository;
+    IBloqueRepository bloqueRepository;
 
-    public AulaServiceImpl(IAulaRepository repository) {
+    public AulaServiceImpl(IBloqueRepository bloqueRepository, IAulaRepository repository) {
+        this.bloqueRepository = bloqueRepository;
         this.repository = repository;
     }
 
@@ -68,6 +71,16 @@ public class AulaServiceImpl  implements IAulaService {
     @Transactional(readOnly = true)
     public Optional<Aula> obtenerAula(Long codigoAula) {
         return repository.findByCodigoAula(codigoAula);
+    }
+
+    @Override
+    public List<Aula> filtrarPorBloque(Long bloqueId) {
+        return repository.findByBloqueId(bloqueId);
+    }
+
+    @Override
+    public List<Aula> filtrarPorFacultad(Long facultadId) {
+        return repository.findByBloque_Facultad_Id(facultadId);
     }
 }
 

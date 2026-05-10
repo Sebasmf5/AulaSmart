@@ -50,6 +50,11 @@ management:
       exposure:
         include: "*"
 
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+
 logging:
   level:
     org.springframework: ERROR

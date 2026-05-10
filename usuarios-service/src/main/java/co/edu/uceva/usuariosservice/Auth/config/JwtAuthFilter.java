@@ -1,7 +1,5 @@
 package co.edu.uceva.usuariosservice.Auth.config;
 
-
-import co.edu.uceva.usuariosservice.Auth.repository.ITokenRepository;
 import co.edu.uceva.usuariosservice.Auth.service.JwtService;
 import co.edu.uceva.usuariosservice.domain.model.Usuario;
 import co.edu.uceva.usuariosservice.domain.repository.IUsuarioRepository;
@@ -10,8 +8,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.http.HttpHeaders;
@@ -19,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 
 import java.io.IOException;
@@ -30,17 +25,12 @@ import java.util.Optional;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final UserDetailsService userDetailsService;
-    private final ITokenRepository tokenRepository;
     private final IUsuarioRepository usuarioRepository;
 
     public JwtAuthFilter(IUsuarioRepository usuarioRepository,
-                       ITokenRepository tokenRepository,
-                       JwtService jwtService, UserDetailsService userDetailsService) {
+                         JwtService jwtService) {
         this.usuarioRepository = usuarioRepository;
-        this.tokenRepository = tokenRepository;
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -68,33 +58,26 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        final UserDetails userDetails = this.userDetailsService.loadUserByUsername(codigoUsuario.toString());
-        final boolean isNotTokenExpiredOrRevoked = tokenRepository.findByToken(jwt)
-                .map(token -> !token.isExpired() && !token.isRevoked())
-                .orElse(false);
+        // Validación stateless: solo verifica firma + expiración del JWT
+        final Optional<Usuario> user = usuarioRepository.findById(codigoUsuario);
 
+        if (user.isPresent()) {
+            final boolean isTokenValid = jwtService.isTokenValid(jwt, user.get());
 
-        if (isNotTokenExpiredOrRevoked) {
-            final Optional<Usuario> user = usuarioRepository.findById(codigoUsuario);
-
-            if (user.isPresent()) {
-                final boolean isTokenValid = jwtService.isTokenValid(jwt, user.get());
-
-                if (isTokenValid) {
-                    String rol = jwtService.extractRol(jwt);
-                    List<SimpleGrantedAuthority> authorities = List.of(
-                            new SimpleGrantedAuthority("ROLE_" + (rol != null ? rol.toUpperCase() : ""))
-                    );
-                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            authorities
-                    );
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
+            if (isTokenValid) {
+                String rol = jwtService.extractRol(jwt);
+                List<SimpleGrantedAuthority> authorities = List.of(
+                        new SimpleGrantedAuthority("ROLE_" + (rol != null ? rol.toUpperCase() : ""))
+                );
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        codigoUsuario.toString(),
+                        null,
+                        authorities
+                );
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
 

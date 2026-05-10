@@ -193,4 +193,24 @@ public class AulaRestController {
         return ResponseEntity.ok(aulas);
     }
 
+    @GetMapping("/aulas/bloque/{bloqueId}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorBloque(@PathVariable Long bloqueId) {
+        List<Aula> aulas = aulaService.filtrarPorBloque(bloqueId);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para el bloque " + bloqueId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/aulas/facultad/{facultadId}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorFacultad(@PathVariable Long facultadId) {
+        List<Aula> aulas = aulaService.filtrarPorFacultad(facultadId);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para la facultad " + facultadId);
+        return ResponseEntity.ok(response);
+    }
+
 }

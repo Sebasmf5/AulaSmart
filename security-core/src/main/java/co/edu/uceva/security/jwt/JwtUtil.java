@@ -13,7 +13,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${application.security.jwt.secret-key:eAbpUoiUYzAJOYBExi6S4ezTJZ8xblV2ZWbl2mafPkM}")
+    @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
     public String extractCodigo(final String token) {
