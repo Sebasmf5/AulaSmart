@@ -26,4 +26,9 @@ public class KeyExchangeController {
         String sessionId = keyExchangeService.processKeyExchange(dto);
         return ResponseEntity.ok(Map.of("sessionId", sessionId));
     }
+
+    @GetMapping("/public-key")
+    public ResponseEntity<Map<String, String>> getPublicKey() {
+        return ResponseEntity.ok(keyExchangeService.getPublicKey());
+    }
 }

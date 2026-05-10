@@ -31,19 +31,39 @@ public class KeyExchangeService {
     /** Módulo RSA n */
     private final BigInteger publicKeyN;
 
+    /** Exponente público RSA e */
+    private final BigInteger publicKeyE;
+
     /**
-     * Constructor que recibe las componentes de la clave privada RSA.
-     *
-     * @param privateKeyD exponente privado d
-     * @param publicKeyN  módulo n
-     * @param sessionKeyStore store de sesiones Redis
+     * Constructor que recibe las componentes de la clave privada RSA, y asume el exponente publico e por defecto 65537.
      */
     public KeyExchangeService(BigInteger privateKeyD,
                               BigInteger publicKeyN,
                               SessionKeyStore sessionKeyStore) {
+        this(privateKeyD, publicKeyN, BigInteger.valueOf(65537), sessionKeyStore);
+    }
+
+    /**
+     * Constructor que recibe todas las componentes.
+     */
+    public KeyExchangeService(BigInteger privateKeyD,
+                              BigInteger publicKeyN,
+                              BigInteger publicKeyE,
+                              SessionKeyStore sessionKeyStore) {
         this.privateKeyD  = privateKeyD;
         this.publicKeyN   = publicKeyN;
+        this.publicKeyE   = publicKeyE;
         this.sessionKeyStore = sessionKeyStore;
+    }
+
+    /**
+     * Retorna los datos de la clave publica.
+     */
+    public java.util.Map<String, String> getPublicKey() {
+        return java.util.Map.of(
+            "n", publicKeyN.toString(16),
+            "e", publicKeyE.toString(16)
+        );
     }
 
     /**
