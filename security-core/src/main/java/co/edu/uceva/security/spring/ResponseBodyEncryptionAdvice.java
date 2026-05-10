@@ -71,7 +71,8 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
         if (path.contains("/v3/api-docs")
                 || path.contains("/swagger-ui")
                 || path.contains("/actuator")
-                || path.contains("/crypto/key-exchange")) {
+                || path.contains("/crypto/")
+                || path.equals("/error")) {
             return body;
         }
 

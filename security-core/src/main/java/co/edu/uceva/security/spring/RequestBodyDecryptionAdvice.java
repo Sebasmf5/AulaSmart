@@ -71,7 +71,7 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
         String path = httpRequest.getRequestURI();
 
         // Whitelist de endpoints que pueden recibir texto plano
-        if (path.contains("/crypto/key-exchange")
+        if (path.contains("/crypto/")
                 || path.contains("/v3/api-docs")
                 || path.contains("/swagger-ui")
                 || path.contains("/actuator")) {
