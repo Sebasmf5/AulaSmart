@@ -31,12 +31,7 @@ public class Aula {
     @JoinColumn(name = "bloque_id", nullable = false)
     private Bloque bloque;
 
-    @Column(name = "codigoTipoAula", nullable = false)
-    private String codigoTipoAula;
-
-    @Column(name = "nombreTipoAula", nullable = false)
-    private String nombreTipoAula;
-
-    @Column(name = "requiereAutorizacion", nullable = false)
-    private Boolean requiereAutorizacion;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_aula_id", nullable = false)
+    private TipoAula tipoAula;
 }

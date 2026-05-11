@@ -9,25 +9,28 @@ import lombok.Setter;
 import java.util.List;
 
 @Entity
-@Table(name = "facultades")
+@Table(name = "tipos_aula")
 @Getter
 @Setter
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-public class Facultad {
+public class TipoAula {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Correspondiente al codigoDependencia del SIGA
-    @Column(name = "codigo_dependencia", nullable = false, unique = true)
-    private String codigoDependencia;
+    // Correspondiente al codigo_tipo_aula del SIGA
+    @Column(name = "codigo_tipo_aula", nullable = false, unique = true)
+    private String codigoTipoAula;
 
-    // Correspondiente al nombreDependencia del SIGA
+    // Correspondiente al nombre_tipo_aula del SIGA
     @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @ManyToMany(mappedBy = "facultades")
+    @Column(name = "requiere_autorizacion", nullable = false)
+    private Boolean requiereAutorizacion = false;
+
+    @OneToMany(mappedBy = "tipoAula", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<Bloque> bloques;
+    private List<Aula> aulas;
 }

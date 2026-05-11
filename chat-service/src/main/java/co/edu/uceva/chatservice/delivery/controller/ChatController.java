@@ -1,7 +1,7 @@
 package co.edu.uceva.chatservice.delivery.controller;
 
 import co.edu.uceva.chatservice.domain.model.ChatRequest;
-import co.edu.uceva.chatservice.delivery.service.ChatService;
+import co.edu.uceva.chatservice.domain.service.ChatService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

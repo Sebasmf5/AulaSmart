@@ -23,6 +23,11 @@ public class BloqueServiceImpl implements IBloqueService {
     @Override
     @Transactional(readOnly = true)
     public List<Bloque> listarPorFacultad(Long facultadId) {
-        return bloqueRepository.findByFacultadId(facultadId);
+        return bloqueRepository.findByFacultades_Id(facultadId);
+    }
+
+    @Override
+    public Bloque filtrarPorNombre(String nombre) {
+        return bloqueRepository.findFirstByNombreContainingIgnoreCase(nombre);
     }
 }

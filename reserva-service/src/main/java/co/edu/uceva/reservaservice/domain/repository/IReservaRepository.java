@@ -38,4 +38,14 @@ public interface IReservaRepository extends JpaRepository<Reserva, Long> {
             @Param("horaFin") LocalDateTime horaFin,
             @Param("idReserva") Long idReserva
     );
+
+    // Consulta que devuelve los IDs de las aulas ocupadas
+    @Query("SELECT r.codigoAula FROM Reserva r " +
+            "WHERE r.estado != 'CANCELADA' " +
+            "AND r.horaInicio < :horaFin " +
+            "AND r.horaFin > :horaInicio")
+    List<Long> findAulasOcupadasEnRango(
+            @Param("horaInicio") LocalDateTime horaInicio,
+            @Param("horaFin") LocalDateTime horaFin
+    );
 }

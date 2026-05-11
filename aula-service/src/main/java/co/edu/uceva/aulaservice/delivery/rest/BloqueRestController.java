@@ -33,4 +33,12 @@ public class BloqueRestController {
         response.put("bloques", bloqueService.listarPorFacultad(facultadId));
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/buscar/{nombre}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> filtrarPorNombre(@PathVariable String nombre) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("bloque", bloqueService.filtrarPorNombre(nombre));
+        return ResponseEntity.ok(response);
+    }
 }

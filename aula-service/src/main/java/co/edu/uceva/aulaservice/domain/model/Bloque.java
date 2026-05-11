@@ -27,9 +27,13 @@ public class Bloque {
     @Column(name = "nombre", nullable = false)
     private String nombre;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "facultad_id", nullable = false)
-    private Facultad facultad;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "bloque_facultad",
+        joinColumns = @JoinColumn(name = "bloque_id"),
+        inverseJoinColumns = @JoinColumn(name = "facultad_id")
+    )
+    private List<Facultad> facultades = new java.util.ArrayList<>();
 
     @OneToMany(mappedBy = "bloque", cascade = CascadeType.ALL)
     @JsonIgnore

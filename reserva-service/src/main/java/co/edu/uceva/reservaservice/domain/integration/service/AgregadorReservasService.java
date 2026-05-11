@@ -12,8 +12,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -61,5 +64,73 @@ public class AgregadorReservasService {
         return reservasSiga.stream()
                 .map(sigaMapper::traducir)
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Retorna los codigosAula ocupados en un rango de tiempo, combinando
+     * reservas internas (BD) y reservas externas (SIGA) con detección de solapamiento.
+     *
+     * Para las reservas SIGA, itera sobre todas las aulas conocidas en la BD
+     * que tengan código SIGA asignado, consulta la API por fecha y verifica si
+     * se solapan con el rango solicitado.
+     *
+     * @param horaInicio inicio del rango a consultar (inclusive)
+     * @param horaFin    fin del rango a consultar (exclusive)
+     * @return lista de codigosAula (propios de AulaSmart) ocupados en ese rango
+     */
+    public List<Long> obtenerAulasOcupadasEnRangoConSiga(LocalDateTime horaInicio, LocalDateTime horaFin) {
+        Set<Long> ocupadas = new HashSet<>();
+
+        // 1. Aulas ocupadas en la BD interna de AulaSmart
+        List<Long> ocupadasBD = reservaRepository.findAulasOcupadasEnRango(horaInicio, horaFin);
+        ocupadas.addAll(ocupadasBD);
+
+        // 2. Aulas ocupadas en SIGA para la misma fecha
+        LocalDate fecha = horaInicio.toLocalDate();
+
+        // Todos los codigosAula registrados en el aula-service
+        List<Long> todosLosCodigos;
+        try {
+            todosLosCodigos = aulaClient.listarCodigosAula();
+        } catch (Exception e) {
+            System.err.println("[AgregadorReservasService] No se pudo obtener la lista de aulas: " + e.getMessage());
+            return new ArrayList<>(ocupadas); // fallback: solo BD interna
+        }
+
+        // Para cada aula, consultamos el SIGA y verificamos solapamiento
+        // Usamos parallelStream para realizar las peticiones HTTP de forma concurrente y mejorar el tiempo de respuesta
+        List<Long> ocupadasSiga = todosLosCodigos.parallelStream()
+                .filter(codigoAula -> !ocupadas.contains(codigoAula))
+                .filter(codigoAula -> {
+                    try {
+                        // El codigoAula ES el código SIGA (se usa el mismo valor en la API del SIGA)
+                        List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoAula, fecha);
+                        return reservasSiga.stream().anyMatch(r -> seSolapa(r, horaInicio, horaFin));
+                    } catch (Exception e) {
+                        System.err.println("[AgregadorReservasService] Error consultando SIGA para aula " + codigoAula + ": " + e.getMessage());
+                        return false;
+                    }
+                })
+                .collect(Collectors.toList());
+
+        ocupadas.addAll(ocupadasSiga);
+
+
+        return new ArrayList<>(ocupadas);
+    }
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    /** Verifica si una reserva SIGA se solapa con el rango [inicio, fin). */
+    private boolean seSolapa(SigaReservaDTO siga, LocalDateTime inicio, LocalDateTime fin) {
+        try {
+            java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime sigaInicio = LocalDateTime.parse(siga.getStart_dt(), fmt);
+            LocalDateTime sigaFin    = LocalDateTime.parse(siga.getEnd_dt(),   fmt);
+            // Solapamiento estándar: A.inicio < B.fin && A.fin > B.inicio
+            return sigaInicio.isBefore(fin) && sigaFin.isAfter(inicio);
+        } catch (Exception e) {
+            return false; // si no se puede parsear, ignoramos esa reserva
+        }
     }
 }

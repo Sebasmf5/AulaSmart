@@ -24,6 +24,8 @@ import co.edu.uceva.reservaservice.domain.integration.dto.ReservaDTO;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
@@ -102,6 +104,8 @@ public class ReservaRestController {
         if (authentication != null && authentication.getPrincipal() != null) {
             String codigoSolicitante = authentication.getPrincipal().toString();
             reserva.setIdSolicitante(Long.valueOf(codigoSolicitante));
+            String nombreUsuario = authentication.getName();
+            reserva.setNombreUsuarioResponsable(nombreUsuario);
 
             if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
                 String authority = authentication.getAuthorities().iterator().next().getAuthority(); // Ej: ROLE_ESTUDIANTE
@@ -191,5 +195,24 @@ public class ReservaRestController {
 
     public void restriccionReservas(){
 
+    }
+
+    /**
+     * Obtener lista de IDs de aulas ocupadas en un rango de fechas/horas.
+     * Combina reservas internas (AulaSmart BD) + reservas externas (SIGA universitario).
+     * Formato esperado: fecha=yyyy-MM-dd, horaInicio=HH:mm, horaFin=HH:mm
+     */
+    @GetMapping("/reservas/ocupadas")
+    public ResponseEntity<List<Long>> obtenerAulasOcupadas(
+            @RequestParam String fecha,
+            @RequestParam String horaInicio,
+            @RequestParam String horaFin) {
+
+        LocalDateTime inicio = LocalDateTime.parse(fecha + "T" + horaInicio + ":00");
+        LocalDateTime fin    = LocalDateTime.parse(fecha + "T" + horaFin    + ":00");
+
+        // BD interna + SIGA con detección de solapamiento
+        List<Long> aulasOcupadas = agregadorReservasService.obtenerAulasOcupadasEnRangoConSiga(inicio, fin);
+        return ResponseEntity.ok(aulasOcupadas);
     }
 }

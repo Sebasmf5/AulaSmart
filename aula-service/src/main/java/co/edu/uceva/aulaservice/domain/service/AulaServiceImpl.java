@@ -63,7 +63,7 @@ public class AulaServiceImpl  implements IAulaService {
     @Transactional(readOnly = true)
     public String obtenerTipoAula(Long codigoAula) {
         return repository.findById(codigoAula)
-                .map(aula -> aula.getCodigoTipoAula().toString())
+                .map(aula -> aula.getTipoAula().getCodigoTipoAula())
                 .orElse(null);
     }
 
@@ -80,7 +80,22 @@ public class AulaServiceImpl  implements IAulaService {
 
     @Override
     public List<Aula> filtrarPorFacultad(Long facultadId) {
-        return repository.findByBloque_Facultad_Id(facultadId);
+        return repository.findByBloque_Facultades_Id(facultadId);
+    }
+
+    @Override
+    public List<Aula> filtrarPorNombre(String nombre) {
+        return repository.findByNombreAulaContainingIgnoreCase(nombre);
+    }
+
+    @Override
+    public List<Aula> filtrarPorTipoAula(String tipoAula) {
+        return repository.findByTipoAula_NombreContainingIgnoreCase(tipoAula);
+    }
+
+    @Override
+    public List<Aula> filtrarPorTipoAulaId(Long tipoAulaId) {
+        return repository.findByTipoAulaId(tipoAulaId);
     }
 }
 

@@ -158,7 +158,7 @@ public class AulaRestController {
     public ResponseEntity<Boolean> getRequiereAutorizacion(@PathVariable Long codigo) {
         Aula aula = aulaService.findById(codigo)
                 .orElseThrow(() -> new AulaCodigoNoEncontrada(codigo));
-        Boolean isAutorizable = aula.getRequiereAutorizacion();
+        Boolean isAutorizable = aula.getTipoAula().getRequiereAutorizacion();
         // devolver el valor (true o false)
         return ResponseEntity.ok(isAutorizable);
     }
@@ -213,4 +213,38 @@ public class AulaRestController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/aulas/buscar/{nombreAula}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorNombre(@PathVariable String nombreAula) {
+        List<Aula> aulas = aulaService.filtrarPorNombre(nombreAula);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para la búsqueda: " + nombreAula);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/aulas/tipo-aula/{tipoAula}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorTipoAula(@PathVariable String tipoAula) {
+        List<Aula> aulas = aulaService.filtrarPorTipoAula(tipoAula);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para el tipo: " + tipoAula);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Devuelve todos los codigosAula registrados en el sistema.
+     * Usado por el reserva-service para iterar sobre todas las aulas
+     * y consultar el SIGA en la verificación de disponibilidad.
+     */
+    @GetMapping("/aulas/codigos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<List<Long>> listarCodigosAula() {
+        List<Long> codigos = aulaService.findAll()
+                .stream()
+                .map(Aula::getCodigoAula)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(codigos);
+    }
 }

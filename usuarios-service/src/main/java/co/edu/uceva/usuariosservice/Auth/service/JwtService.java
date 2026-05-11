@@ -58,7 +58,7 @@ public class JwtService {
                 .id(usuario.getCodigo().toString()) // jti
                 .subject(usuario.getEmail())       // sub
                 .claim("nombre", usuario.getNombre() + " " + usuario.getApellido()) // claim personalizado
-                .claim("rol", usuario.getRol())                                     // claim personalizado
+                .claim("rol", usuario.getRol().name())                                     // claim personalizado
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())

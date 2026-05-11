@@ -1,18 +1,33 @@
 server:
-  port: 8084
+  port: 8086
 
 spring:
   application:
     name: chat-service
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openaisdk.autoconfigure.OpenAiSdkImageAutoConfiguration
   ai:
     openai:
-      api-key: ${GROQ_API_KEY}
-      base-url: https://api.groq.com/openai/v1
+      api-key: ${SPRING_AI_OPENAI_API_KEY}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.groq.com/openai/v1}
       chat:
         options:
-          model: llama-3.3-70b-versatile
+          model: meta-llama/llama-4-scout-17b-16e-instruct
           temperature: 0.0
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 60000 # Increased to 60 seconds to allow for multiple external API calls
 
-app:
-  reserva-service:
-    url: http://localhost:8083
+conexion:
+  servicios:
+    aula-service:
+      url: ${URL_SERVICIO_ASISTENCIA:http://aula-service:8083}
+    reserva-service:
+      url: ${URL_SERVICIO_RESERVA:http://reserva-service:8080}
+
+

@@ -51,7 +51,7 @@ public class AuthService {
                         usuario.getCodigo(),
                         usuario.getNombre() + " " + usuario.getApellido(),
                         usuario.getEmail(),
-                        usuario.getRol(),
+                        usuario.getRol().name(),
                         usuario.getUltimoInicioSesion()
                 )
         );
@@ -87,7 +87,7 @@ public class AuthService {
                         usuario.getCodigo(),
                         usuario.getNombre() + " " + usuario.getApellido(),
                         usuario.getEmail(),
-                        usuario.getRol(),
+                        usuario.getRol().name(),
                         usuario.getUltimoInicioSesion()
                 )
         );
@@ -118,7 +118,7 @@ public class AuthService {
                         usuario.getCodigo(),
                         usuario.getNombre() + " " + usuario.getApellido(),
                         usuario.getEmail(),
-                        usuario.getRol(),
+                        usuario.getRol().name(),
                         usuario.getUltimoInicioSesion()
                 )
         );

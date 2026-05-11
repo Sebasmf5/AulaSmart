@@ -20,6 +20,8 @@ public class AulaSmartReservaMapper {
         dto.setCodigoPrograma(reserva.getCodigoPrograma());
         dto.setGrupo(reserva.getGrupo());
         dto.setOrigen("AULASMART");
+        dto.setNombreUsuarioResponsable(reserva.getNombreUsuarioResponsable());
+        dto.setTitulo(reserva.getTitulo());
         
         return dto;
     }

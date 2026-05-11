@@ -5,9 +5,11 @@ import co.edu.uceva.aulaservice.domain.integration.SigaDTO.SigaResponseDTO;
 import co.edu.uceva.aulaservice.domain.model.Aula;
 import co.edu.uceva.aulaservice.domain.model.Bloque;
 import co.edu.uceva.aulaservice.domain.model.Facultad;
+import co.edu.uceva.aulaservice.domain.model.TipoAula;
 import co.edu.uceva.aulaservice.domain.repository.IAulaRepository;
 import co.edu.uceva.aulaservice.domain.repository.IBloqueRepository;
 import co.edu.uceva.aulaservice.domain.repository.IFacultadRepository;
+import co.edu.uceva.aulaservice.domain.repository.ITipoAulaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +32,7 @@ public class SincronizacionAulasScheduler {
     private final IAulaRepository aulaRepository;
     private final IBloqueRepository bloqueRepository;
     private final IFacultadRepository facultadRepository;
+    private final ITipoAulaRepository tipoAulaRepository;
 
     @Value("${siga.api.url:https://uceva.datasae.co/siga_new/web/app.php/publicomanejoespacios}")
     private String urlBase;
@@ -93,11 +96,35 @@ public class SincronizacionAulasScheduler {
                                     Bloque b = new Bloque();
                                     b.setCodigoEdificio(aula.getCodigoEdificio());
                                     b.setNombre(aula.getNombreEdificio());
-                                    b.setFacultad(facultad);
                                     return bloqueRepository.save(b);
                                 });
 
-                        // ── 3. Upsert Aula ───────────────────────────────────────────────────
+                        boolean hasFacultad = bloque.getFacultades().stream()
+                                .anyMatch(f -> f.getCodigoDependencia().equals(facultad.getCodigoDependencia()));
+                        
+                        if (!hasFacultad) {
+                            bloque.getFacultades().add(facultad);
+                            bloque = bloqueRepository.save(bloque);
+                        }
+
+                        // ── 3. Upsert TipoAula (codigoTipoAula del SIGA) ────────────────────
+                        TipoAula tipoAula = tipoAulaRepository
+                                .findByCodigoTipoAula(aula.getCodigoTipoAula())
+                                .orElseGet(() -> {
+                                    TipoAula ta = new TipoAula();
+                                    ta.setCodigoTipoAula(aula.getCodigoTipoAula());
+                                    ta.setNombre(aula.getNombreTipoAula());
+                                    
+                                    // Aulas especiales que requieren autorización:
+                                    // 5 = Salas, 25 = Laboratorios, 80 = Escenarios Deportivos
+                                    String tipo = aula.getCodigoTipoAula();
+                                    boolean requierePermiso = "5".equals(tipo) || "25".equals(tipo) || "80".equals(tipo);
+                                    ta.setRequiereAutorizacion(requierePermiso);
+                                    
+                                    return tipoAulaRepository.save(ta);
+                                });
+
+                        // ── 4. Upsert Aula ───────────────────────────────────────────────────
                         Aula aulaLocal = aulaRepository
                                 .findByCodigoAula(aula.getCodigoAula())
                                 .orElse(new Aula());
@@ -106,14 +133,7 @@ public class SincronizacionAulasScheduler {
                         aulaLocal.setNombreAula(aula.getNombreAula() != null ? aula.getNombreAula() : "Aula sin nombre");
                         aulaLocal.setCapacidad(aula.getCapacidad() != null ? aula.getCapacidad() : 0);
                         aulaLocal.setBloque(bloque);
-                        aulaLocal.setCodigoTipoAula(aula.getCodigoTipoAula());
-                        aulaLocal.setNombreTipoAula(aula.getNombreTipoAula());
-
-                        // Aulas especiales que requieren autorización:
-                        // 5 = Salas, 25 = Laboratorios, 80 = Escenarios Deportivos
-                        String tipo = aula.getCodigoTipoAula();
-                        boolean requierePermiso = "5".equals(tipo) || "25".equals(tipo) || "80".equals(tipo);
-                        aulaLocal.setRequiereAutorizacion(requierePermiso);
+                        aulaLocal.setTipoAula(tipoAula);
 
                         aulaRepository.save(aulaLocal);
                     }

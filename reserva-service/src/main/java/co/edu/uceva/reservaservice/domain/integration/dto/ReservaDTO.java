@@ -18,4 +18,6 @@ public class ReservaDTO {
     private String codigoPrograma;
     private String grupo;
     private String origen; // "AULASMART" o "SIGA"
+    private String nombreUsuarioResponsable;
+    private String titulo;
 }

@@ -23,4 +23,7 @@ public interface IAulaService {
 
         List<Aula> filtrarPorBloque(Long bloqueId);
         List<Aula> filtrarPorFacultad(Long facultadId);
+        List<Aula> filtrarPorNombre(String nombre);
+        List<Aula> filtrarPorTipoAula(String tipoAula);
+        List<Aula> filtrarPorTipoAulaId(Long tipoAulaId);
 }

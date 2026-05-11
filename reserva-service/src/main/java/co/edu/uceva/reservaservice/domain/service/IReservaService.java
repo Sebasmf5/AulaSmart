@@ -23,4 +23,5 @@ public interface IReservaService {
     void deleteReserva(Reserva reserva);
     List<Reserva> findAll();
     Page<Reserva> findAll(Pageable pageable);
+    List<Long> findAulasOcupadasEnRango(java.time.LocalDateTime horaInicio, java.time.LocalDateTime horaFin);
 }

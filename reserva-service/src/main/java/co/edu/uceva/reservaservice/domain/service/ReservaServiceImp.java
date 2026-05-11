@@ -33,6 +33,11 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva addReserva(Reserva reserva) {
+        // Validar integridad de las fechas
+        if (reserva.getHoraInicio() == null || reserva.getHoraFin() == null || !reserva.getHoraInicio().isBefore(reserva.getHoraFin())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser estrictamente anterior a la hora de fin");
+        }
+
         // Validar reglas de negocio para ESTUDIANTES
         if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
             String tipoAula = aulaClient.getTipoDeAula(reserva.getCodigoAula());
@@ -93,6 +98,11 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
+        // Validar integridad de las fechas
+        if (reserva.getHoraInicio() == null || reserva.getHoraFin() == null || !reserva.getHoraInicio().isBefore(reserva.getHoraFin())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser estrictamente anterior a la hora de fin");
+        }
+
         if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
             String tipoAula = aulaClient.getTipoDeAula(reserva.getCodigoAula());
             if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
@@ -154,5 +164,11 @@ public class ReservaServiceImp implements IReservaService{
     @Transactional (readOnly = true)
     public Page<Reserva> findAll(Pageable pageable) {
         return reservaRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> findAulasOcupadasEnRango(LocalDateTime horaInicio, LocalDateTime horaFin) {
+        return reservaRepository.findAulasOcupadasEnRango(horaInicio, horaFin);
     }
 }

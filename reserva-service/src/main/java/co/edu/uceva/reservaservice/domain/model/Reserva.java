@@ -42,16 +42,20 @@ public class Reserva {
     @Column(name = "id_solicitante", nullable = false)
     private Long idSolicitante;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "rol_solicitante", nullable = false)
+    @Transient
     private RolUsuario rolSolicitante;
 
     @Column(name = "codigo_programa")
     private String codigoPrograma;
 
     @Column(name = "grupo")
-    @NotBlank(message = "El grupo no puede estar vacío")
     private String grupo;
+
+    @Transient
+    private String nombreUsuarioResponsable;
+
+    @Column(name = "titulo")
+    private String titulo;
 
     @Version
     private Long version;
