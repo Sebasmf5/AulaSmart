@@ -13,7 +13,7 @@ spring:
       base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.groq.com/openai/v1}
       chat:
         options:
-          model: meta-llama/llama-4-scout-17b-16e-instruct
+          model: llama-3.3-70b-versatile
           temperature: 0.0
   cloud:
     openfeign:

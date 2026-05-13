@@ -13,4 +13,5 @@ public interface IAulaRepository extends JpaRepository<Aula, Long> {
     List<Aula> findByNombreAulaContainingIgnoreCase(String texto);
     List<Aula> findByTipoAula_NombreContainingIgnoreCase(String nombreTipoAula);
     List<Aula> findByTipoAulaId(Long tipoAulaId);
+    List<Aula> findBySincronizadaConSigaTrue();
 }

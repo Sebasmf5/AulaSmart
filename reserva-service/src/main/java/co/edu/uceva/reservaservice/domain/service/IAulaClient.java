@@ -20,4 +20,8 @@ public interface IAulaClient {
     /** Devuelve todos los codigosAula registrados en el aula-service. */
     @GetMapping("/api/v1/aula-service/aulas/codigos")
     List<Long> listarCodigosAula();
+
+    /** Devuelve solo los codigosAula de aulas sincronizadas con SIGA. */
+    @GetMapping("/api/v1/aula-service/aulas/codigos-siga")
+    List<Long> listarCodigosAulaSiga();
 }

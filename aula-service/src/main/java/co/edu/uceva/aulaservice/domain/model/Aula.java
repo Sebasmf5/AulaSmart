@@ -34,4 +34,7 @@ public class Aula {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tipo_aula_id", nullable = false)
     private TipoAula tipoAula;
+
+    @Column(name = "sincronizada_con_siga")
+    private Boolean sincronizadaConSiga = false;
 }

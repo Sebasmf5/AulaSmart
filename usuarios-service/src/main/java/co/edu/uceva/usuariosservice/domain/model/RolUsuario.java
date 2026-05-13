@@ -4,5 +4,6 @@ public enum RolUsuario {
     Estudiante,
     Docente,
     Administrativo,
+    Administrador,
     Monitor
 }

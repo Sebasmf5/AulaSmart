@@ -37,14 +37,19 @@ public class AgregadorReservasService {
                 .collect(Collectors.toList());
 
         // 2. Obtener de SIGA
-        Integer codigoSiga = aulaClient.getSigaDeAula(codigoAula);
-        System.out.println(codigoSiga);
         List<ReservaDTO> listaSiga = new java.util.ArrayList<>();
-        if (codigoSiga != null) {
-            List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAula(codigoSiga.longValue());
-            listaSiga = reservasSiga.stream()
-                    .map(sigaMapper::traducir)
-                    .collect(Collectors.toList());
+        try {
+            Integer codigoSiga = aulaClient.getSigaDeAula(codigoAula);
+            System.out.println(codigoSiga);
+            if (codigoSiga != null) {
+                List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAula(codigoSiga.longValue());
+                listaSiga = reservasSiga.stream()
+                        .map(sigaMapper::traducir)
+                        .collect(Collectors.toList());
+            }
+        } catch (Exception e) {
+            System.err.println("[AgregadorReservasService] Error consultando SIGA para aula " + codigoAula + ": " + e.getMessage());
+            // Si falla la consulta a SIGA, retornamos solo las reservas internas
         }
 
         // 3. Agregar y retornar
@@ -56,14 +61,19 @@ public class AgregadorReservasService {
     }
 
     public List<ReservaDTO> obtenerReservasSigaPorFecha(Long codigoAula, LocalDate fecha) {
-        Integer codigoSiga = aulaClient.getSigaDeAula(codigoAula);
-        if (codigoSiga == null) {
+        try {
+            Integer codigoSiga = aulaClient.getSigaDeAula(codigoAula);
+            if (codigoSiga == null) {
+                return new java.util.ArrayList<>();
+            }
+            List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoSiga.longValue(), fecha);
+            return reservasSiga.stream()
+                    .map(sigaMapper::traducir)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("[AgregadorReservasService] Error consultando SIGA por fecha para aula " + codigoAula + ": " + e.getMessage());
             return new java.util.ArrayList<>();
         }
-        List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoSiga.longValue(), fecha);
-        return reservasSiga.stream()
-                .map(sigaMapper::traducir)
-                .collect(Collectors.toList());
     }
 
     /**
@@ -81,29 +91,32 @@ public class AgregadorReservasService {
     public List<Long> obtenerAulasOcupadasEnRangoConSiga(LocalDateTime horaInicio, LocalDateTime horaFin) {
         Set<Long> ocupadas = new HashSet<>();
 
-        // 1. Aulas ocupadas en la BD interna de AulaSmart
+        // 1. Aulas ocupadas en la BD interna de AulaSmart (todos los tipos de aula)
         List<Long> ocupadasBD = reservaRepository.findAulasOcupadasEnRango(horaInicio, horaFin);
         ocupadas.addAll(ocupadasBD);
 
         // 2. Aulas ocupadas en SIGA para la misma fecha
+        // Solo consultamos SIGA para aulas que sabemos que están sincronizadas con él.
+        // Las aulas creadas manualmente (sincronizadaConSiga=false) se evalúan solo contra la BD interna.
         LocalDate fecha = horaInicio.toLocalDate();
 
-        // Todos los codigosAula registrados en el aula-service
-        List<Long> todosLosCodigos;
+        List<Long> codigosConSiga;
         try {
-            todosLosCodigos = aulaClient.listarCodigosAula();
+            codigosConSiga = aulaClient.listarCodigosAulaSiga();
         } catch (Exception e) {
-            System.err.println("[AgregadorReservasService] No se pudo obtener la lista de aulas: " + e.getMessage());
+            System.err.println("[AgregadorReservasService] No se pudo obtener la lista de aulas sincronizadas con SIGA: " + e.getMessage());
             return new ArrayList<>(ocupadas); // fallback: solo BD interna
         }
 
-        // Para cada aula, consultamos el SIGA y verificamos solapamiento
-        // Usamos parallelStream para realizar las peticiones HTTP de forma concurrente y mejorar el tiempo de respuesta
-        List<Long> ocupadasSiga = todosLosCodigos.parallelStream()
+        if (codigosConSiga == null || codigosConSiga.isEmpty()) {
+            return new ArrayList<>(ocupadas);
+        }
+
+        // Para cada aula sincronizada con SIGA, consultamos la API externa y verificamos solapamiento
+        List<Long> ocupadasSiga = codigosConSiga.parallelStream()
                 .filter(codigoAula -> !ocupadas.contains(codigoAula))
                 .filter(codigoAula -> {
                     try {
-                        // El codigoAula ES el código SIGA (se usa el mismo valor en la API del SIGA)
                         List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoAula, fecha);
                         return reservasSiga.stream().anyMatch(r -> seSolapa(r, horaInicio, horaFin));
                     } catch (Exception e) {
@@ -114,7 +127,6 @@ public class AgregadorReservasService {
                 .collect(Collectors.toList());
 
         ocupadas.addAll(ocupadasSiga);
-
 
         return new ArrayList<>(ocupadas);
     }

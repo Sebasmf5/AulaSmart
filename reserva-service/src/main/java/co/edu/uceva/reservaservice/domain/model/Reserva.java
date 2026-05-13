@@ -40,9 +40,12 @@ public class Reserva {
     private EstadosReserva estado;
 
     @Column(name = "id_solicitante", nullable = false)
+    @NotNull(message = "El ID del solicitante es obligatorio")
     private Long idSolicitante;
 
-    @Transient
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol_solicitante", nullable = false)
+    @NotNull(message = "El rol del solicitante es obligatorio")
     private RolUsuario rolSolicitante;
 
     @Column(name = "codigo_programa")
@@ -51,10 +54,11 @@ public class Reserva {
     @Column(name = "grupo")
     private String grupo;
 
-    @Transient
+    @Column(name = "nombre_usuario_responsable")
     private String nombreUsuarioResponsable;
 
     @Column(name = "titulo")
+    @NotBlank(message = "El motivo o título de la reserva es obligatorio")
     private String titulo;
 
     @Version

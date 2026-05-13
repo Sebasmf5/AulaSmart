@@ -48,6 +48,10 @@ public class AulaRestController {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
+        // Las aulas creadas manualmente por defecto no están en SIGA
+        if (aula.getSincronizadaConSiga() == null) {
+            aula.setSincronizadaConSiga(false);
+        }
         Map<String, Object> response = new HashMap<>();
         Aula nuevoAula = aulaService.save(aula);
         response.put(MENSAJE, "El aula ha sido creado con éxito!");
@@ -138,16 +142,10 @@ public class AulaRestController {
     @GetMapping("/aulas/siga/{codigo}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Long> getPasaporteSiga(@PathVariable Long codigo) {
-        Optional<Aula> aula = aulaService.findById(codigo);
-        Long codigoAula = null;
-        if (aula.isPresent()) {
-            codigoAula = aula.get().getCodigoAula();
-        }
-        else {
-            throw new AulaNoEncontradaException(codigo);
-        }
-        // Devolvemos el Long directamente.
-        return ResponseEntity.ok(codigoAula);
+        Aula aula = aulaService.obtenerAula(codigo)
+                .orElseThrow(() -> new AulaCodigoNoEncontrada(codigo));
+        // Devolvemos el codigoAula (código SIGA) directamente.
+        return ResponseEntity.ok(aula.getCodigoAula());
     }
 
     /*
@@ -156,7 +154,7 @@ public class AulaRestController {
     @GetMapping("aulas/requiere-autorizacion/{codigo}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<Boolean> getRequiereAutorizacion(@PathVariable Long codigo) {
-        Aula aula = aulaService.findById(codigo)
+        Aula aula = aulaService.obtenerAula(codigo)
                 .orElseThrow(() -> new AulaCodigoNoEncontrada(codigo));
         Boolean isAutorizable = aula.getTipoAula().getRequiereAutorizacion();
         // devolver el valor (true o false)
@@ -235,14 +233,27 @@ public class AulaRestController {
 
     /**
      * Devuelve todos los codigosAula registrados en el sistema.
-     * Usado por el reserva-service para iterar sobre todas las aulas
-     * y consultar el SIGA en la verificación de disponibilidad.
      */
     @GetMapping("/aulas/codigos")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
     public ResponseEntity<List<Long>> listarCodigosAula() {
         List<Long> codigos = aulaService.findAll()
                 .stream()
+                .map(Aula::getCodigoAula)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(codigos);
+    }
+
+    /**
+     * Devuelve los codigosAula de aulas que están sincronizadas con SIGA.
+     * Solo estas aulas deben consultarse contra el sistema SIGA para verificar disponibilidad.
+     */
+    @GetMapping("/aulas/codigos-siga")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<List<Long>> listarCodigosAulaSiga() {
+        List<Long> codigos = aulaService.findAll()
+                .stream()
+                .filter(Aula::getSincronizadaConSiga)
                 .map(Aula::getCodigoAula)
                 .collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(codigos);
