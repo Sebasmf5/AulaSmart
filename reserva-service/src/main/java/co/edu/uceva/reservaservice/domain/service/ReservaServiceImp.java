@@ -40,7 +40,7 @@ public class ReservaServiceImp implements IReservaService{
 
         // Validar reglas de negocio para ESTUDIANTES
         if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
-            String tipoAula = aulaClient.getTipoDeAula(reserva.getCodigoAula());
+            String tipoAula = aulaClient.getTipoDeAula(reserva.getAulaId());
             // Los estudiantes solo pueden reservar tipo 78 y 79
             if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
                 throw new ReservaNoPermitidaException("Los estudiantes solo pueden reservar aulas interactivas y audiovisuales");
@@ -48,7 +48,7 @@ public class ReservaServiceImp implements IReservaService{
         }
 
         // Validar si el aula requiere autorización
-        Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getCodigoAula());
+        Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getAulaId());
         if (Boolean.TRUE.equals(requiereAutorizacion) && reserva.getEstado() == EstadosReserva.CONFIRMADA) {
             reserva.setEstado(EstadosReserva.PENDIENTE);
         } else {
@@ -56,8 +56,8 @@ public class ReservaServiceImp implements IReservaService{
         }
 
         // Validar solapamiento externo (SIGA) antes de intentar guardar
-        List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorFecha(
-            reserva.getCodigoAula(),
+        List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorAulaId(
+            reserva.getAulaId(),
             reserva.getHoraInicio().toLocalDate()
         );
 
@@ -104,21 +104,21 @@ public class ReservaServiceImp implements IReservaService{
         }
 
         if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
-            String tipoAula = aulaClient.getTipoDeAula(reserva.getCodigoAula());
+            String tipoAula = aulaClient.getTipoDeAula(reserva.getAulaId());
             if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
                 throw new ReservaNoPermitidaException("Los estudiantes solo pueden reservar aulas interactivas y audiovisuales (Tipos 78 y 79).");
             }
         }
 
         // Validar si el aula requiere autorización
-        Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getCodigoAula());
+        Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getAulaId());
         if (Boolean.TRUE.equals(requiereAutorizacion) && reserva.getEstado() == EstadosReserva.CONFIRMADA) {
             reserva.setEstado(EstadosReserva.PENDIENTE);
         }
 
         // Validar solapamiento externo (SIGA) antes de intentar actualizar
-        List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorFecha(
-            reserva.getCodigoAula(),
+        List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorAulaId(
+            reserva.getAulaId(),
             reserva.getHoraInicio().toLocalDate()
         );
 

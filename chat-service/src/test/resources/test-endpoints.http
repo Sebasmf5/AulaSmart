@@ -1,0 +1,290 @@
+### ============================================================================
+### AulaSmart - Chat Service - Tests de Integración Directos
+### ============================================================================
+### Este archivo se puede ejecutar con:
+###   - VS Code: extensión "REST Client" (humao.rest-client)
+###   - IntelliJ: Tools > HTTP Client > Create Request in HTTP Client
+###   - Postman: Importar como colección
+###
+### IMPORTANTE:
+###   1. Reemplazar {{baseUrl}} por la URL del chat-service (ej: http://localhost:8086)
+###   2. Reemplazar {{jwtToken}} por un token JWT válido del usuarios-service
+###   3. Las fechas deben ser futuras (ej: 2026-05-20 en adelante)
+### ============================================================================
+
+@baseUrl = http://localhost:8086
+@jwtToken = eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIyIiwicm9sZSI6IkRPQ0VOVEUiLCJpYXQiOjE3MTU1MzQwMDB9...
+
+# ─────────────────────────────────────────────────────────────────────────────
+# CONFIGURACIÓN GLOBAL DE HEADERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+###
+GET {{baseUrl}}/actuator/health
+Authorization: Bearer {{jwtToken}}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 1: CONSULTAS DE DISPONIBILIDAD
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC01: Consultar aulas disponibles en un bloque (fuzzy matching)
+# El bot debería resolver "bloque B" a "BLOQUE B - AVELLANOS"
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "aulas disponibles en el bloque B el 2026-05-20 de 08:00 a 10:00"
+}
+
+### TC02: Typo en nombre de bloque (Levenshtein)
+# "Abellanos" (con 'b') debería encontrar "AVELLANOS" (con 'v')
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "aulas disponibles en el bloque Abellanos el 2026-05-20 de 08:00 a 10:00"
+}
+
+### TC03: Consultar aulas disponibles por tipo
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "laboratorios disponibles el 2026-05-20 de 14:00 a 16:00"
+}
+
+### TC04: Consultar aula específica por nombre
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "está libre el aula B104 el 2026-05-20 de 10:00 a 12:00"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 2: RESERVAS EXITOSAS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC05: Reserva exitosa como DOCENTE (sin restricciones)
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el aula B104 el 2026-05-20 de 08:00 a 10:00 para reunión de facultad"
+}
+
+### TC06: Reserva con motivo (título)
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "quiero reservar el aula A101 el 2026-05-21 de 14:00 a 16:00 para clase de refuerzo de cálculo"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 3: RESTRICCIONES DE ROL (ESTUDIANTE)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC07: Estudiante intenta reservar LABORATORIO (tipo 77) → RECHAZADO
+# El estudiante solo puede reservar tipos 78 (Aula Interactiva) y 79 (Audiovisual)
+# Cambiar el JWT por uno de ESTUDIANTE
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el laboratorio química el 2026-05-20 de 10:00 a 12:00 para prácticas"
+}
+
+### TC08: Estudiante reserva AULA INTERACTIVA (tipo 78) → ACEPTADO
+# Cambiar el JWT por uno de ESTUDIANTE
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el aula interactiva 1 el 2026-05-20 de 10:00 a 12:00 para estudio grupal"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 4: SOLAPAMIENTOS Y CRUCES DE HORARIOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC09: Intentar reservar aula YA OCUPADA → RECHAZADO
+# Primero ejecutar TC05 para ocupar B104, luego intentar:
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el aula B104 el 2026-05-20 de 08:00 a 10:00 para otra reunión"
+}
+
+### TC10: Reservar MISMO aula en horario DIFERENTE → ACEPTADO
+# Si B104 está ocupada 08:00-10:00, debería estar libre 10:00-12:00
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el aula B104 el 2026-05-20 de 10:00 a 12:00 para tutoría"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 5: AUTORIZACIÓN PENDIENTE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC11: Reservar aula que requiere autorización → PENDIENTE
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el auditorio principal el 2026-05-22 de 08:00 a 12:00 para evento de graduación"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 6: MEMORIA DE CONVERSACIÓN
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC12: Primera consulta sobre un aula
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "quiero reservar el aula B104 mañana de 8 a 10 para monitorias"
+}
+
+### TC13: Segunda consulta SIN repetir contexto (memoria)
+# El bot debería recordar que hablamos del aula B104 y la fecha de mañana
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "qué horarios tiene libre ese aula"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 7: FECHAS RELATIVAS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC14: Usar "mañana" sin fecha explícita
+# El bot debería inferir la fecha a partir de "Hoy es YYYY-MM-DD"
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "aulas disponibles en el bloque A mañana de 10:00 a 12:00"
+}
+
+### TC15: Usar "hoy" + hora
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "hay algún aula libre hoy a las 2 de la tarde"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 8: MANEJO DE ERRORES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC16: Aula inexistente → mensaje amigable
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "reservar el aula XYZ999 el 2026-05-20 de 08:00 a 10:00"
+}
+
+### TC17: Bloque inexistente → sugerir alternativas
+POST {{baseUrl}}/api/v1/chat
+Content-Type: application/json
+Authorization: Bearer {{jwtToken}}
+
+{
+  "mensaje": "aulas disponibles en el bloque ZZZ el 2026-05-20 de 08:00 a 10:00"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 9: CONDICIÓN DE CARRERA (BLOQUEO OPTIMISTA)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC18: Reserva concurrente (simulación manual)
+# Para probar condiciones de carrera real, ejecutar dos requests simultáneas
+# al mismo aula/hora desde dos terminales diferentes.
+#
+# Terminal 1:
+# POST {{baseUrl}}/api/v1/chat
+# { "mensaje": "reservar aula B104 el 2026-05-25 de 08:00 a 10:00 para evento A" }
+#
+# Terminal 2 (al mismo tiempo):
+# POST {{baseUrl}}/api/v1/chat
+# { "mensaje": "reservar aula B104 el 2026-05-25 de 08:00 a 10:00 para evento B" }
+#
+# Resultado esperado: Una CONFIRMADA, la otra RECHAZADA por solapamiento
+# (El índice GIST en PostgreSQL previene el insert solapado)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESCENARIO 10: VERIFICACIÓN DE PERSISTENCIA (JWT)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### TC19: Verificar que la reserva guardó el rol y nombre del JWT
+# Después de hacer una reserva exitosa (TC05), verificar en la BD:
+#
+# SELECT id_reserva, aula_id, id_solicitante, rol_solicitante,
+#        nombre_usuario_responsable, titulo
+# FROM reservas
+# ORDER BY id_reserva DESC
+# LIMIT 1;
+#
+# Resultado esperado:
+#   id_solicitante: debe coincidir con el 'sub' del JWT
+#   rol_solicitante: DOCENTE / ESTUDIANTE / ADMINISTRATIVO
+#   nombre_usuario_responsable: nombre del usuario en el JWT
+#   titulo: "reunión de facultad" (el motivo que dio el usuario)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# COMANDOS ADICIONALES PARA VERIFICACIÓN
+# ═══════════════════════════════════════════════════════════════════════════════
+
+### Verificar reservas de un aula (endpoint directo del reserva-service)
+GET http://localhost:8080/api/v1/reserva-service/reservas/aula/1/agregadas
+Authorization: Bearer {{jwtToken}}
+
+### Verificar aulas ocupadas en un rango (endpoint directo del reserva-service)
+GET http://localhost:8080/api/v1/reserva-service/reservas/ocupadas?fecha=2026-05-20&horaInicio=08:00&horaFin=10:00
+Authorization: Bearer {{jwtToken}}
+
+### Listar todas las aulas (endpoint directo del aula-service)
+GET http://localhost:8082/api/v1/aula-service/aulas
+Authorization: Bearer {{jwtToken}}
+
+### Listar aulas sincronizadas con SIGA
+GET http://localhost:8082/api/v1/aula-service/aulas/sincronizadas-siga
+Authorization: Bearer {{jwtToken}}
+
+# ============================================================================
+# INSTRUCCIONES PARA OBTENER JWT
+# ============================================================================
+# 1. Registrar usuario (si no existe):
+#    POST http://localhost:8084/api/v1/usuarios/register
+#    {"nombre":"Docente","apellido":"Test","email":"docente@test.com","password":"Test123!","rol":"Docente"}
+#
+# 2. Login:
+#    POST http://localhost:8084/api/v1/usuarios/login
+#    {"email":"docente@test.com","password":"Test123!"}
+#
+# 3. Copiar el token de la respuesta y pegarlo en {{jwtToken}}
+# ============================================================================

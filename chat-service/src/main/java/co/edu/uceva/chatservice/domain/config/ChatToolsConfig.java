@@ -169,7 +169,7 @@ public class ChatToolsConfig {
             System.out.println("Aulas ocupadas devueltas: " + (ocupadas != null ? ocupadas.size() : "null"));
 
             List<AulaDTO> disponibles = responseAula.aulas().stream()
-                    .filter(a -> ocupadas == null || !ocupadas.contains(a.codigoAula()))
+                    .filter(a -> ocupadas == null || !ocupadas.contains(a.id()))
                     .collect(Collectors.toList());
             if (disponibles.isEmpty()) {
                 return "No hay aulas disponibles en el bloque " + bloqueDTO.nombre() + " el " + fecha + " de " + horaInicio + " a " + horaFin + "." + MSG_SUGERENCIA;
@@ -202,7 +202,7 @@ public class ChatToolsConfig {
             }
             List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
             List<AulaDTO> disponibles = responseAula.aulas().stream()
-                    .filter(a -> ocupadas == null || !ocupadas.contains(a.codigoAula()))
+                    .filter(a -> ocupadas == null || !ocupadas.contains(a.id()))
                     .collect(Collectors.toList());
             if (disponibles.isEmpty()) {
                 return "No hay aulas de tipo " + tipoAula + " disponibles el " + fecha + " de " + horaInicio + " a " + horaFin + "." + MSG_SUGERENCIA;
@@ -237,7 +237,7 @@ public class ChatToolsConfig {
             List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
 
             List<AulaDTO> disponibles = responseAula.aulas().stream()
-                    .filter(aula -> ocupadas == null || !ocupadas.contains(aula.codigoAula()))
+                    .filter(aula -> ocupadas == null || !ocupadas.contains(aula.id()))
                     .collect(Collectors.toList());
 
             if (disponibles.isEmpty()) {
@@ -276,8 +276,8 @@ public class ChatToolsConfig {
         System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha
                 + " | De: " + horaInicio + " a: " + horaFin + " | Motivo: " + motivo);
 
-        // ── 1. Resolver codigoAula desde el nombre y obtener metadatos ───────
-        Long codigoAula = null;
+        // ── 1. Resolver aulaId desde el nombre y obtener metadatos ──────────
+        Long aulaId = null;
         AulaDTO aulaEncontrada = null;
         try {
             ResponseAulaDTO response = aulaClient.buscarAulasPorNombre(nombreAula);
@@ -285,8 +285,8 @@ public class ChatToolsConfig {
                 return "No encontré ninguna aula con el nombre '" + nombreAula + "'. Verifica el nombre e intenta de nuevo.";
             }
             aulaEncontrada = response.aulas().get(0);
-            codigoAula = aulaEncontrada.codigoAula();
-            System.out.println("codigoAula resuelto: " + codigoAula);
+            aulaId = aulaEncontrada.id();          // PK de la base de datos
+            System.out.println("aulaId resuelto: " + aulaId + " (codigoAula SIGA: " + aulaEncontrada.codigoAula() + ")");
         } catch (FeignException e) {
             System.err.println("[reservarAulaTool] Error buscando aula: " + e.getMessage());
             return MSG_ERROR_RED;
@@ -330,7 +330,7 @@ public class ChatToolsConfig {
         // ── 4. Validar disponibilidad real (BD interna + SIGA) ───────────────
         try {
             List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
-            if (ocupadas != null && ocupadas.contains(codigoAula)) {
+            if (ocupadas != null && ocupadas.contains(aulaId)) {
                 return "Lo siento, el aula '" + nombreAula + "' ya está ocupada el " + fecha
                         + " de " + horaInicio + " a " + horaFin
                         + " (reserva existente en AulaSmart o clase programada en el sistema SIGA).";
@@ -349,7 +349,7 @@ public class ChatToolsConfig {
             String horaFinISO = fecha + "T" + horaFin + ":00";
 
             Map<String, Object> payload = new java.util.LinkedHashMap<>();
-            payload.put("codigoAula", codigoAula);
+            payload.put("aulaId", aulaId);     // PK de la base de datos
             payload.put("horaInicio", horaInicioISO);
             payload.put("horaFin", horaFinISO);
             payload.put("estado", "CONFIRMADA");
@@ -403,17 +403,17 @@ public class ChatToolsConfig {
         System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha);
 
         try {
-            // 1. Resolver codigoAula
+            // 1. Resolver aulaId (PK)
             ResponseAulaDTO response = aulaClient.buscarAulasPorNombre(nombreAula);
             if (response == null || response.aulas() == null || response.aulas().isEmpty()) {
                 return "No encontré ninguna aula con el nombre '" + nombreAula + "'. Verifica el nombre e intenta de nuevo.";
             }
-            Long codigoAula = response.aulas().get(0).codigoAula();
+            Long aulaId = response.aulas().get(0).id();
             String nombreReal = response.aulas().get(0).nombreAula();
-            System.out.println("Aula resuelta: " + nombreReal + " (codigo=" + codigoAula + ")");
+            System.out.println("Aula resuelta: " + nombreReal + " (aulaId=" + aulaId + ")");
 
             // 2. Obtener reservas del aula (AulaSmart + SIGA)
-            Map<String, Object> respuestaReservas = reservaClient.obtenerReservasPorAula(codigoAula);
+            Map<String, Object> respuestaReservas = reservaClient.obtenerReservasPorAula(aulaId);
             List<Map<String, Object>> reservas = extraerReservas(respuestaReservas);
 
             // 3. Filtrar reservas por fecha

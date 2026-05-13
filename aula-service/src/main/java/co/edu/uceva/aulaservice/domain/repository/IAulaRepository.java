@@ -14,4 +14,11 @@ public interface IAulaRepository extends JpaRepository<Aula, Long> {
     List<Aula> findByTipoAula_NombreContainingIgnoreCase(String nombreTipoAula);
     List<Aula> findByTipoAulaId(Long tipoAulaId);
     List<Aula> findBySincronizadaConSigaTrue();
+
+    /**
+     * Devuelve el máximo codigoAula registrado.
+     * Usado para generar códigos automáticos para aulas manuales.
+     */
+    @org.springframework.data.jpa.repository.Query("SELECT MAX(a.codigoAula) FROM Aula a")
+    Long findMaxCodigoAula();
 }

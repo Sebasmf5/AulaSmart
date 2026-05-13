@@ -223,7 +223,7 @@ class ReservaConcurrencyTest {
     private Reserva copiarReserva(Reserva original) {
         Reserva copia = new Reserva();
         copia.setIdReserva(original.getIdReserva());
-        copia.setCodigoAula(original.getCodigoAula());
+        copia.setAulaId(original.getAulaId());
         copia.setHoraInicio(original.getHoraInicio());
         copia.setHoraFin(original.getHoraFin());
         copia.setEstado(original.getEstado());
@@ -238,9 +238,9 @@ class ReservaConcurrencyTest {
     /**
      * Construye una reserva nueva para los tests de solapamiento.
      */
-    private Reserva reservaParaTest(Long codigoAula, LocalDateTime inicio, LocalDateTime fin) {
+    private Reserva reservaParaTest(Long aulaId, LocalDateTime inicio, LocalDateTime fin) {
         Reserva r = new Reserva();
-        r.setCodigoAula(codigoAula);
+        r.setAulaId(aulaId);
         r.setHoraInicio(inicio);
         r.setHoraFin(fin);
         r.setEstado(EstadosReserva.PENDIENTE);

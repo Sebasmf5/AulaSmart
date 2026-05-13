@@ -20,9 +20,9 @@ public class Reserva {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idReserva;
 
-    @Column(name = "codigo_aula", nullable = false)
-    @NotNull(message = "El código del aula es obligatorio")
-    private Long codigoAula;
+    @Column(name = "aula_id", nullable = false)
+    @NotNull(message = "El ID del aula es obligatorio")
+    private Long aulaId;
 
     @Column(name = "hora_inicio", nullable = false)
     @NotNull(message = "La hora de inicio es obligatoria")

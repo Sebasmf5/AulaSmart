@@ -65,11 +65,11 @@ public class ReservaRestController {
     }
 
     /**
-     * Listar reservas unificadas (AulaSmart + SIGA) por Aula.
+     * Listar reservas unificadas (AulaSmart + SIGA) por Aula (usando aulaId / PK).
      */
-    @GetMapping("/reservas/aula/{codigoAula}/agregadas")
-    public ResponseEntity<Map<String, Object>> getReservasAgregadas(@PathVariable Long codigoAula) {
-        List<ReservaDTO> reservas = agregadorReservasService.obtenerTodasLasReservas(codigoAula);
+    @GetMapping("/reservas/aula/{aulaId}/agregadas")
+    public ResponseEntity<Map<String, Object>> getReservasAgregadas(@PathVariable Long aulaId) {
+        List<ReservaDTO> reservas = agregadorReservasService.obtenerTodasLasReservas(aulaId);
         if (reservas.isEmpty()) {
             throw new NoHayReservasException();
         }

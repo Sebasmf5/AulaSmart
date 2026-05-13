@@ -258,4 +258,52 @@ public class AulaRestController {
                 .collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(codigos);
     }
+
+    // ── Endpoints por ID de base de datos (PK) para uso interno entre microservicios ──
+
+    @GetMapping("/aulas/{id}/tipo")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<String> getTipoDeAulaById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        return ResponseEntity.ok(aula.getTipoAula().getCodigoTipoAula());
+    }
+
+    @GetMapping("/aulas/{id}/requiere-autorizacion")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Boolean> getRequiereAutorizacionById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        return ResponseEntity.ok(aula.getTipoAula().getRequiereAutorizacion());
+    }
+
+    @GetMapping("/aulas/{id}/codigo-siga")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Long> getCodigoSigaById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        return ResponseEntity.ok(aula.getCodigoAula());
+    }
+
+    /**
+     * Devuelve las aulas sincronizadas con SIGA como lista de objetos {id, codigoAula}.
+     * Usado por reserva-service para mapear aulaId (PK) a codigoAula (pasaporte SIGA).
+     */
+    @GetMapping("/aulas/sincronizadas-siga")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<List<Map<String, Object>>> listarAulasSincronizadasSiga() {
+        List<Aula> aulas = aulaService.findAll()
+                .stream()
+                .filter(a -> Boolean.TRUE.equals(a.getSincronizadaConSiga()))
+                .toList();
+        List<Map<String, Object>> resultado = aulas.stream()
+                .map(a -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", a.getId());
+                    map.put("codigoAula", a.getCodigoAula());
+                    return map;
+                })
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(resultado);
+    }
 }

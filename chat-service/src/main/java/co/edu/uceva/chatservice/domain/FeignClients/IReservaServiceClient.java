@@ -17,8 +17,8 @@ import java.util.Map;
         configuration = FeignClientInterceptor.class
 )
 public interface IReservaServiceClient {
-    @GetMapping("/api/v1/reserva-service/reservas/aula/{codigoAula}/agregadas")
-    Map<String, Object> obtenerReservasPorAula(@PathVariable Long codigoAula);
+    @GetMapping("/api/v1/reserva-service/reservas/aula/{aulaId}/agregadas")
+    Map<String, Object> obtenerReservasPorAula(@PathVariable Long aulaId);
 
     @PostMapping("/api/v1/reserva-service/reservas")
     Map<String, Object> crearReserva(@RequestBody Map<String, Object> reserva);

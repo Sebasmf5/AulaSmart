@@ -18,7 +18,7 @@ public class SigaReservaMapper {
         ReservaDTO dto = new ReservaDTO();
         
         dto.setIdReserva("SIGA-" + sigaReserva.getId_unico());
-        dto.setCodigoAula(Long.valueOf(sigaReserva.getCode_location()));
+        dto.setAulaId(Long.valueOf(sigaReserva.getCode_location()));
         
         dto.setHoraInicio(LocalDateTime.parse(sigaReserva.getStart_dt(), DATE_FORMAT));
         dto.setHoraFin(LocalDateTime.parse(sigaReserva.getEnd_dt(), DATE_FORMAT));
