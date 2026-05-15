@@ -1,10 +1,12 @@
 package co.edu.uceva.reservaservice.delevery.rest;
 
+import co.edu.uceva.reservaservice.domain.excepcion.AccesoNoAutorizadoException;
 import co.edu.uceva.reservaservice.domain.excepcion.NoHayReservasException;
 import co.edu.uceva.reservaservice.domain.excepcion.PaginaSinReservasException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ValidationException;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
+import co.edu.uceva.reservaservice.domain.service.IAulaClient;
 import co.edu.uceva.reservaservice.domain.service.IReservaService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +19,19 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import co.edu.uceva.reservaservice.domain.integration.service.AgregadorReservasService;
+import co.edu.uceva.reservaservice.domain.integration.dto.ReservaDTO;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import co.edu.uceva.reservaservice.domain.model.RolUsuario;
 
 @RestController
 @RequestMapping("/api/v1/reserva-service")
@@ -31,10 +42,14 @@ public class ReservaRestController {
     private static final String MENSAJE = "mensaje";
 
     private final IReservaService reservaService;
+    private final AgregadorReservasService agregadorReservasService;
+    private final IAulaClient iaulaClient;
 
     // Inyección de dependencia del servicio que proporciona servicios de CRUD
-    public ReservaRestController(IReservaService reservaService) {
+    public ReservaRestController(IReservaService reservaService, AgregadorReservasService agregadorReservasService, IAulaClient iaulaClient) {
         this.reservaService = reservaService;
+        this.iaulaClient = iaulaClient;
+        this.agregadorReservasService = agregadorReservasService;
     }
     /**
      * Listar todas las reservas.
@@ -42,6 +57,20 @@ public class ReservaRestController {
     @GetMapping("/reservas")
     public ResponseEntity<Map<String, Object>> getReservas() {
         List<Reserva> reservas = reservaService.findAll();
+        if (reservas.isEmpty()) {
+            throw new NoHayReservasException();
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Listar reservas unificadas (AulaSmart + SIGA) por Aula (usando aulaId / PK).
+     */
+    @GetMapping("/reservas/aula/{aulaId}/agregadas")
+    public ResponseEntity<Map<String, Object>> getReservasAgregadas(@PathVariable Long aulaId) {
+        List<ReservaDTO> reservas = agregadorReservasService.obtenerTodasLasReservas(aulaId);
         if (reservas.isEmpty()) {
             throw new NoHayReservasException();
         }
@@ -70,6 +99,24 @@ public class ReservaRestController {
     public ResponseEntity<Map<String, Object>> addReserva(@Valid @RequestBody Reserva reserva, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
+        }
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            String codigoSolicitante = authentication.getPrincipal().toString();
+            reserva.setIdSolicitante(Long.valueOf(codigoSolicitante));
+            String nombreUsuario = authentication.getName();
+            reserva.setNombreUsuarioResponsable(nombreUsuario);
+
+            if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
+                String authority = authentication.getAuthorities().iterator().next().getAuthority(); // Ej: ROLE_ESTUDIANTE
+                String rolStr = authority.replace("ROLE_", "");
+                try {
+                    reserva.setRolSolicitante(RolUsuario.valueOf(rolStr));
+                } catch (IllegalArgumentException e) {
+                    // Si el rol no mapea a RolUsuario
+                }
+            }
         }
         Map<String, Object> response = new HashMap<>();
         Reserva nuevaReserva = reservaService.addReserva(reserva);
@@ -110,10 +157,53 @@ public class ReservaRestController {
         }
         reservaService.findReservaById(reserva.getIdReserva())
                 .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() != null) {
+            String codigoSolicitante = authentication.getPrincipal().toString();
+            reserva.setIdSolicitante(Long.valueOf(codigoSolicitante));
+
+            if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
+                String authority = authentication.getAuthorities().iterator().next().getAuthority(); // Ej: ROLE_ESTUDIANTE
+                String rolStr = authority.replace("ROLE_", "");
+                try {
+                    reserva.setRolSolicitante(RolUsuario.valueOf(rolStr));
+                } catch (IllegalArgumentException e) {
+                    // Si el rol no mapea a RolUsuario
+                }
+            }
+        }
+        
         Map<String, Object> response = new HashMap<>();
         Reserva reservaActualizado = reservaService.updateReserva(reserva);
         response.put(MENSAJE, "La reserva ha sido actualizado con éxito!");
         response.put(RESERVA, reservaActualizado);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener las reservas del usuario autenticado.
+     */
+    @GetMapping("/reservas/mis-reservas")
+    public ResponseEntity<Map<String, Object>> getMisReservas() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String codigoSolicitante = authentication.getPrincipal().toString();
+        Long idSolicitante = Long.valueOf(codigoSolicitante);
+
+        List<Reserva> reservas = reservaService.findByIdSolicitante(idSolicitante);
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener las reservas de un usuario específico por su ID.
+     */
+    @GetMapping("/reservas/usuario/{id}")
+    public ResponseEntity<Map<String, Object>> getReservasByUsuario(@PathVariable Long id) {
+        List<Reserva> reservas = reservaService.findByIdSolicitante(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
         return ResponseEntity.ok(response);
     }
 
@@ -128,5 +218,81 @@ public class ReservaRestController {
         response.put(MENSAJE, "La reserva ha sido encontrado con éxito!");
         response.put(RESERVA, reserva);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Verifica si el usuario autenticado tiene rol ADMINISTRADOR.
+     */
+    private void verificarRolAdministrador() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            throw new AccesoNoAutorizadoException("No se pudo verificar la identidad del usuario.");
+        }
+        boolean esAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+        if (!esAdmin) {
+            throw new AccesoNoAutorizadoException("Esta operación requiere privilegios de administrador.");
+        }
+    }
+
+    public void restriccionReservas(){
+
+    }
+
+    /**
+     * Listar reservas pendientes de aprobación (solo administradores).
+     */
+    @GetMapping("/reservas/pendientes")
+    public ResponseEntity<Map<String, Object>> getReservasPendientes() {
+        verificarRolAdministrador();
+        List<Reserva> reservas = reservaService.findReservasPendientes();
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Confirmar una reserva pendiente (solo administradores).
+     */
+    @PutMapping("/reservas/{id}/confirmar")
+    public ResponseEntity<Map<String, Object>> confirmarReserva(@PathVariable Long id) {
+        verificarRolAdministrador();
+        Reserva reserva = reservaService.confirmarReserva(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "La reserva ha sido confirmada con éxito.");
+        response.put(RESERVA, reserva);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Rechazar (cancelar) una reserva pendiente (solo administradores).
+     */
+    @PutMapping("/reservas/{id}/rechazar")
+    public ResponseEntity<Map<String, Object>> rechazarReserva(@PathVariable Long id) {
+        verificarRolAdministrador();
+        Reserva reserva = reservaService.rechazarReserva(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "La reserva ha sido rechazada con éxito.");
+        response.put(RESERVA, reserva);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener lista de IDs de aulas ocupadas en un rango de fechas/horas.
+     * Combina reservas internas (AulaSmart BD) + reservas externas (SIGA universitario).
+     * Formato esperado: fecha=yyyy-MM-dd, horaInicio=HH:mm, horaFin=HH:mm
+     */
+    @GetMapping("/reservas/ocupadas")
+    public ResponseEntity<List<Long>> obtenerAulasOcupadas(
+            @RequestParam String fecha,
+            @RequestParam String horaInicio,
+            @RequestParam String horaFin) {
+
+        LocalDateTime inicio = LocalDateTime.parse(fecha + "T" + horaInicio + ":00");
+        LocalDateTime fin    = LocalDateTime.parse(fecha + "T" + horaFin    + ":00");
+
+        // BD interna + SIGA con detección de solapamiento
+        List<Long> aulasOcupadas = agregadorReservasService.obtenerAulasOcupadasEnRangoConSiga(inicio, fin);
+        return ResponseEntity.ok(aulasOcupadas);
     }
 }

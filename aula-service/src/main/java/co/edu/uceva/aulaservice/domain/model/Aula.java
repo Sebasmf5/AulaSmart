@@ -1,5 +1,6 @@
 package co.edu.uceva.aulaservice.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import co.edu.uceva.security.converter.EncryptDatabaseConverter;
 @Table(name = "aulas")
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 
 public class Aula {
     @Id
@@ -16,7 +18,7 @@ public class Aula {
     private Long id;
 
     // dependo de stiven
-    @Column(name = "codigoAula", nullable = false)
+    @Column(name = "codigoAula", nullable = false, unique = true)
     private Long codigoAula;
 
     @Column(name = "nombreAula", nullable = false)
@@ -33,19 +35,14 @@ public class Aula {
     @Column(name = "capacidad", nullable = false)
     private Integer capacidad;
 
-    @Column(name = "codigoDependencia", nullable = false)
-    private String codigoDependencia;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bloque_id", nullable = false)
+    private Bloque bloque;
 
-    @Column(name = "nombreDependencia", nullable = false)
-    private String nombreDependencia;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_aula_id", nullable = false)
+    private TipoAula tipoAula;
 
-    @Column(name = "codigoTipoAula", nullable = false)
-    private String codigoTipoAula;
-
-    @Column(name = "nombreTipoAula", nullable = false)
-    private String nombreTipoAula;
-
-    @Version
-    private int version;
-
+    @Column(name = "sincronizada_con_siga")
+    private Boolean sincronizadaConSiga = false;
 }

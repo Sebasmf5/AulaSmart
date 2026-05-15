@@ -13,6 +13,11 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - system-network
 
@@ -20,19 +25,21 @@ services:
     build:
       context: .
       dockerfile: usuarios-service/Dockerfile
-    container_name: usarios-service
+    container_name: usuarios-service
+    restart: unless-stopped
     ports:
-      - "8081:8080"
-    env_file:
-      - usuarios-service/.env
+      - "8081:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - TZ=America/Bogota
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - system-network
 
@@ -41,18 +48,21 @@ services:
       context: .
       dockerfile: reserva-service/Dockerfile
     container_name: reserva-service
+    restart: unless-stopped
     ports:
       - "8082:8080"
-    env_file:
-      - reserva-service/.env
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
+      - TZ=America/Bogota
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - system-network
 
@@ -61,18 +71,20 @@ services:
       context: .
       dockerfile: aula-service/Dockerfile
     container_name: aula-service
+    restart: unless-stopped
     ports:
-      - "8083:8080"
-    env_file:
-      - aula-service/.env
+      - "8083:8082"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - TZ=America/Bogota
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - system-network
 
@@ -81,18 +93,46 @@ services:
       context: .
       dockerfile: incidencia-service/Dockerfile
     container_name: incidencia-service
+    restart: unless-stopped
     ports:
-      - "8084:8080"
-    env_file:
-      - incidencia-service/.env
+      - "8085:8087"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - API_KEY_GROQ=${API_KEY_GROQ}
+      - TZ=America/Bogota
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    networks:
+      - system-network
+
+  chat-service:
+    build:
+      context: .
+      dockerfile: chat-service/Dockerfile
+    container_name: chat-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
+      - URL_SERVICIO_RESERVA=http://reserva-service:8080
+      - SPRING_AI_OPENAI_API_KEY=${GROQ_API_KEY_CHAT}
+      - SPRING_AI_OPENAI_BASE_URL=https://api.groq.com/openai/v1
+      - TZ=America/Bogota
+    depends_on:
+      postgres:
+        condition: service_healthy
+      reserva-service:
+        condition: service_started
+      aula-service:
+        condition: service_started
     networks:
       - system-network
 

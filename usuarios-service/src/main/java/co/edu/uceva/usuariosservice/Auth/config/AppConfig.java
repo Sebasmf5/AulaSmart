@@ -1,10 +1,8 @@
 package co.edu.uceva.usuariosservice.Auth.config;
 
 import co.edu.uceva.usuariosservice.domain.excepcions.UsuarioNoEncontradoException;
-import lombok.RequiredArgsConstructor;
 import co.edu.uceva.usuariosservice.domain.model.Usuario;
 import co.edu.uceva.usuariosservice.domain.repository.IUsuarioRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -40,7 +38,8 @@ public class AppConfig {
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService());
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService());
         authProvider.setPasswordEncoder(passwordEncoder());
         return authProvider;
     }

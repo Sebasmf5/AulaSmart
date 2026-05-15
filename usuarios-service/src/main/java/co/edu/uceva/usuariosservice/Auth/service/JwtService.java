@@ -23,6 +23,10 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long jwtRefreshExpiration;
 
+    public long getJwtExpiration() {
+        return jwtExpiration;
+    }
+
     // Extrae el código (ID) del usuario guardado en el ID del token
     public Long extractCodigo(final String token) {
         return Long.parseLong(getAllClaims(token).getId());
@@ -71,10 +75,10 @@ public class JwtService {
 
     private String buildToken(final Usuario usuario, final long expiration, final String sessionId) {
         var builder = Jwts.builder()
-                .id(usuario.getCodigo().toString())                                 // jti
-                .subject(usuario.getEmail())                                        // sub
-                .claim("nombre", usuario.getNombre() + " " + usuario.getApellido()) // claim
-                .claim("rol", usuario.getRol())                                     // claim
+                .id(usuario.getCodigo().toString())
+                .subject(usuario.getEmail())
+                .claim("nombre", usuario.getNombre() + " " + usuario.getApellido())
+                .claim("rol", usuario.getRol().name())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey());

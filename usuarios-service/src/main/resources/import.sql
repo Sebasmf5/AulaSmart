@@ -1,2 +1,0 @@
-INSERT INTO usuarios (nombre, apellido, email, password, rol)
-VALUES ('Sebastián', 'Morales', 'sebas@email.com', '123456', 'ESTUDIANTE');
