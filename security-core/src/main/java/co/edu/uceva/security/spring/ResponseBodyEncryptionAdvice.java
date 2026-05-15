@@ -71,7 +71,8 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
         if (path.contains("/v3/api-docs")
                 || path.contains("/swagger-ui")
                 || path.contains("/actuator")
-                || path.contains("/crypto/")
+                || path.startsWith("/api/v1/crypto/")
+                || path.startsWith("/api/v1/auth/")
                 || path.equals("/error")) {
             return body;
         }
@@ -110,10 +111,10 @@ public class ResponseBodyEncryptionAdvice implements ResponseBodyAdvice<Object> 
 
             return new EncryptedPayloadDto(encryptedData, ivB64, hmacB64, sessionId);
 
-        } catch (CryptoException ce) {
-            throw ce;
         } catch (Exception e) {
-            throw new CryptoException("Error al cifrar el cuerpo de la respuesta: " + e.getMessage(), e);
+            // Si falla el cifrado (ej: no hay llave de sesión o es respuesta de error),
+            // responder en texto plano para evitar loop infinito con GlobalExceptionHandler
+            return body;
         }
     }
 

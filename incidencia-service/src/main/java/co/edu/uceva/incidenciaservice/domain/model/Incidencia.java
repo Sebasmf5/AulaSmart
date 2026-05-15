@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import co.edu.uceva.security.converter.EncryptDatabaseConverter;
 
 import java.time.LocalDateTime;
 
@@ -30,7 +29,6 @@ public class Incidencia {
 
     @NotBlank(message = "La descripción del daño es obligatoria para generar la carta")
     @Column(name = "descripcion_breve", nullable = false, length = 1024)
-    @Convert(converter = EncryptDatabaseConverter.class)
     private String descripcionBreve;
 
     // Guardaremos la ruta de la imagen provista como evidencia (si aplica)

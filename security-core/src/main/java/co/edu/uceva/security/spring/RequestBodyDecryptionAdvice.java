@@ -8,7 +8,6 @@ import co.edu.uceva.security.protocol.EncryptionContext;
 import co.edu.uceva.security.redis.SessionKeyStore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -41,16 +40,16 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
     private final SessionKeyStore   sessionKeyStore;
     private final EncryptionContext encryptionContext;
     private final ObjectMapper      objectMapper;
-
-    @Autowired
-    private HttpServletRequest httpRequest;
+    private final HttpServletRequest httpRequest;
 
     public RequestBodyDecryptionAdvice(SessionKeyStore sessionKeyStore,
                                        EncryptionContext encryptionContext,
-                                       ObjectMapper objectMapper) {
+                                       ObjectMapper objectMapper,
+                                       HttpServletRequest httpRequest) {
         this.sessionKeyStore   = sessionKeyStore;
         this.encryptionContext = encryptionContext;
         this.objectMapper      = objectMapper;
+        this.httpRequest       = httpRequest;
     }
 
     @Override
@@ -71,7 +70,8 @@ public class RequestBodyDecryptionAdvice extends RequestBodyAdviceAdapter {
         String path = httpRequest.getRequestURI();
 
         // Whitelist de endpoints que pueden recibir texto plano
-        if (path.contains("/crypto/")
+        if (path.startsWith("/api/v1/crypto/")
+                || path.startsWith("/api/v1/auth/")
                 || path.contains("/v3/api-docs")
                 || path.contains("/swagger-ui")
                 || path.contains("/actuator")) {
