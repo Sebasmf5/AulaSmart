@@ -1,5 +1,6 @@
 package co.edu.uceva.reservaservice.domain.repository;
 
+import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,10 @@ import java.util.List;
 
 public interface IReservaRepository extends JpaRepository<Reserva, Long> {
     List<Reserva> findByAulaId(Long aulaId);
+
+    List<Reserva> findByIdSolicitante(Long idSolicitante);
+
+    List<Reserva> findByEstado(EstadosReserva estado);
 
     @Query("SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM Reserva r " +
             "WHERE r.aulaId = :aulaId " +

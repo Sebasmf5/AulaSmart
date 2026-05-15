@@ -1,6 +1,7 @@
 package co.edu.uceva.reservaservice.domain.service;
 
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaModificadaException;
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaSolapadaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoPermitidaException;
 import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
@@ -49,7 +50,7 @@ public class ReservaServiceImp implements IReservaService{
 
         // Validar si el aula requiere autorización
         Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getAulaId());
-        if (Boolean.TRUE.equals(requiereAutorizacion) && reserva.getEstado() == EstadosReserva.CONFIRMADA) {
+        if (Boolean.TRUE.equals(requiereAutorizacion)) {
             reserva.setEstado(EstadosReserva.PENDIENTE);
         } else {
             reserva.setEstado(EstadosReserva.CONFIRMADA);
@@ -112,7 +113,7 @@ public class ReservaServiceImp implements IReservaService{
 
         // Validar si el aula requiere autorización
         Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getAulaId());
-        if (Boolean.TRUE.equals(requiereAutorizacion) && reserva.getEstado() == EstadosReserva.CONFIRMADA) {
+        if (Boolean.TRUE.equals(requiereAutorizacion)) {
             reserva.setEstado(EstadosReserva.PENDIENTE);
         }
 
@@ -170,5 +171,35 @@ public class ReservaServiceImp implements IReservaService{
     @Transactional(readOnly = true)
     public List<Long> findAulasOcupadasEnRango(LocalDateTime horaInicio, LocalDateTime horaFin) {
         return reservaRepository.findAulasOcupadasEnRango(horaInicio, horaFin);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> findByIdSolicitante(Long idSolicitante) {
+        return reservaRepository.findByIdSolicitante(idSolicitante);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> findReservasPendientes() {
+        return reservaRepository.findByEstado(EstadosReserva.PENDIENTE);
+    }
+
+    @Override
+    @Transactional
+    public Reserva confirmarReserva(Long idReserva) {
+        Reserva reserva = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new ReservaNoEncontradaException(idReserva));
+        reserva.setEstado(EstadosReserva.CONFIRMADA);
+        return reservaRepository.save(reserva);
+    }
+
+    @Override
+    @Transactional
+    public Reserva rechazarReserva(Long idReserva) {
+        Reserva reserva = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new ReservaNoEncontradaException(idReserva));
+        reserva.setEstado(EstadosReserva.CANCELADA);
+        return reservaRepository.save(reserva);
     }
 }

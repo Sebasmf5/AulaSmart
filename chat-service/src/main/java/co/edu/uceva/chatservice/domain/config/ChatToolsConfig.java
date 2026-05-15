@@ -37,8 +37,6 @@ public class ChatToolsConfig {
         this.objectMapper = objectMapper;
     }
 
-    // ── Helpers de normalización y fuzzy matching ───────────────────────────
-
     private String normalizar(String input) {
         if (input == null) return "";
         String sinAcentos = Normalizer.normalize(input, Normalizer.Form.NFD)

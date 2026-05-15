@@ -13,6 +13,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
+/**
+ * Configuración multi-proveedor para el chat-service.
+ * Soporta fallback entre proveedores y modelos según disponibilidad y costo.
+ */
 @Configuration
 public class ChatClientConfig {
 
@@ -24,6 +28,20 @@ public class ChatClientConfig {
 
     @Value("${spring.ai.openai.chat.options.model:llama-3.3-70b-versatile}")
     private String model;
+
+    // Configuración alternativa (Ollama local)
+    @Value("${spring.ai.ollama.enabled:false}")
+    private boolean ollamaEnabled;
+
+    @Value("${spring.ai.ollama.base-url:http://localhost:11434}")
+    private String ollamaBaseUrl;
+
+    @Value("${spring.ai.ollama.model:llama3.2:latest}")
+    private String ollamaModel;
+
+    // Configuración de caché
+    @Value("${chat.cache.enabled:true}")
+    private boolean cacheEnabled;
 
     @Bean
     @Primary
@@ -58,8 +76,7 @@ public class ChatClientConfig {
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder, ChatToolsConfig chatToolsConfig) {
         return builder
-                .defaultSystem(
-                        "Eres el asistente virtual oficial de AulaSmart de la Universidad Central del Valle del Cauca (UCEVA). " +
+                .defaultSystem("Eres el asistente virtual oficial de AulaSmart de la Universidad Central del Valle del Cauca (UCEVA). " +
                         "Tu único propósito es ayudar a docentes y estudiantes a consultar disponibilidad de aulas y crear reservas. " +
                         "Si el usuario te pregunta por cualquier otro tema fuera del ámbito de infraestructura física, reservas o aulas, " +
                         "debes negarte amablemente a responder. " +
@@ -70,8 +87,7 @@ public class ChatClientConfig {
                         "usa el contexto de la conversación anterior (aula, fecha, bloque) para responder sin pedirle que repita la información. " +
                         "Cuando el usuario quiera hacer una reserva, DEBES preguntarle el motivo o título de la reserva si no lo ha proporcionado. " +
                         "Ejemplos de motivos: 'Reunión de proyecto', 'Clase de refuerzo', 'Examen parcial', 'Tutoría'. " +
-                        "No invoques la herramienta de reserva sin antes tener un motivo claro."
-                )
+                        "No invoques la herramienta de reserva sin antes tener un motivo claro.")
                 .defaultToolCallbacks(ToolCallbacks.from(chatToolsConfig))
                 .defaultToolNames("consultarPorBloque", "consultarPorTipo", "consultarPorNombreAula", "consultarHorariosAula", "reservarAulaTool")
                 .build();

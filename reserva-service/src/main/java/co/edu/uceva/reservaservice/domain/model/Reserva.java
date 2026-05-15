@@ -36,16 +36,13 @@ public class Reserva {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @NotNull(message = "El estado de la reserva es obligatorio")
     private EstadosReserva estado;
 
     @Column(name = "id_solicitante", nullable = false)
-    @NotNull(message = "El ID del solicitante es obligatorio")
     private Long idSolicitante;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rol_solicitante", nullable = false)
-    @NotNull(message = "El rol del solicitante es obligatorio")
     private RolUsuario rolSolicitante;
 
     @Column(name = "codigo_programa")

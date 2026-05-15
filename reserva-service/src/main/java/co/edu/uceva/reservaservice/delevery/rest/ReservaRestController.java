@@ -1,5 +1,6 @@
 package co.edu.uceva.reservaservice.delevery.rest;
 
+import co.edu.uceva.reservaservice.domain.excepcion.AccesoNoAutorizadoException;
 import co.edu.uceva.reservaservice.domain.excepcion.NoHayReservasException;
 import co.edu.uceva.reservaservice.domain.excepcion.PaginaSinReservasException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
@@ -181,6 +182,32 @@ public class ReservaRestController {
     }
 
     /**
+     * Obtener las reservas del usuario autenticado.
+     */
+    @GetMapping("/reservas/mis-reservas")
+    public ResponseEntity<Map<String, Object>> getMisReservas() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String codigoSolicitante = authentication.getPrincipal().toString();
+        Long idSolicitante = Long.valueOf(codigoSolicitante);
+
+        List<Reserva> reservas = reservaService.findByIdSolicitante(idSolicitante);
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener las reservas de un usuario específico por su ID.
+     */
+    @GetMapping("/reservas/usuario/{id}")
+    public ResponseEntity<Map<String, Object>> getReservasByUsuario(@PathVariable Long id) {
+        List<Reserva> reservas = reservaService.findByIdSolicitante(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Obtener una reserva por su ID.
      */
     @GetMapping("/reservas/{id}")
@@ -193,8 +220,61 @@ public class ReservaRestController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Verifica si el usuario autenticado tiene rol ADMINISTRADOR.
+     */
+    private void verificarRolAdministrador() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getAuthorities() == null) {
+            throw new AccesoNoAutorizadoException("No se pudo verificar la identidad del usuario.");
+        }
+        boolean esAdmin = authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMINISTRADOR"));
+        if (!esAdmin) {
+            throw new AccesoNoAutorizadoException("Esta operación requiere privilegios de administrador.");
+        }
+    }
+
     public void restriccionReservas(){
 
+    }
+
+    /**
+     * Listar reservas pendientes de aprobación (solo administradores).
+     */
+    @GetMapping("/reservas/pendientes")
+    public ResponseEntity<Map<String, Object>> getReservasPendientes() {
+        verificarRolAdministrador();
+        List<Reserva> reservas = reservaService.findReservasPendientes();
+        Map<String, Object> response = new HashMap<>();
+        response.put(RESERVAS, reservas);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Confirmar una reserva pendiente (solo administradores).
+     */
+    @PutMapping("/reservas/{id}/confirmar")
+    public ResponseEntity<Map<String, Object>> confirmarReserva(@PathVariable Long id) {
+        verificarRolAdministrador();
+        Reserva reserva = reservaService.confirmarReserva(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "La reserva ha sido confirmada con éxito.");
+        response.put(RESERVA, reserva);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Rechazar (cancelar) una reserva pendiente (solo administradores).
+     */
+    @PutMapping("/reservas/{id}/rechazar")
+    public ResponseEntity<Map<String, Object>> rechazarReserva(@PathVariable Long id) {
+        verificarRolAdministrador();
+        Reserva reserva = reservaService.rechazarReserva(id);
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "La reserva ha sido rechazada con éxito.");
+        response.put(RESERVA, reserva);
+        return ResponseEntity.ok(response);
     }
 
     /**

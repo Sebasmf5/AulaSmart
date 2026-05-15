@@ -110,4 +110,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(AccesoNoAutorizadoException.class)
+    public ResponseEntity<Map<String, Object>> handleAccesoNoAutorizadoException(AccesoNoAutorizadoException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getMessage());
+        response.put(STATUS, HttpStatus.FORBIDDEN.value());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
 }

@@ -24,4 +24,8 @@ public interface IReservaService {
     List<Reserva> findAll();
     Page<Reserva> findAll(Pageable pageable);
     List<Long> findAulasOcupadasEnRango(java.time.LocalDateTime horaInicio, java.time.LocalDateTime horaFin);
+    List<Reserva> findByIdSolicitante(Long idSolicitante);
+    List<Reserva> findReservasPendientes();
+    Reserva confirmarReserva(Long idReserva);
+    Reserva rechazarReserva(Long idReserva);
 }
