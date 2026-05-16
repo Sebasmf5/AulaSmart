@@ -21,6 +21,19 @@ services:
     networks:
       - system-network
 
+  redis:
+    image: redis:7-alpine
+    container_name: aulasmart-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - system-network
+
   usuarios-service:
     build:
       context: .
@@ -28,17 +41,23 @@ services:
     container_name: usuarios-service
     restart: unless-stopped
     ports:
-      - "8081:8084"
+      - "8081:8080"
     environment:
+      - SERVER_PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - RSA_MASTER_D=${RSA_MASTER_D}
+      - RSA_MASTER_N=${RSA_MASTER_N}
+      - DB_MASTER_KEY=${DB_MASTER_KEY}
       - TZ=America/Bogota
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - system-network
@@ -56,9 +75,8 @@ services:
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - REDIS_HOST=redis
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8080
       - TZ=America/Bogota
     depends_on:
       postgres:
@@ -73,17 +91,23 @@ services:
     container_name: aula-service
     restart: unless-stopped
     ports:
-      - "8083:8082"
+      - "8083:8080"
     environment:
+      - SERVER_PORT=8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - REDIS_HOST=redis
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - RSA_MASTER_D=${RSA_MASTER_D}
+      - RSA_MASTER_N=${RSA_MASTER_N}
+      - DB_MASTER_KEY=${DB_MASTER_KEY}
       - TZ=America/Bogota
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - system-network
@@ -95,13 +119,12 @@ services:
     container_name: incidencia-service
     restart: unless-stopped
     ports:
-      - "8085:8087"
+      - "8085:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - REDIS_HOST=redis
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - API_KEY_GROQ=${API_KEY_GROQ}
       - TZ=America/Bogota
@@ -121,7 +144,7 @@ services:
       - "8086:8086"
     environment:
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8080
       - URL_SERVICIO_RESERVA=http://reserva-service:8080
       - SPRING_AI_OPENAI_API_KEY=${GROQ_API_KEY_CHAT}
       - SPRING_AI_OPENAI_BASE_URL=https://api.groq.com/openai/v1

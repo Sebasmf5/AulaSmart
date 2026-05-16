@@ -1,5 +1,6 @@
 package co.edu.uceva.usuariosservice.config;
 
+import co.edu.uceva.usuariosservice.domain.model.RolUsuario;
 import co.edu.uceva.usuariosservice.domain.model.Usuario;
 import co.edu.uceva.usuariosservice.domain.repository.IUsuarioRepository;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class DataSeeder implements CommandLineRunner {
         admin.setApellido("Sistema");
         admin.setEmail("admin@uceva.edu.co");
         admin.setPassword("Admin123!");
-        admin.setRol("Administrativo");
+        admin.setRol(RolUsuario.Administrativo);
         usuarioRepository.save(admin);
 
         log.info("Seed user created: codigo={}, password=Admin123!", admin.getCodigo());

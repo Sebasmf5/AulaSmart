@@ -25,8 +25,7 @@ public class Usuario {
 
     @NotEmpty(message = "El correo no puede estar vacío")
     @Email(message = "Debe ser un correo válido (ejemplo@uceva.edu.co)")
-    @Column(nullable = false, unique = true, length = 512) // mayor longitud para ciphertext en Base64
-    @Convert(converter = EncryptDatabaseConverter.class)
+    @Column(nullable = false, unique = true, length = 512)
     private String email;
 
     @NotEmpty(message = "La contraseña no puede estar vacía")
