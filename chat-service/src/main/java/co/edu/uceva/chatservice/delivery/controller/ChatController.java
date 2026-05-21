@@ -17,8 +17,6 @@ public class ChatController {
 
     @PostMapping
     public String hablarConIA(@RequestBody ChatRequest request) {
-        // Recibimos el JSON {"mensaje": "Reserva el aula..."}
-        // y lo mandamos directo al Service (que internamente hablará con Groq y ejecutará Tools)
         return chatService.procesarMensaje(request.mensaje());
     }
 }

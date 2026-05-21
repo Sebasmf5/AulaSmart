@@ -26,6 +26,7 @@ public class ChatToolsConfig {
     private final IAulaServiceClient aulaClient;
     private final IReservaServiceClient reservaClient;
     private final ObjectMapper objectMapper;
+    private List<BloqueDTO> cacheBloques = new ArrayList<>();
 
     private static final String MSG_ERROR_RED = "Lo siento, tuve un problema al conectar con el sistema de reservas. Por favor, intenta de nuevo en unos momentos.";
     private static final String MSG_ERROR_GENERICO = "Lo siento, ocurrió un error inesperado. Por favor, intenta de nuevo en unos momentos.";
@@ -35,6 +36,21 @@ public class ChatToolsConfig {
         this.aulaClient = aulaClient;
         this.reservaClient = reservaClient;
         this.objectMapper = objectMapper;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void precargarBloques() {
+        try {
+            Map<String, Object> response = aulaClient.listarBloques();
+            Object bloquesRaw = response != null ? response.get("bloques") : null;
+            if (bloquesRaw != null) {
+                cacheBloques = objectMapper.convertValue(bloquesRaw,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
+                System.out.println("[ChatToolsConfig] " + cacheBloques.size() + " bloques precargados en caché.");
+            }
+        } catch (Exception e) {
+            System.err.println("[ChatToolsConfig] Error precargando bloques: " + e.getMessage());
+        }
     }
 
     private String normalizar(String input) {
@@ -77,16 +93,20 @@ public class ChatToolsConfig {
             // ignorar, intentaremos fallback
         }
 
-        // 2. Fallback: obtener todos los bloques
-        List<BloqueDTO> todosLosBloques;
-        try {
-            Map<String, Object> response = aulaClient.listarBloques();
-            Object bloquesRaw = response != null ? response.get("bloques") : null;
-            if (bloquesRaw == null) return null;
-            todosLosBloques = objectMapper.convertValue(bloquesRaw,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
-        } catch (Exception e) {
-            return null;
+        // 2. Fallback: usar bloques precargados en caché
+        List<BloqueDTO> todosLosBloques = cacheBloques;
+        if (todosLosBloques == null || todosLosBloques.isEmpty()) {
+            // Si la caché está vacía, intentar cargar una vez más
+            try {
+                Map<String, Object> response = aulaClient.listarBloques();
+                Object bloquesRaw = response != null ? response.get("bloques") : null;
+                if (bloquesRaw == null) return null;
+                todosLosBloques = objectMapper.convertValue(bloquesRaw,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
+                cacheBloques = todosLosBloques; // Actualizar caché
+            } catch (Exception e) {
+                return null;
+            }
         }
 
         if (todosLosBloques == null || todosLosBloques.isEmpty()) return null;
@@ -121,12 +141,20 @@ public class ChatToolsConfig {
     }
 
     private String listarNombresBloques() {
+        if (cacheBloques != null && !cacheBloques.isEmpty()) {
+            return cacheBloques.stream()
+                    .map(BloqueDTO::nombre)
+                    .filter(n -> n != null)
+                    .collect(Collectors.joining(", "));
+        }
+        // Fallback si la caché está vacía
         try {
             Map<String, Object> response = aulaClient.listarBloques();
             Object bloquesRaw = response != null ? response.get("bloques") : null;
             if (bloquesRaw == null) return "";
             List<BloqueDTO> bloques = objectMapper.convertValue(bloquesRaw,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
+            cacheBloques = bloques; // Actualizar caché
             return bloques.stream()
                     .map(BloqueDTO::nombre)
                     .filter(n -> n != null)
@@ -138,12 +166,12 @@ public class ChatToolsConfig {
 
     // ── Tools ───────────────────────────────────────────────────────────────
 
-    @Tool(name = "consultarPorBloque", description = "Consulta aulas disponibles en un bloque específico en una fecha y horario.")
+    @Tool(name = "consultarPorBloque", description = "Consulta aulas disponibles en un bloque.")
     public String consultarPorBloque(
-            @ToolParam(description = "Nombre del bloque. Ej: BLOQUE B - AVELLANOS o Abellanos o B") String bloque,
-            @ToolParam(description = "Fecha en formato yyyy-MM-dd. Ej: 2026-05-15 o 15 de mayo") String fecha,
-            @ToolParam(description = "Hora de inicio en formato HH:mm. Ej: 08:00") String horaInicio,
-            @ToolParam(description = "Hora de fin en formato HH:mm. Ej: 10:00") String horaFin
+            @ToolParam(description = "Nombre del bloque, ej: Bloque B") String bloque,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin
     ) {
         System.out.println("=== [consultarPorBloque] INICIO ===");
         System.out.println("Parametros: bloque=" + bloque + ", fecha=" + fecha + ", inicio=" + horaInicio + ", fin=" + horaFin);
@@ -186,12 +214,12 @@ public class ChatToolsConfig {
         }
     }
 
-    @Tool(name = "consultarPorTipo", description = "Consulta aulas disponibles por tipo en una fecha y horario.")
+    @Tool(name = "consultarPorTipo", description = "Consulta aulas disponibles por tipo.")
     public String consultarPorTipo(
-            @ToolParam(description = "Tipo de aula: AULA AUDIOVISUAL, SALA, LABORATORIO, AULA INTERACTIVA") String tipoAula,
-            @ToolParam(description = "Fecha en formato yyyy-MM-dd. Ej: 2026-05-15") String fecha,
-            @ToolParam(description = "Hora de inicio en formato HH:mm. Ej: 08:00") String horaInicio,
-            @ToolParam(description = "Hora de fin en formato HH:mm. Ej: 10:00") String horaFin
+            @ToolParam(description = "Tipo de aula") String tipoAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin
     ) {
         try {
             ResponseAulaDTO responseAula = aulaClient.listarAulasPorTipoAula(tipoAula);
@@ -219,12 +247,12 @@ public class ChatToolsConfig {
         }
     }
 
-    @Tool(name = "consultarPorNombreAula", description = "Consulta si un aula específica está disponible en una fecha y horario.")
+    @Tool(name = "consultarPorNombreAula", description = "Consulta disponibilidad de un aula específica.")
     public String consultarPorNombreAula(
-            @ToolParam(description = "Nombre del aula a consultar. Ej: AULA 101") String nombreAula,
-            @ToolParam(description = "Fecha en formato yyyy-MM-dd. Ej: 2026-05-15") String fecha,
-            @ToolParam(description = "Hora de inicio en formato HH:mm. Ej: 08:00") String horaInicio,
-            @ToolParam(description = "Hora de fin en formato HH:mm. Ej: 10:00") String horaFin
+            @ToolParam(description = "Nombre del aula") String nombreAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin
     ) {
         try {
             ResponseAulaDTO responseAula = aulaClient.buscarAulasPorNombre(nombreAula);
@@ -262,13 +290,13 @@ public class ChatToolsConfig {
         }
     }
 
-    @Tool(name = "reservarAulaTool", description = "Úsalo SIEMPRE que el usuario dé una orden directa de separar, agendar o reservar un aula específica.")
+    @Tool(name = "reservarAulaTool", description = "Reserva un aula específica.")
     public String reservarAulaTool(
-            @ToolParam(description = "Nombre del Aula a reservar (obligatorio) Ej: B101- Digital o B101") String nombreAula,
-            @ToolParam(description = "Fecha de la reserva en formato yyyy-MM-dd") String fecha,
-            @ToolParam(description = "Hora de inicio en formato HH:mm") String horaInicio,
-            @ToolParam(description = "Hora de fin en formato HH:mm") String horaFin,
-            @ToolParam(description = "Motivo o título de la reserva. Ej: Reunión de proyecto, Clase de refuerzo, Examen parcial") String motivo
+            @ToolParam(description = "Nombre del aula") String nombreAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin,
+            @ToolParam(description = "Motivo o título de la reserva") String motivo
     ) {
         System.out.println("=== [reservarAulaTool] INICIO ===");
         System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha
@@ -280,7 +308,9 @@ public class ChatToolsConfig {
         try {
             ResponseAulaDTO response = aulaClient.buscarAulasPorNombre(nombreAula);
             if (response == null || response.aulas() == null || response.aulas().isEmpty()) {
-                return "No encontré ninguna aula con el nombre '" + nombreAula + "'. Verifica el nombre e intenta de nuevo.";
+                return "ERROR: No encontré ninguna aula con el nombre '" + nombreAula + "'. " +
+                        "INSTRUCCIÓN PARA EL ASISTENTE: Pide al usuario que verifique el nombre del aula. " +
+                        "NO inventes nombres de aulas. NO busques otra aula sin permiso explícito del usuario.";
             }
             aulaEncontrada = response.aulas().get(0);
             aulaId = aulaEncontrada.id();          // PK de la base de datos
@@ -318,10 +348,12 @@ public class ChatToolsConfig {
             String codigoTipoAula = (aulaEncontrada != null && aulaEncontrada.tipoAula() != null)
                     ? aulaEncontrada.tipoAula().codigoTipoAula() : null;
             if (!"78".equals(codigoTipoAula) && !"79".equals(codigoTipoAula)) {
-                return "Como estudiante, solo puedes reservar aulas interactivas (tipo 78) o audiovisuales (tipo 79). " +
+                return "ERROR: Como estudiante, solo puedes reservar aulas interactivas (tipo 78) o audiovisuales (tipo 79). " +
                         "El aula '" + nombreAula + "' es de tipo " +
                         (codigoTipoAula != null ? codigoTipoAula : "desconocido") +
-                        ", por lo que no está permitida para tu rol.";
+                        ", por lo que no está permitida para tu rol. " +
+                        "INSTRUCCIÓN PARA EL ASISTENTE: NO sugieras otra aula automáticamente. " +
+                        "Pregunta al usuario si quiere ver aulas de tipo 78 o 79 disponibles.";
             }
         }
 
@@ -329,9 +361,11 @@ public class ChatToolsConfig {
         try {
             List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
             if (ocupadas != null && ocupadas.contains(aulaId)) {
-                return "Lo siento, el aula '" + nombreAula + "' ya está ocupada el " + fecha
+                return "ERROR: El aula '" + nombreAula + "' ya está ocupada el " + fecha
                         + " de " + horaInicio + " a " + horaFin
-                        + " (reserva existente en AulaSmart o clase programada en el sistema SIGA).";
+                        + ". INSTRUCCIÓN PARA EL ASISTENTE: Informa al usuario que esta aula NO está disponible."
+                        + " NO busques otra aula automáticamente. NO hagas otra reserva."
+                        + " Pregunta al usuario si quiere buscar otra aula o elegir otro horario.";
             }
         } catch (FeignException e) {
             System.err.println("[reservarAulaTool] Error verificando disponibilidad: " + e.getMessage());
@@ -392,10 +426,10 @@ public class ChatToolsConfig {
         }
     }
 
-    @Tool(name = "consultarHorariosAula", description = "Consulta los horarios ocupados y disponibles de un aula específica en una fecha dada.")
+    @Tool(name = "consultarHorariosAula", description = "Consulta horarios ocupados y disponibles de un aula.")
     public String consultarHorariosAula(
-            @ToolParam(description = "Nombre del aula. Ej: AULA 101 o B104") String nombreAula,
-            @ToolParam(description = "Fecha en formato yyyy-MM-dd. Ej: 2026-05-14") String fecha
+            @ToolParam(description = "Nombre del aula") String nombreAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha
     ) {
         System.out.println("=== [consultarHorariosAula] INICIO ===");
         System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha);

@@ -4,6 +4,7 @@ import co.edu.uceva.usuariosservice.domain.model.Usuario;
 import co.edu.uceva.usuariosservice.domain.repository.IUsuarioRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +14,11 @@ import java.util.List;
 public class UsuarioServiceImpl implements IUsuarioService{
 
     IUsuarioRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UsuarioServiceImpl(IUsuarioRepository repository) {
+    public UsuarioServiceImpl(IUsuarioRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -33,13 +36,22 @@ public class UsuarioServiceImpl implements IUsuarioService{
     @Override
     @Transactional
     public Usuario update(Usuario usuario) {
+        encodePasswordIfNeeded(usuario);
         return repository.save(usuario);
     }
 
     @Override
     @Transactional
     public Usuario save(Usuario usuario) {
+        encodePasswordIfNeeded(usuario);
         return repository.save(usuario);
+    }
+
+    private void encodePasswordIfNeeded(Usuario usuario) {
+        String password = usuario.getPassword();
+        if (password != null && !password.isBlank() && !password.startsWith("$2a$")) {
+            usuario.setPassword(passwordEncoder.encode(password));
+        }
     }
 
     @Override

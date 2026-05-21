@@ -76,13 +76,22 @@ public class ChatServiceImp implements ChatService{
      */
     private boolean esConsultaCacheable(String mensaje) {
         String lower = mensaje.toLowerCase();
-        // Solo cacheamos consultas puras de disponibilidad
+        // Detectar consultas generales
         boolean esConsulta = lower.contains("disponible") || lower.contains("hay") || 
                             lower.contains("libre") || lower.contains("ocupado") ||
-                            lower.contains("aulas") || lower.contains("horario");
+                            lower.contains("aulas") || lower.contains("horario") ||
+                            lower.contains("cuáles") || lower.contains("cuando") ||
+                            lower.contains("qué") || lower.contains("dime") ||
+                            lower.contains("cuántas") || lower.contains("capacidad");
+        // Detectar follow-ups cortos (1-3 palabras, sin verbos de acción)
+        boolean esFollowUpCorto = mensaje.trim().split("\\s+").length <= 3 &&
+                                 !lower.contains("reserv") && !lower.contains("agendar") &&
+                                 !lower.contains("quiero") && !lower.contains("necesito");
+        // Excluir reservas explícitas
         boolean esReserva = lower.contains("reserv") || lower.contains("agendar") || 
-                           lower.contains("separar") || lower.contains("confirm");
-        return esConsulta && !esReserva;
+                           lower.contains("separar") || lower.contains("confirm") ||
+                           lower.contains("quiero") || lower.contains("necesito");
+        return (esConsulta || esFollowUpCorto) && !esReserva;
     }
 
     /**
