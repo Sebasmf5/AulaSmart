@@ -35,7 +35,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/v1/auth/**", "/api/v1/crypto/public-key")
+                        req.requestMatchers("/api/v1/auth/**", "/api/v1/crypto/public-key", "/api/v1/crypto/handshake")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
@@ -58,7 +58,7 @@ public class SecurityConfig {
     public FilterRegistrationBean<EncryptionFilter> encryptionFilter(InMemorySessionStore sessionStore) {
         FilterRegistrationBean<EncryptionFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(new EncryptionFilter(sessionStore));
-        reg.addUrlPatterns("/api/v1/usuario-service/*");
+        reg.addUrlPatterns("/api/v1/usuario-service/*", "/api/v1/auth/*");
         reg.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return reg;
     }

@@ -41,27 +41,25 @@ public class EncryptionFilter implements Filter {
             return;
         }
 
-        // Solo leer body si no es GET/DELETE y tiene contenido
-        String encryptedBody = "";
-        if (!"GET".equalsIgnoreCase(httpRequest.getMethod())
-                && !"DELETE".equalsIgnoreCase(httpRequest.getMethod())) {
-            String contentLength = httpRequest.getHeader("Content-Length");
-            if (contentLength != null && !contentLength.equals("0")) {
-                encryptedBody = readBody(httpRequest);
-            }
-        }
+        String method = httpRequest.getMethod().toUpperCase();
 
+        // Leer body solo si la peticion tiene contenido
         HttpServletRequest wrappedRequest = httpRequest;
-        if (!encryptedBody.isEmpty()) {
+        if (!"GET".equals(method) && !"DELETE".equals(method) && !"OPTIONS".equals(method)
+                && !"HEAD".equals(method)) {
             try {
-                String payload = extractPayload(encryptedBody);
-                CryptoService crypto = new CryptoService(session.getAesKey());
-                String plaintext = crypto.decrypt(payload);
-                wrappedRequest = new PlainTextRequestWrapper(httpRequest, plaintext.getBytes(StandardCharsets.UTF_8));
+                String encryptedBody = readBody(httpRequest);
+                if (encryptedBody != null && !encryptedBody.isBlank()) {
+                    String payload = extractPayload(encryptedBody);
+                    CryptoService crypto = new CryptoService(session.getAesKey());
+                    String plaintext = crypto.decrypt(payload);
+                    wrappedRequest = new PlainTextRequestWrapper(httpRequest,
+                            plaintext.getBytes(StandardCharsets.UTF_8));
+                }
             } catch (Exception e) {
                 httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 httpResponse.setContentType("application/json");
-                httpResponse.getWriter().write("{\"error\":\"Payload invalido\"}");
+                httpResponse.getWriter().write("{\"error\":\"Payload invalido: " + e.getMessage() + "\"}");
                 return;
             }
         }
@@ -69,7 +67,6 @@ public class EncryptionFilter implements Filter {
         CaptureResponseWrapper captureResponse = new CaptureResponseWrapper(httpResponse);
         chain.doFilter(wrappedRequest, captureResponse);
 
-        // Leer response capturada, cifrar y enviar al cliente
         byte[] responseBytes = captureResponse.getCapturedData();
         String responseBody = new String(responseBytes, StandardCharsets.UTF_8);
 
@@ -77,11 +74,11 @@ public class EncryptionFilter implements Filter {
             CryptoService crypto = new CryptoService(session.getAesKey());
             String encryptedResponse = crypto.encrypt(responseBody);
             String json = "{\"payload\":\"" + encryptedResponse + "\"}";
-
             httpResponse.setContentType("application/json");
             httpResponse.setCharacterEncoding("UTF-8");
             httpResponse.setContentLength(json.getBytes(StandardCharsets.UTF_8).length);
             httpResponse.getWriter().write(json);
+            httpResponse.getWriter().flush();
         } catch (Exception e) {
             httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             httpResponse.setContentType("application/json");
@@ -91,7 +88,8 @@ public class EncryptionFilter implements Filter {
 
     private String readBody(HttpServletRequest request) throws IOException {
         StringBuilder sb = new StringBuilder();
-        try (BufferedReader reader = request.getReader()) {
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(request.getInputStream(), StandardCharsets.UTF_8))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
@@ -102,7 +100,7 @@ public class EncryptionFilter implements Filter {
 
     private String extractPayload(String body) {
         int start = body.indexOf("\"payload\":\"");
-        if (start == -1) throw new RuntimeException("No payload field");
+        if (start == -1) throw new RuntimeException("No payload field in: " + body.substring(0, Math.min(body.length(), 100)));
         start += "\"payload\":\"".length();
         int end = body.indexOf("\"", start);
         if (end == -1) throw new RuntimeException("No payload end");
@@ -146,43 +144,46 @@ public class EncryptionFilter implements Filter {
 
     private static class CaptureResponseWrapper extends HttpServletResponseWrapper {
         private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        private final PrintWriter writer = new PrintWriter(outputStream);
+        private PrintWriter writer;
+        private boolean writerUsed = false;
 
         public CaptureResponseWrapper(HttpServletResponse response) {
             super(response);
         }
 
         @Override
-        public ServletOutputStream getOutputStream() throws IOException {
+        public ServletOutputStream getOutputStream() {
             return new ServletOutputStream() {
                 @Override public boolean isReady() { return true; }
                 @Override public void setWriteListener(WriteListener listener) {}
-                @Override public void write(int b) throws IOException { outputStream.write(b); }
+                @Override public void write(int b) { outputStream.write(b); }
             };
         }
 
         @Override
-        public PrintWriter getWriter() throws IOException {
+        public PrintWriter getWriter() {
+            if (writer == null) {
+                writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+            }
+            writerUsed = true;
             return writer;
         }
 
         @Override
         public void flushBuffer() {
-            // No hacer nada para evitar comitear el response original prematuramente
+            // No propagar flush al response original
         }
 
         @Override
-        public void setContentLength(int len) {
-            // No delegar para evitar Content-Length incorrecto en el response original
-        }
+        public void setContentLength(int len) {}
 
         @Override
-        public void setContentLengthLong(long len) {
-            // No delegar
-        }
+        public void setContentLengthLong(long len) {}
 
         public byte[] getCapturedData() {
-            writer.flush();
+            if (writerUsed && writer != null) {
+                writer.flush();
+            }
             return outputStream.toByteArray();
         }
     }
