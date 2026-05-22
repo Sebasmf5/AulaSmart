@@ -1,7 +1,11 @@
 package co.edu.uceva.usuariosservice.Auth.config;
 
+import co.edu.uceva.security.filter.EncryptionFilter;
+import co.edu.uceva.security.session.InMemorySessionStore;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,7 +35,7 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers("/api/v1/auth/**")
+                        req.requestMatchers("/api/v1/auth/**", "/api/v1/crypto/public-key")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()
@@ -48,5 +52,14 @@ public class SecurityConfig {
         ;
 
         return http.build();
+    }
+
+    @Bean
+    public FilterRegistrationBean<EncryptionFilter> encryptionFilter(InMemorySessionStore sessionStore) {
+        FilterRegistrationBean<EncryptionFilter> reg = new FilterRegistrationBean<>();
+        reg.setFilter(new EncryptionFilter(sessionStore));
+        reg.addUrlPatterns("/api/v1/usuario-service/*");
+        reg.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
+        return reg;
     }
 }
