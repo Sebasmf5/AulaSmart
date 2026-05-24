@@ -83,7 +83,7 @@ public class UsuarioRestController {
     }
 
     @PostMapping("/usuarios")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
 
@@ -112,7 +112,7 @@ public class UsuarioRestController {
     }
 
     @DeleteMapping("/usuarios/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -133,7 +133,7 @@ public class UsuarioRestController {
     }
 
     @PutMapping("/usuarios/{id}")
-    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
         Map<String, Object> response = new HashMap<>();
 

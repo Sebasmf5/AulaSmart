@@ -104,9 +104,14 @@ public class ReservaRestController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() != null) {
             String codigoSolicitante = authentication.getPrincipal().toString();
+            // Siempre sobreescribir el idSolicitante desde el JWT por seguridad
             reserva.setIdSolicitante(Long.valueOf(codigoSolicitante));
-            String nombreUsuario = authentication.getName();
-            reserva.setNombreUsuarioResponsable(nombreUsuario);
+
+            // Solo sobreescribir nombre si no viene del frontend/chat
+            if (reserva.getNombreUsuarioResponsable() == null || reserva.getNombreUsuarioResponsable().isBlank()) {
+                String nombreUsuario = authentication.getName();
+                reserva.setNombreUsuarioResponsable(nombreUsuario);
+            }
 
             if (authentication.getAuthorities() != null && !authentication.getAuthorities().isEmpty()) {
                 String authority = authentication.getAuthorities().iterator().next().getAuthority(); // Ej: ROLE_ESTUDIANTE

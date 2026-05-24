@@ -34,10 +34,18 @@ spring:
           model: llama-3.1-8b-instant
           temperature: 0.3
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 app:
   version: 0.0.1
   api:
     version: v1
+  uploads:
+    incidencias: ${UPLOADS_DIR:/app/uploads/incidencias}
 
 server:
   port: 8087

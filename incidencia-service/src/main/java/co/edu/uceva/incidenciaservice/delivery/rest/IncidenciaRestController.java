@@ -4,6 +4,7 @@ import co.edu.uceva.incidenciaservice.domain.exception.IncidenciaNoEncontradaExc
 import co.edu.uceva.incidenciaservice.domain.exception.NoHayIncidenciasException;
 import co.edu.uceva.incidenciaservice.domain.exception.PaginaSinIncidenciasException;
 import co.edu.uceva.incidenciaservice.domain.exception.ValidationException;
+import co.edu.uceva.incidenciaservice.domain.model.EstadoIncidencia;
 import co.edu.uceva.incidenciaservice.domain.model.Incidencia;
 import co.edu.uceva.incidenciaservice.domain.service.IIncidenciaService;
 import org.springframework.data.domain.Page;
@@ -13,12 +14,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/v1/incidencia-service")
@@ -37,12 +41,12 @@ public class IncidenciaRestController {
 
     @PostMapping("/incidencias")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Incidencia incidencia, BindingResult result, org.springframework.security.core.Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Incidencia incidencia, BindingResult result, Authentication authentication) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
         
-        // Extraer el codigo_usuario desde el token JWT (Principal) para evitar inyección desde el cliente
+        // Extraer el codigo_usuario desde el token JWT
         String codigoStr = (String) authentication.getPrincipal();
         incidencia.setCodigoUsuario(Long.valueOf(codigoStr));
         Incidencia nuevaIncidencia = incidenciaService.save(incidencia);
@@ -53,20 +57,34 @@ public class IncidenciaRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    /**
+     * Subir imagen de evidencia a una incidencia existente.
+     * El usuario que creó la incidencia puede subir la imagen.
+     */
+    @PostMapping("/incidencias/{id}/imagen")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> subirImagen(
+            @PathVariable Long id,
+            @RequestParam("imagen") MultipartFile imagen) {
+        
+        Incidencia incidencia = incidenciaService.guardarImagenEvidencia(id, imagen);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "Imagen de evidencia subida exitosamente.");
+        response.put(INCIDENCIA, incidencia);
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/incidencias/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @Valid @RequestBody Incidencia incidencia, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
-        // Validamos que exista antes de actualizar
         Incidencia incidenciaExistente = incidenciaService.findById(id)
                 .orElseThrow(() -> new IncidenciaNoEncontradaException(id));
         
-        // Aseguramos que el ID de la ruta siga siendo el mismo
         incidencia.setId(incidenciaExistente.getId());
-        
-        // Mantenemos el propietario original y la fecha de reporte original para evitar manipulaciones
         incidencia.setCodigoUsuario(incidenciaExistente.getCodigoUsuario());
         incidencia.setFechaReporte(incidenciaExistente.getFechaReporte());
         
@@ -124,6 +142,61 @@ public class IncidenciaRestController {
         
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "La incidencia se ha eliminado correctamente!");
+        return ResponseEntity.ok(response);
+    }
+
+    // ── NUEVOS ENDPOINTS ADMINISTRATIVOS ───────────────────────────────────
+
+    /**
+     * Contar incidencias pendientes (para badge/notificación).
+     */
+    @GetMapping("/incidencias/pendientes/count")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
+    public ResponseEntity<Map<String, Object>> getCountPendientes() {
+        long cantidad = incidenciaService.countByEstado(EstadoIncidencia.PENDIENTE);
+        Map<String, Object> response = new HashMap<>();
+        response.put("cantidad", cantidad);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Listar incidencias pendientes de respuesta (solo administradores).
+     */
+    @GetMapping("/incidencias/pendientes")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
+    public ResponseEntity<Map<String, Object>> getIncidenciasPendientes() {
+        List<Incidencia> incidencias = incidenciaService.findByEstado(EstadoIncidencia.PENDIENTE);
+        Map<String, Object> response = new HashMap<>();
+        response.put(INCIDENCIAS, incidencias);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Responder una incidencia (solo administradores).
+     * Cambia el estado de PENDIENTE a REVISADA.
+     */
+    @PutMapping("/incidencias/{id}/responder")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
+    public ResponseEntity<Map<String, Object>> responderIncidencia(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body) {
+        
+        String respuesta = body.get("respuesta");
+        if (respuesta == null || respuesta.isBlank()) {
+            Map<String, Object> error = new HashMap<>();
+            error.put(MENSAJE, "El campo 'respuesta' es obligatorio.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String codigoAdminStr = (String) auth.getPrincipal();
+        Long codigoAdministrador = Long.valueOf(codigoAdminStr);
+
+        Incidencia incidencia = incidenciaService.responderIncidencia(id, respuesta, codigoAdministrador);
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put(MENSAJE, "La incidencia ha sido respondida exitosamente.");
+        response.put(INCIDENCIA, incidencia);
         return ResponseEntity.ok(response);
     }
 }

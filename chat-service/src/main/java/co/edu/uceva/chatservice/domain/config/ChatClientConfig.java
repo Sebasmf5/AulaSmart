@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 
 /**
- * Configuración multi-proveedor para el chat-service.
- * Soporta fallback entre proveedores y modelos según disponibilidad y costo.
+ * Configuración del cliente de IA para el chat-service.
+ * Registra el ChatClient con system prompt externo y tools automáticas desde ChatToolsConfig.
  */
 @Configuration
 public class ChatClientConfig {
@@ -23,25 +23,14 @@ public class ChatClientConfig {
     @Value("${spring.ai.openai.api-key}")
     private String apiKey;
 
-    @Value("${spring.ai.openai.base-url:https://api.groq.com/openai/v1}")
+    @Value("${spring.ai.openai.base-url:https://opencode.ai/zen/go/v1}")
     private String baseUrl;
 
-    @Value("${spring.ai.openai.chat.options.model:llama-3.3-70b-versatile}")
+    @Value("${spring.ai.openai.chat.options.model:kimi-k2.6}")
     private String model;
 
-    // Configuración alternativa (Ollama local)
-    @Value("${spring.ai.ollama.enabled:false}")
-    private boolean ollamaEnabled;
-
-    @Value("${spring.ai.ollama.base-url:http://localhost:11434}")
-    private String ollamaBaseUrl;
-
-    @Value("${spring.ai.ollama.model:llama3.2:latest}")
-    private String ollamaModel;
-
-    // Configuración de caché
-    @Value("${chat.cache.enabled:true}")
-    private boolean cacheEnabled;
+    @Value("${chat.system-prompt}")
+    private String systemPrompt;
 
     @Bean
     @Primary
@@ -76,13 +65,8 @@ public class ChatClientConfig {
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder, ChatToolsConfig chatToolsConfig) {
         return builder
-                .defaultSystem("Eres AulaBot, asistente de reservas de aulas de UCEVA. " +
-                        "Solo respondes sobre aulas y reservas. " +
-                        "Para consultas de disponibilidad o reservas, DEBES usar tus tools. " +
-                        "No inventes datos. Usa el contexto de la conversación para follow-ups. " +
-                        "Antes de reservar, pide el motivo/título si no lo tiene.")
+                .defaultSystem(systemPrompt)
                 .defaultToolCallbacks(ToolCallbacks.from(chatToolsConfig))
-                .defaultToolNames("consultarPorBloque", "consultarPorTipo", "consultarPorNombreAula", "consultarHorariosAula", "reservarAulaTool")
                 .build();
     }
 }

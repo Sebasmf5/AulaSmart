@@ -24,6 +24,14 @@ public class JwtUtil {
         return getAllClaims(token).get("rol", String.class);
     }
 
+    public String extractNombre(final String token) {
+        return getAllClaims(token).get("nombre", String.class);
+    }
+
+    public String extractCodigoPrograma(final String token) {
+        return getAllClaims(token).get("codigoPrograma", String.class);
+    }
+
     public boolean isTokenValid(String token) {
         return !isTokenExpired(token);
     }

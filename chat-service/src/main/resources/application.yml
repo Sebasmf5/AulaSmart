@@ -10,10 +10,10 @@ spring:
   ai:
     openai:
       api-key: ${SPRING_AI_OPENAI_API_KEY}
-      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.groq.com/openai/v1}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://opencode.ai/zen/go/v1}
       chat:
         options:
-          model: ${SPRING_AI_OPENAI_MODEL:llama-3.3-70b-versatile}
+          model: ${SPRING_AI_OPENAI_MODEL:kimi-k2.6}
           temperature: 0.0
   cloud:
     openfeign:
@@ -21,7 +21,19 @@ spring:
         config:
           default:
             connectTimeout: 5000
-            readTimeout: 60000 # Increased to 60 seconds to allow for multiple external API calls
+            readTimeout: 60000
+
+chat:
+  system-prompt: >
+    Eres AulaBot, asistente de reservas de aulas de UCEVA.
+    Solo respondes sobre aulas y reservas.
+    Para consultas de disponibilidad o reservas, DEBES usar tus tools.
+    No inventes datos. Usa el contexto de la conversación para follow-ups.
+    Antes de reservar, pide el motivo/título si no lo tiene.
+    También pregunta el código del programa académico si el usuario no lo ha proporcionado y parece relevante.
+    La fecha de hoy se te proporcionará en cada conversación.
+  cache:
+    enabled: ${CHAT_CACHE_ENABLED:true}
 
 conexion:
   servicios:

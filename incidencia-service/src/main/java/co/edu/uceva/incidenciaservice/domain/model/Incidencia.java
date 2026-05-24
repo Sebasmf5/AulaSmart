@@ -43,11 +43,34 @@ public class Incidencia {
     @Column(name = "tipo_incidencia", nullable = false)
     private TipoIncidencia tipoIncidencia;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "estado", nullable = false)
+    private EstadoIncidencia estado = EstadoIncidencia.PENDIENTE;
+
+    @Column(name = "respuesta_administracion", columnDefinition = "TEXT")
+    private String respuestaAdministracion;
+
+    @Column(name = "fecha_respuesta")
+    private LocalDateTime fechaRespuesta;
+
+    @Column(name = "codigo_administrador")
+    private Long codigoAdministrador;
+
     @Column(name = "fecha_reporte", nullable = false, updatable = false)
     private LocalDateTime fechaReporte;
 
     @PrePersist
     protected void onCreate() {
         this.fechaReporte = LocalDateTime.now();
+        if (this.estado == null) {
+            this.estado = EstadoIncidencia.PENDIENTE;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        if (this.respuestaAdministracion != null && this.fechaRespuesta == null) {
+            this.fechaRespuesta = LocalDateTime.now();
+        }
     }
 }

@@ -5,13 +5,13 @@ import co.edu.uceva.chatservice.domain.FeignClients.IReservaServiceClient;
 import co.edu.uceva.chatservice.domain.dto.AulaDTO;
 import co.edu.uceva.chatservice.domain.dto.BloqueDTO;
 import co.edu.uceva.chatservice.domain.dto.ResponseAulaDTO;
+import co.edu.uceva.security.jwt.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Component;
 
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ai.tool.annotation.Tool;
 
 import java.text.Normalizer;
@@ -20,22 +20,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class ChatToolsConfig {
 
     private final IAulaServiceClient aulaClient;
     private final IReservaServiceClient reservaClient;
     private final ObjectMapper objectMapper;
+    private final JwtUtil jwtUtil;
     private List<BloqueDTO> cacheBloques = new ArrayList<>();
 
     private static final String MSG_ERROR_RED = "Lo siento, tuve un problema al conectar con el sistema de reservas. Por favor, intenta de nuevo en unos momentos.";
     private static final String MSG_ERROR_GENERICO = "Lo siento, ocurrió un error inesperado. Por favor, intenta de nuevo en unos momentos.";
     private static final String MSG_SUGERENCIA = " ¿Te gustaría que busque en otro bloque o por tipo de aula (Laboratorio, Aula Interactiva, etc.)?";
 
-    public ChatToolsConfig(IAulaServiceClient aulaClient, IReservaServiceClient reservaClient, ObjectMapper objectMapper) {
+    public ChatToolsConfig(IAulaServiceClient aulaClient, IReservaServiceClient reservaClient, ObjectMapper objectMapper, JwtUtil jwtUtil) {
         this.aulaClient = aulaClient;
         this.reservaClient = reservaClient;
         this.objectMapper = objectMapper;
+        this.jwtUtil = jwtUtil;
     }
 
     @jakarta.annotation.PostConstruct
@@ -46,10 +49,10 @@ public class ChatToolsConfig {
             if (bloquesRaw != null) {
                 cacheBloques = objectMapper.convertValue(bloquesRaw,
                         objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
-                System.out.println("[ChatToolsConfig] " + cacheBloques.size() + " bloques precargados en caché.");
+                log.info("[ChatToolsConfig] {} bloques precargados en caché.", cacheBloques.size());
             }
         } catch (Exception e) {
-            System.err.println("[ChatToolsConfig] Error precargando bloques: " + e.getMessage());
+            log.error("[ChatToolsConfig] Error precargando bloques: {}", e.getMessage());
         }
     }
 
@@ -296,7 +299,8 @@ public class ChatToolsConfig {
             @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
             @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
             @ToolParam(description = "Hora fin HH:mm") String horaFin,
-            @ToolParam(description = "Motivo o título de la reserva") String motivo
+            @ToolParam(description = "Motivo o título de la reserva") String motivo,
+            @ToolParam(description = "Código del programa académico (opcional)", required = false) String codigoPrograma
     ) {
         System.out.println("=== [reservarAulaTool] INICIO ===");
         System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha
@@ -324,24 +328,39 @@ public class ChatToolsConfig {
         }
 
         // ── 2. Extraer identidad del usuario desde el JWT ────────────────────
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+        String jwtHeader = AuthContext.getJwt();
+        if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
             return "No se pudo identificar tu sesión. Por favor inicia sesión e intenta de nuevo.";
+        }
+
+        String jwt = jwtHeader.substring(7);
+        if (!jwtUtil.isTokenValid(jwt)) {
+            return "Tu sesión ha expirado. Por favor inicia sesión de nuevo.";
+        }
+
+        String codigoStr = jwtUtil.extractCodigo(jwt);
+        String rolStr = jwtUtil.extractRol(jwt);
+        if (codigoStr == null || codigoStr.isBlank()) {
+            return "No se pudo determinar tu ID de usuario desde el token JWT.";
         }
 
         Long idSolicitante;
         try {
-            idSolicitante = Long.valueOf(auth.getName());
+            idSolicitante = Long.valueOf(codigoStr);
         } catch (NumberFormatException e) {
             return "No se pudo determinar tu ID de usuario desde el token JWT.";
         }
 
-        String rolStr = auth.getAuthorities().stream()
-                .findFirst()
-                .map(a -> a.getAuthority().replace("ROLE_", ""))
-                .orElse("DOCENTE");
+        String nombreUsuario = jwtUtil.extractNombre(jwt);
+        if (nombreUsuario == null || nombreUsuario.isBlank()) {
+            nombreUsuario = codigoStr; // Fallback al código si no hay nombre en el token
+        }
 
-        System.out.println("ID Solicitante: " + idSolicitante + " | Rol: " + rolStr);
+        if (rolStr == null || rolStr.isBlank()) {
+            rolStr = "DOCENTE";
+        }
+
+        log.info("ID Solicitante: {} | Rol: {} | Nombre: {}", idSolicitante, rolStr, nombreUsuario);
 
         // ── 3. Validación proactiva de rol ESTUDIANTE ────────────────────────
         if ("ESTUDIANTE".equalsIgnoreCase(rolStr)) {
@@ -386,10 +405,14 @@ public class ChatToolsConfig {
             payload.put("horaFin", horaFinISO);
             payload.put("estado", "CONFIRMADA");
             payload.put("idSolicitante", idSolicitante);
-            payload.put("rolSolicitante", rolStr);
+            payload.put("rolSolicitante", rolStr.toUpperCase()); // Normalizar a mayúsculas para compatibilidad con enum
+            payload.put("nombreUsuarioResponsable", nombreUsuario);
             payload.put("titulo", motivo);
+            if (codigoPrograma != null && !codigoPrograma.isBlank()) {
+                payload.put("codigoPrograma", codigoPrograma);
+            }
 
-            System.out.println("[reservarAulaTool] Payload: " + payload);
+            log.info("[reservarAulaTool] Payload: {}", payload);
             Map<String, Object> respuesta = reservaClient.crearReserva(payload);
 
             // Determinar estado final de la reserva
@@ -417,11 +440,14 @@ public class ChatToolsConfig {
                         + " para: " + motivo + ".";
             }
 
+        } catch (FeignException.BadRequest e) {
+            log.error("[reservarAulaTool] Error 400 al crear reserva. Body: {}", e.contentUTF8());
+            return "Error en los datos de la reserva: " + e.contentUTF8();
         } catch (FeignException e) {
-            System.err.println("[reservarAulaTool] Error al crear reserva: " + e.getMessage());
+            log.error("[reservarAulaTool] Error de comunicación al crear reserva: {} | Status: {} | Body: {}", e.getMessage(), e.status(), e.contentUTF8());
             return MSG_ERROR_RED;
         } catch (Exception e) {
-            System.err.println("[reservarAulaTool] Error inesperado al crear reserva: " + e.getMessage());
+            log.error("[reservarAulaTool] Error inesperado al crear reserva: {}", e.getMessage());
             return MSG_ERROR_GENERICO;
         }
     }
