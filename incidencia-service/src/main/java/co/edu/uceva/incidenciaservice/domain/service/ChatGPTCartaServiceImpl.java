@@ -58,11 +58,11 @@ public class ChatGPTCartaServiceImpl implements ChatGPTCartaService {
                 .format(DateTimeFormatter.ofPattern("d 'de' MMMM 'de' yyyy", Locale.forLanguageTag("es-CO")));
 
         String tipoLegible = switch (tipoIncidencia) {
-            case "QUEJA"          -> "Queja";
-            case "RECLAMO"        -> "Reclamo";
-            case "RECOMENDACION"  -> "Recomendación";
-            case "DANO_FISICO"    -> "Daño Físico";
-            default               -> tipoIncidencia;
+            case "HARDWARE"         -> "Hardware";
+            case "SOFTWARE"         -> "Software";
+            case "INFRAESTRUCTURA"  -> "Infraestructura";
+            case "OTRO"             -> "Otro";
+            default                 -> tipoIncidencia;
         };
 
         return """

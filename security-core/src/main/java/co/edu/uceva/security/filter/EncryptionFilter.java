@@ -27,6 +27,14 @@ public class EncryptionFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
+        String path = httpRequest.getRequestURI();
+
+        // Rutas publicas: nunca cifrar/descifrar, pasar directo
+        if (path.contains("/auth/") || path.contains("/crypto/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String sessionId = httpRequest.getHeader("x-session-id");
         if (sessionId == null || sessionId.isEmpty()) {
             chain.doFilter(request, response);
@@ -35,9 +43,9 @@ public class EncryptionFilter implements Filter {
 
         CryptoSession session = sessionStore.getSession(sessionId);
         if (session == null) {
-            httpResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            httpResponse.setContentType("application/json");
-            httpResponse.getWriter().write("{\"error\":\"Sesion criptografica invalida\"}");
+            // Sesion invalida o expirada: pasar en plano como si no hubiera x-session-id
+            // El cliente (Flutter) detectara el 401 de Spring Security si el endpoint requiere auth
+            chain.doFilter(request, response);
             return;
         }
 

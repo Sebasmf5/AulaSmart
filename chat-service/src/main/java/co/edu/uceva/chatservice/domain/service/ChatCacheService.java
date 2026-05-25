@@ -42,7 +42,7 @@ public class ChatCacheService {
     }
 
     public void put(String key, String value, Duration ttl) {
-        if (cache.size() >= MAX_CACHE_SIZE) {
+        if (cache.size () >= MAX_CACHE_SIZE) {
             // Eliminar entrada más antigua
             cache.entrySet().stream()
                     .min(Map.Entry.comparingByValue((e1, e2) -> e1.timestamp().compareTo(e2.timestamp())))

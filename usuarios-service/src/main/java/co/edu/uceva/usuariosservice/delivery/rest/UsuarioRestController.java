@@ -1,5 +1,6 @@
 package co.edu.uceva.usuariosservice.delivery.rest;
 
+import co.edu.uceva.usuariosservice.domain.model.RolUsuario;
 import co.edu.uceva.usuariosservice.domain.model.Usuario;
 import co.edu.uceva.usuariosservice.domain.service.IUsuarioService;
 import jakarta.validation.Valid;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 
 import java.util.HashMap;
 import java.util.List;
@@ -84,7 +86,7 @@ public class UsuarioRestController {
 
     @PostMapping("/usuarios")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Usuario usuario, BindingResult bindingResult, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
 
         if (bindingResult.hasErrors()) {
@@ -95,6 +97,13 @@ public class UsuarioRestController {
 
             response.put(ERRORS, errors);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // Validar permisos de creación según rol del autenticado
+        String creatorRole = authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
+        if (!canAssignRole(creatorRole, usuario.getRol())) {
+            response.put(MENSAJE, "No tienes permiso para crear usuarios con el rol " + usuario.getRol().name());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
         try {
@@ -134,7 +143,7 @@ public class UsuarioRestController {
 
     @PutMapping("/usuarios/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
-    public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @Valid @RequestBody Usuario usuario, BindingResult bindingResult) {
+    public ResponseEntity<Map<String, Object>> update(@PathVariable Long id, @Valid @RequestBody Usuario usuario, BindingResult bindingResult, Authentication authentication) {
         Map<String, Object> response = new HashMap<>();
 
         if (bindingResult.hasErrors()) {
@@ -145,6 +154,13 @@ public class UsuarioRestController {
 
             response.put("errors", errors);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+
+        // Validar permisos de actualización según rol del autenticado
+        String creatorRole = authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
+        if (!canAssignRole(creatorRole, usuario.getRol())) {
+            response.put(MENSAJE, "No tienes permiso para asignar el rol " + usuario.getRol().name());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
         }
 
         try {
@@ -189,5 +205,23 @@ public class UsuarioRestController {
             response.put(ERROR, e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
+    }
+
+    /**
+     * Determina si un usuario con el rol {@code creatorRole} puede asignar el rol {@code assignedRole}
+     * a otro usuario.
+     *
+     * <ul>
+     *   <li>{@code ADMINISTRADOR} → puede asignar cualquier rol.</li>
+     *   <li>{@code ADMINISTRATIVO} → solo puede asignar {@code DOCENTE} o {@code ESTUDIANTE}.</li>
+     * </ul>
+     */
+    private boolean canAssignRole(String creatorRole, RolUsuario assignedRole) {
+        return switch (creatorRole) {
+            case "ADMINISTRADOR" -> true;
+            case "ADMINISTRATIVO" ->
+                    assignedRole == RolUsuario.Docente || assignedRole == RolUsuario.Estudiante;
+            default -> false;
+        };
     }
 }
