@@ -14,7 +14,7 @@ public class ChatEncryptionConfig {
     public FilterRegistrationBean<EncryptionFilter> encryptionFilter(InMemorySessionStore sessionStore) {
         FilterRegistrationBean<EncryptionFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(new EncryptionFilter(sessionStore));
-        reg.addUrlPatterns("/api/v1/chat-service/*");
+        reg.addUrlPatterns("/api/v1/chat/*");
         reg.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return reg;
     }
