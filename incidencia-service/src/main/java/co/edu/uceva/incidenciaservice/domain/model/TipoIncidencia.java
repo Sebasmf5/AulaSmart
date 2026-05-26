@@ -4,5 +4,7 @@ public enum TipoIncidencia {
     HARDWARE,
     SOFTWARE,
     INFRAESTRUCTURA,
-    OTRO
+    QUEJA,
+    RECLAMO,
+    SUGERENCIA
 }

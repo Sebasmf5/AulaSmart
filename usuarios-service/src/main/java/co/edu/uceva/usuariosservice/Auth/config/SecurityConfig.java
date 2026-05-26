@@ -68,7 +68,7 @@ public class SecurityConfig {
     public FilterRegistrationBean<EncryptionFilter> encryptionFilter(InMemorySessionStore sessionStore) {
         FilterRegistrationBean<EncryptionFilter> reg = new FilterRegistrationBean<>();
         reg.setFilter(new EncryptionFilter(sessionStore));
-        reg.addUrlPatterns("/api/v1/usuario-service/*", "/api/v1/auth/*");
+        reg.addUrlPatterns("/api/v1/usuario-service/*");
         reg.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return reg;
     }

@@ -28,6 +28,7 @@ import java.util.Map;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -131,15 +132,15 @@ public class ReservaRestController {
     }
 
     /**
-     * Eliminar una reserva pasando el objeto en el cuerpo de la petición.
+     * Eliminar una reserva por su ID. Abierto a todos los roles.
      */
-    @DeleteMapping("/reservas")
-    public ResponseEntity<Map<String, Object>> delete(@RequestBody Reserva reserva) {
-        reservaService.findReservaById(reserva.getIdReserva())
-                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+    @DeleteMapping("/reservas/{id}")
+    public ResponseEntity<Map<String, Object>> delete(@PathVariable Long id) {
+        Reserva reserva = reservaService.findReservaById(id)
+                .orElseThrow(() -> new ReservaNoEncontradaException(id));
         reservaService.deleteReserva(reserva);
         Map<String, Object> response = new HashMap<>();
-        response.put(MENSAJE, "la reserva ha sido eliminado con éxito!");
+        response.put(MENSAJE, "La reserva ha sido eliminada con éxito!");
         response.put(RESERVA, null);
         return ResponseEntity.ok(response);
     }
@@ -149,6 +150,7 @@ public class ReservaRestController {
      * @param reserva: Objeto Reserva que se va a actualizar
      */
     @PutMapping("/reservas")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> update(@Valid @RequestBody Reserva reserva, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);

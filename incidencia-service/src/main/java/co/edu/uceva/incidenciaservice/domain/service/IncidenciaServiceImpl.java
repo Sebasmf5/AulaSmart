@@ -130,6 +130,10 @@ public class IncidenciaServiceImpl implements IIncidenciaService {
             return incidenciaRepository.save(incidencia);
 
         } catch (IOException e) {
+            System.err.println("[IncidenciaService] Error al guardar imagen: " + e.getMessage());
+            System.err.println("[IncidenciaService] UploadDir: " + uploadDir);
+            System.err.println("[IncidenciaService] Causa: " + e.getCause());
+            e.printStackTrace();
             throw new RuntimeException("Error al guardar la imagen: " + e.getMessage(), e);
         }
     }

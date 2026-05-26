@@ -54,8 +54,10 @@ public class CryptoController {
             }
 
             String sessionId = sessionStore.createSession(aesKey);
+            System.out.println("[CryptoController] Handshake success | sessionId: " + sessionId + " | store instance: " + System.identityHashCode(sessionStore));
             return ResponseEntity.ok(Map.of("sessionId", sessionId));
         } catch (Exception e) {
+            System.err.println("[CryptoController] Handshake failed: " + e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

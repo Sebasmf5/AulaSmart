@@ -99,6 +99,17 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
+        // Recuperar la reserva existente para validar su estado
+        Reserva existente = reservaRepository.findById(reserva.getIdReserva())
+                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+
+        // Solo se permite modificar reservas en estado PENDIENTE
+        if (existente.getEstado() != EstadosReserva.PENDIENTE) {
+            throw new ReservaNoPermitidaException(
+                    "No se puede modificar una reserva que ya está " + existente.getEstado().name().toLowerCase()
+            );
+        }
+
         // Validar integridad de las fechas
         if (reserva.getHoraInicio() == null || reserva.getHoraFin() == null || !reserva.getHoraInicio().isBefore(reserva.getHoraFin())) {
             throw new IllegalArgumentException("La hora de inicio debe ser estrictamente anterior a la hora de fin");

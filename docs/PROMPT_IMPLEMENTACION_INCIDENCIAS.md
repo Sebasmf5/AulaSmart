@@ -90,12 +90,31 @@ class Incidencia {
 
 ### 4.1 Para usuarios (Docente/Estudiante/Admin)
 
-- [ ] **Crear incidencia**: Formulario con:
-  - Selector de aula (obtener lista de aulas desde `aula-service`)
-  - Campo descripción (máx 500 caracteres, contador visible)
-  - Selector de tipo (`HARDWARE`, `SOFTWARE`, `INFRAESTRUCTURA`, `OTRO`)
-  - Botón para adjuntar imagen (opcional)
-  - Al guardar, mostrar la **carta formal generada** por la IA en un diálogo/bottom sheet
+- [ ] **Crear incidencia**: Flujo de DOS PASOS obligatorio:
+
+  **PASO 1 — Crear la incidencia (JSON)**
+  Enviar `POST /api/v1/incidencia-service/incidencias` con **SOLO estos 3 campos**:
+  ```json
+  {
+    "codigoAula": 123,
+    "descripcionBreve": "El proyector no enciende",
+    "tipoIncidencia": "HARDWARE"
+  }
+  ```
+  **NO enviar**: `codigoUsuario`, `estado`, `cartaFormalGenerada`, `fechaReporte`, `urlImagen`, `respuestaAdministracion`, `fechaRespuesta`, `codigoAdministrador`. El backend los ignora o los genera automáticamente.
+
+  La respuesta trae la incidencia completa incluyendo `cartaFormalGenerada` generada por IA.
+
+  **PASO 2 — Subir imagen (solo si el usuario seleccionó una)**
+  Si hay imagen, hacer `POST /api/v1/incidencia-service/incidencias/{id}/imagen` con `multipart/form-data`.
+
+  **Por qué en 2 pasos**: El endpoint JSON (`/incidencias`) no acepta imágenes binarias. Además, si la imagen falla, la incidencia ya quedó creada con su carta.
+
+  UI sugerida:
+  - Formulario con selector de aula, tipo, descripción (max 500 chars, contador) y adjuntar imagen (opcional, preview local).
+  - Botón "Generar Carta y Enviar" (loading indicator).
+  - BottomSheet mostrando la `cartaFormalGenerada` devuelta por el backend.
+  - Botón "Confirmar envío" en el BottomSheet. Si había imagen seleccionada, subirla ahora.
 - [ ] **Ver mis incidencias**: Lista con tarjetas mostrando estado, fecha, aula y tipo
 - [ ] **Ver detalle**: Pantalla completa con:
   - Descripción
@@ -212,16 +231,39 @@ Card(
 
 ---
 
-## 6. Gestión de Imágenes
+## 6. Gestión de Imágenes (Flujo de 2 pasos)
 
-### Subir imagen
+### Paso 1: Crear la incidencia (JSON puro)
 
 ```dart
-final dio = Dio();
-final formData = FormData.fromMap({
-  'imagen': await MultipartFile.fromFile(imagePath, filename: 'evidencia.jpg'),
-});
-await dio.post('/incidencias/$id/imagen', data: formData);
+final response = await dio.post(
+  '/api/v1/incidencia-service/incidencias',
+  data: {
+    "codigoAula": selectedAulaId,
+    "descripcionBreve": descripcionController.text,
+    "tipoIncidencia": selectedTipo.name, // HARDWARE, SOFTWARE, INFRAESTRUCTURA, OTRO
+  },
+);
+final incidenciaId = response.data['incidencia']['id'];
+final cartaGenerada = response.data['incidencia']['cartaFormalGenerada'];
+```
+
+### Paso 2: Subir imagen (multipart/form-data) — solo si el usuario adjuntó una
+
+```dart
+if (selectedImage != null) {
+  final formData = FormData.fromMap({
+    'imagen': await MultipartFile.fromFile(
+      selectedImage.path,
+      filename: 'evidencia_$incidenciaId.jpg',
+    ),
+  });
+
+  await dio.post(
+    '/api/v1/incidencia-service/incidencias/$incidenciaId/imagen',
+    data: formData,
+  );
+}
 ```
 
 ### Mostrar imagen
@@ -235,6 +277,8 @@ Image.network(
 ```
 
 > **Nota:** La imagen se almacena en el servidor de archivos del contenedor Docker. La URL puede variar según configuración de nginx o proxy inverso.
+>
+> **IMPORTANTE**: Nunca intentes enviar la imagen dentro del `POST /incidencias` inicial. Ese endpoint solo acepta `application/json`.
 
 ---
 

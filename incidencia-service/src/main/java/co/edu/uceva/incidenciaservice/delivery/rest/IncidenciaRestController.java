@@ -1,16 +1,22 @@
 package co.edu.uceva.incidenciaservice.delivery.rest;
 
+import co.edu.uceva.incidenciaservice.delivery.dto.CrearIncidenciaRequest;
 import co.edu.uceva.incidenciaservice.domain.exception.IncidenciaNoEncontradaException;
 import co.edu.uceva.incidenciaservice.domain.exception.NoHayIncidenciasException;
 import co.edu.uceva.incidenciaservice.domain.exception.PaginaSinIncidenciasException;
 import co.edu.uceva.incidenciaservice.domain.exception.ValidationException;
 import co.edu.uceva.incidenciaservice.domain.model.EstadoIncidencia;
 import co.edu.uceva.incidenciaservice.domain.model.Incidencia;
+import co.edu.uceva.incidenciaservice.domain.model.TipoIncidencia;
 import co.edu.uceva.incidenciaservice.domain.service.IIncidenciaService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +36,9 @@ public class IncidenciaRestController {
 
     private final IIncidenciaService incidenciaService;
 
+    @Value("${app.uploads.incidencias:/app/uploads/incidencias}")
+    private String uploadDir;
+
     // Constantes
     private static final String MENSAJE = "mensaje";
     private static final String INCIDENCIA = "incidencia";
@@ -41,16 +50,23 @@ public class IncidenciaRestController {
 
     @PostMapping("/incidencias")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Incidencia incidencia, BindingResult result, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody CrearIncidenciaRequest request, BindingResult result, Authentication authentication) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
         }
-        
-        // Extraer el codigo_usuario desde el token JWT
+
+        // Construir la entidad desde el DTO (solo 3 campos del frontend)
+        Incidencia incidencia = new Incidencia();
+        incidencia.setCodigoAula(request.getCodigoAula());
+        incidencia.setDescripcionBreve(request.getDescripcionBreve());
+        incidencia.setTipoIncidencia(TipoIncidencia.valueOf(request.getTipoIncidencia()));
+
+        // El backend maneja automáticamente el resto
         String codigoStr = (String) authentication.getPrincipal();
         incidencia.setCodigoUsuario(Long.valueOf(codigoStr));
+
         Incidencia nuevaIncidencia = incidenciaService.save(incidencia);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "La incidencia se ha reportado y guardado con éxito!");
         response.put(INCIDENCIA, nuevaIncidencia);
@@ -73,6 +89,43 @@ public class IncidenciaRestController {
         response.put(MENSAJE, "Imagen de evidencia subida exitosamente.");
         response.put(INCIDENCIA, incidencia);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Obtener la imagen de evidencia de una incidencia.
+     * Accesible para todos los usuarios autenticados.
+     */
+    @GetMapping("/incidencias/{id}/imagen")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Resource> obtenerImagen(@PathVariable Long id) {
+        Incidencia incidencia = incidenciaService.findById(id)
+                .orElseThrow(() -> new IncidenciaNoEncontradaException(id));
+
+        if (incidencia.getUrlImagen() == null || incidencia.getUrlImagen().isBlank()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            java.nio.file.Path rutaImagen = java.nio.file.Paths.get(uploadDir).resolve(incidencia.getUrlImagen());
+            Resource resource = new UrlResource(rutaImagen.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Detectar content type
+            String contentType = java.nio.file.Files.probeContentType(rutaImagen);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(resource);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/incidencias/{id}")
