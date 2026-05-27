@@ -29,7 +29,6 @@ public class Usuario {
     private String email;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @NotEmpty(message = "La contraseña no puede estar vacía")
     @Size(min = 8, max = 255)
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[#$@!%&*-_?])[A-Za-z\\d#$@!%&*-_?]{8,}$",

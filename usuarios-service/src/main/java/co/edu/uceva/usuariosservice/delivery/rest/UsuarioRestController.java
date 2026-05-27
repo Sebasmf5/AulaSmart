@@ -98,6 +98,10 @@ public class UsuarioRestController {
             response.put(ERRORS, errors);
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+        if (usuario.getPassword() == null || usuario.getPassword().isBlank()) {
+            response.put(ERRORS, List.of("El campo 'password' La contraseña no puede estar vacía"));
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
 
         // Validar permisos de creación según rol del autenticado
         String creatorRole = authentication.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
