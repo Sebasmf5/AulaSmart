@@ -1,0 +1,571 @@
+package co.edu.uceva.chatservice.domain.config;
+
+import co.edu.uceva.chatservice.domain.FeignClients.IAulaServiceClient;
+import co.edu.uceva.chatservice.domain.FeignClients.IReservaServiceClient;
+import co.edu.uceva.chatservice.domain.dto.AulaDTO;
+import co.edu.uceva.chatservice.domain.dto.BloqueDTO;
+import co.edu.uceva.chatservice.domain.dto.ResponseAulaDTO;
+import co.edu.uceva.security.jwt.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import feign.FeignException;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.stereotype.Component;
+
+import org.springframework.ai.tool.annotation.Tool;
+
+import java.text.Normalizer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Slf4j
+@Component
+public class ChatToolsConfig {
+
+    private final IAulaServiceClient aulaClient;
+    private final IReservaServiceClient reservaClient;
+    private final ObjectMapper objectMapper;
+    private final JwtUtil jwtUtil;
+    private List<BloqueDTO> cacheBloques = new ArrayList<>();
+
+    private static final String MSG_ERROR_RED = "Lo siento, tuve un problema al conectar con el sistema de reservas. Por favor, intenta de nuevo en unos momentos.";
+    private static final String MSG_ERROR_GENERICO = "Lo siento, ocurrió un error inesperado. Por favor, intenta de nuevo en unos momentos.";
+    private static final String MSG_SUGERENCIA = " ¿Te gustaría que busque en otro bloque o por tipo de aula (Laboratorio, Aula Interactiva, etc.)?";
+
+    public ChatToolsConfig(IAulaServiceClient aulaClient, IReservaServiceClient reservaClient, ObjectMapper objectMapper, JwtUtil jwtUtil) {
+        this.aulaClient = aulaClient;
+        this.reservaClient = reservaClient;
+        this.objectMapper = objectMapper;
+        this.jwtUtil = jwtUtil;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void precargarBloques() {
+        try {
+            Map<String, Object> response = aulaClient.listarBloques();
+            Object bloquesRaw = response != null ? response.get("bloques") : null;
+            if (bloquesRaw != null) {
+                cacheBloques = objectMapper.convertValue(bloquesRaw,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
+                log.info("[ChatToolsConfig] {} bloques precargados en caché.", cacheBloques.size());
+            }
+        } catch (Exception e) {
+            log.error("[ChatToolsConfig] Error precargando bloques: {}", e.getMessage());
+        }
+    }
+
+    private String normalizar(String input) {
+        if (input == null) return "";
+        String sinAcentos = Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+        return sinAcentos.toUpperCase().trim().replaceAll("\\s+", " ");
+    }
+
+    private int distanciaLevenshtein(String a, String b) {
+        int m = a.length();
+        int n = b.length();
+        if (m == 0) return n;
+        if (n == 0) return m;
+        int[][] dp = new int[m + 1][n + 1];
+        for (int i = 0; i <= m; i++) dp[i][0] = i;
+        for (int j = 0; j <= n; j++) dp[0][j] = j;
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                int cost = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
+                dp[i][j] = Math.min(Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1), dp[i - 1][j - 1] + cost);
+            }
+        }
+        return dp[m][n];
+    }
+
+    /**
+     * Resuelve un bloque a partir de una entrada de usuario usando matching directo,
+     * contención mutua y distancia de Levenshtein como fallback.
+     */
+    private BloqueDTO resolverBloque(String inputBloque) {
+        // 1. Intento directo
+        try {
+            Map<String, BloqueDTO> responseMap = aulaClient.buscarBloque(inputBloque);
+            BloqueDTO bloque = responseMap != null ? responseMap.get("bloque") : null;
+            if (bloque != null && bloque.id() != null) {
+                return bloque;
+            }
+        } catch (FeignException e) {
+            // ignorar, intentaremos fallback
+        }
+
+        // 2. Fallback: usar bloques precargados en caché
+        List<BloqueDTO> todosLosBloques = cacheBloques;
+        if (todosLosBloques == null || todosLosBloques.isEmpty()) {
+            // Si la caché está vacía, intentar cargar una vez más
+            try {
+                Map<String, Object> response = aulaClient.listarBloques();
+                Object bloquesRaw = response != null ? response.get("bloques") : null;
+                if (bloquesRaw == null) return null;
+                todosLosBloques = objectMapper.convertValue(bloquesRaw,
+                        objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
+                cacheBloques = todosLosBloques; // Actualizar caché
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        if (todosLosBloques == null || todosLosBloques.isEmpty()) return null;
+
+        String inputNorm = normalizar(inputBloque);
+        BloqueDTO mejorCandidato = null;
+        int mejorDistancia = Integer.MAX_VALUE;
+
+        for (BloqueDTO b : todosLosBloques) {
+            String nombreNorm = normalizar(b.nombre());
+            String codigoNorm = normalizar(b.codigoEdificio());
+
+            // Contención mutua (A contiene B o B contiene A)
+            if (nombreNorm.contains(inputNorm) || inputNorm.contains(nombreNorm) ||
+                    codigoNorm.contains(inputNorm) || inputNorm.contains(codigoNorm)) {
+                return b;
+            }
+
+            // Levenshtein contra nombre y código
+            int distNombre = distanciaLevenshtein(inputNorm, nombreNorm);
+            int distCodigo = distanciaLevenshtein(inputNorm, codigoNorm);
+            int distMin = Math.min(distNombre, distCodigo);
+            int umbral = Math.max(3, Math.max(inputNorm.length(), nombreNorm.length()) / 3);
+
+            if (distMin <= umbral && distMin < mejorDistancia) {
+                mejorDistancia = distMin;
+                mejorCandidato = b;
+            }
+        }
+
+        return mejorCandidato;
+    }
+
+    private String listarNombresBloques() {
+        if (cacheBloques != null && !cacheBloques.isEmpty()) {
+            return cacheBloques.stream()
+                    .map(BloqueDTO::nombre)
+                    .filter(n -> n != null)
+                    .collect(Collectors.joining(", "));
+        }
+        // Fallback si la caché está vacía
+        try {
+            Map<String, Object> response = aulaClient.listarBloques();
+            Object bloquesRaw = response != null ? response.get("bloques") : null;
+            if (bloquesRaw == null) return "";
+            List<BloqueDTO> bloques = objectMapper.convertValue(bloquesRaw,
+                    objectMapper.getTypeFactory().constructCollectionType(List.class, BloqueDTO.class));
+            cacheBloques = bloques; // Actualizar caché
+            return bloques.stream()
+                    .map(BloqueDTO::nombre)
+                    .filter(n -> n != null)
+                    .collect(Collectors.joining(", "));
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    // ── Tools ───────────────────────────────────────────────────────────────
+
+    @Tool(name = "consultarPorBloque", description = "Consulta aulas disponibles en un bloque.")
+    public String consultarPorBloque(
+            @ToolParam(description = "Nombre del bloque, ej: Bloque B") String bloque,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin
+    ) {
+        System.out.println("=== [consultarPorBloque] INICIO ===");
+        System.out.println("Parametros: bloque=" + bloque + ", fecha=" + fecha + ", inicio=" + horaInicio + ", fin=" + horaFin);
+        try {
+            BloqueDTO bloqueDTO = resolverBloque(bloque);
+            if (bloqueDTO == null || bloqueDTO.id() == null) {
+                String nombres = listarNombresBloques();
+                return "No encontré ningún bloque con el nombre '" + bloque + "'." +
+                        (nombres.isEmpty() ? "" : " Los bloques disponibles son: " + nombres + ".") +
+                        MSG_SUGERENCIA;
+            }
+            System.out.println("Bloque resuelto: " + bloqueDTO.nombre() + " (id=" + bloqueDTO.id() + ")");
+
+            ResponseAulaDTO responseAula = aulaClient.listarAulasPorBloque(bloqueDTO.id());
+            if (responseAula == null || responseAula.aulas() == null || responseAula.aulas().isEmpty()) {
+                return "El bloque " + bloqueDTO.nombre() + " no tiene aulas registradas." + MSG_SUGERENCIA;
+            }
+            System.out.println("Aulas en bloque: " + responseAula.aulas().size());
+
+            List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
+            System.out.println("Aulas ocupadas devueltas: " + (ocupadas != null ? ocupadas.size() : "null"));
+
+            List<AulaDTO> disponibles = responseAula.aulas().stream()
+                    .filter(a -> ocupadas == null || !ocupadas.contains(a.id()))
+                    .collect(Collectors.toList());
+            if (disponibles.isEmpty()) {
+                return "No hay aulas disponibles en el bloque " + bloqueDTO.nombre() + " el " + fecha + " de " + horaInicio + " a " + horaFin + "." + MSG_SUGERENCIA;
+            }
+            StringBuilder sb = new StringBuilder("Aulas disponibles en ").append(bloqueDTO.nombre())
+                    .append(" el ").append(fecha).append(" de ").append(horaInicio).append(" a ").append(horaFin).append(":\n");
+            disponibles.forEach(a -> sb.append("- ").append(a.nombreAula()).append(" (Capacidad: ").append(a.capacidad()).append(")\n"));
+            System.out.println("Retornando " + disponibles.size() + " aulas disponibles");
+            return sb.toString();
+        } catch (FeignException e) {
+            System.err.println("[consultarPorBloque] Error de comunicación: " + e.getMessage());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            System.err.println("[consultarPorBloque] Error inesperado: " + e.getMessage());
+            return MSG_ERROR_GENERICO;
+        }
+    }
+
+    @Tool(name = "consultarPorTipo", description = "Consulta aulas disponibles por tipo.")
+    public String consultarPorTipo(
+            @ToolParam(description = "Tipo de aula") String tipoAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin
+    ) {
+        try {
+            ResponseAulaDTO responseAula = aulaClient.listarAulasPorTipoAula(tipoAula);
+            if (responseAula == null || responseAula.aulas() == null || responseAula.aulas().isEmpty()) {
+                return "No encontré aulas del tipo '" + tipoAula + "'." + MSG_SUGERENCIA;
+            }
+            List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
+            List<AulaDTO> disponibles = responseAula.aulas().stream()
+                    .filter(a -> ocupadas == null || !ocupadas.contains(a.id()))
+                    .collect(Collectors.toList());
+            if (disponibles.isEmpty()) {
+                return "No hay aulas de tipo " + tipoAula + " disponibles el " + fecha + " de " + horaInicio + " a " + horaFin + "." + MSG_SUGERENCIA;
+            }
+            StringBuilder sb = new StringBuilder("Aulas de tipo ").append(tipoAula)
+                    .append(" disponibles el ").append(fecha).append(" de ").append(horaInicio).append(" a ").append(horaFin).append(":\n");
+            disponibles.forEach(a -> sb.append("- ").append(a.nombreAula())
+                    .append(" (Bloque: ").append(a.bloque().nombre()).append(", Capacidad: ").append(a.capacidad()).append(")\n"));
+            return sb.toString();
+        } catch (FeignException e) {
+            System.err.println("[consultarPorTipo] Error de comunicación: " + e.getMessage());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            System.err.println("[consultarPorTipo] Error inesperado: " + e.getMessage());
+            return MSG_ERROR_GENERICO;
+        }
+    }
+
+    @Tool(name = "consultarPorNombreAula", description = "Consulta disponibilidad de un aula específica.")
+    public String consultarPorNombreAula(
+            @ToolParam(description = "Nombre del aula") String nombreAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin
+    ) {
+        try {
+            ResponseAulaDTO responseAula = aulaClient.buscarAulasPorNombre(nombreAula);
+            if (responseAula == null || responseAula.aulas() == null || responseAula.aulas().isEmpty()) {
+                return "No encontré ninguna aula con el nombre '" + nombreAula + "'." + MSG_SUGERENCIA;
+            }
+
+            List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
+
+            List<AulaDTO> disponibles = responseAula.aulas().stream()
+                    .filter(aula -> ocupadas == null || !ocupadas.contains(aula.id()))
+                    .collect(Collectors.toList());
+
+            if (disponibles.isEmpty()) {
+                return "Lo siento, el aula '" + nombreAula + "' está ocupada el " + fecha + " de " + horaInicio + " a " + horaFin + "." + MSG_SUGERENCIA;
+            }
+
+            StringBuilder sb = new StringBuilder("¡Buenas noticias! Encontré disponibilidad para '")
+                    .append(nombreAula).append("' el ").append(fecha)
+                    .append(" de ").append(horaInicio).append(" a ").append(horaFin).append(":\n");
+
+            disponibles.forEach(aula ->
+                    sb.append("- ").append(aula.nombreAula())
+                            .append(" (Bloque: ").append(aula.bloque().nombre())
+                            .append(", Capacidad: ").append(aula.capacidad()).append(" personas)\n")
+            );
+
+            return sb.toString();
+        } catch (FeignException e) {
+            System.err.println("[consultarPorNombreAula] Error de comunicación: " + e.getMessage());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            System.err.println("[consultarPorNombreAula] Error inesperado: " + e.getMessage());
+            return MSG_ERROR_GENERICO;
+        }
+    }
+
+    @Tool(name = "reservarAulaTool", description = "Reserva un aula específica.")
+    public String reservarAulaTool(
+            @ToolParam(description = "Nombre del aula") String nombreAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha,
+            @ToolParam(description = "Hora inicio HH:mm") String horaInicio,
+            @ToolParam(description = "Hora fin HH:mm") String horaFin,
+            @ToolParam(description = "Motivo o título de la reserva") String motivo,
+            @ToolParam(description = "Código del programa académico (opcional)", required = false) String codigoPrograma
+    ) {
+        System.out.println("=== [reservarAulaTool] INICIO ===");
+        System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha
+                + " | De: " + horaInicio + " a: " + horaFin + " | Motivo: " + motivo);
+
+        // ── 1. Resolver aulaId desde el nombre y obtener metadatos ──────────
+        Long aulaId = null;
+        AulaDTO aulaEncontrada = null;
+        try {
+            ResponseAulaDTO response = aulaClient.buscarAulasPorNombre(nombreAula);
+            if (response == null || response.aulas() == null || response.aulas().isEmpty()) {
+                return "ERROR: No encontré ninguna aula con el nombre '" + nombreAula + "'. " +
+                        "INSTRUCCIÓN PARA EL ASISTENTE: Pide al usuario que verifique el nombre del aula. " +
+                        "NO inventes nombres de aulas. NO busques otra aula sin permiso explícito del usuario.";
+            }
+            aulaEncontrada = response.aulas().get(0);
+            aulaId = aulaEncontrada.id();          // PK de la base de datos
+            System.out.println("aulaId resuelto: " + aulaId + " (codigoAula SIGA: " + aulaEncontrada.codigoAula() + ")");
+        } catch (FeignException e) {
+            System.err.println("[reservarAulaTool] Error buscando aula: " + e.getMessage());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            System.err.println("[reservarAulaTool] Error inesperado buscando aula: " + e.getMessage());
+            return MSG_ERROR_GENERICO;
+        }
+
+        // ── 2. Extraer identidad del usuario desde el JWT ────────────────────
+        String jwtHeader = AuthContext.getJwt();
+        if (jwtHeader == null || !jwtHeader.startsWith("Bearer ")) {
+            return "No se pudo identificar tu sesión. Por favor inicia sesión e intenta de nuevo.";
+        }
+
+        String jwt = jwtHeader.substring(7);
+        if (!jwtUtil.isTokenValid(jwt)) {
+            return "Tu sesión ha expirado. Por favor inicia sesión de nuevo.";
+        }
+
+        String codigoStr = jwtUtil.extractCodigo(jwt);
+        String rolStr = jwtUtil.extractRol(jwt);
+        if (codigoStr == null || codigoStr.isBlank()) {
+            return "No se pudo determinar tu ID de usuario desde el token JWT.";
+        }
+
+        Long idSolicitante;
+        try {
+            idSolicitante = Long.valueOf(codigoStr);
+        } catch (NumberFormatException e) {
+            return "No se pudo determinar tu ID de usuario desde el token JWT.";
+        }
+
+        String nombreUsuario = jwtUtil.extractNombre(jwt);
+        if (nombreUsuario == null || nombreUsuario.isBlank()) {
+            nombreUsuario = codigoStr; // Fallback al código si no hay nombre en el token
+        }
+
+        if (rolStr == null || rolStr.isBlank()) {
+            rolStr = "DOCENTE";
+        }
+
+        log.info("ID Solicitante: {} | Rol: {} | Nombre: {}", idSolicitante, rolStr, nombreUsuario);
+
+        // ── 3. Validación proactiva de rol ESTUDIANTE ────────────────────────
+        if ("ESTUDIANTE".equalsIgnoreCase(rolStr)) {
+            String codigoTipoAula = (aulaEncontrada != null && aulaEncontrada.tipoAula() != null)
+                    ? aulaEncontrada.tipoAula().codigoTipoAula() : null;
+            if (!"78".equals(codigoTipoAula) && !"79".equals(codigoTipoAula)) {
+                return "ERROR: Como estudiante, solo puedes reservar aulas interactivas (tipo 78) o audiovisuales (tipo 79). " +
+                        "El aula '" + nombreAula + "' es de tipo " +
+                        (codigoTipoAula != null ? codigoTipoAula : "desconocido") +
+                        ", por lo que no está permitida para tu rol. " +
+                        "INSTRUCCIÓN PARA EL ASISTENTE: NO sugieras otra aula automáticamente. " +
+                        "Pregunta al usuario si quiere ver aulas de tipo 78 o 79 disponibles.";
+            }
+        }
+
+        // ── 4. Validar disponibilidad real (BD interna + SIGA) ───────────────
+        try {
+            List<Long> ocupadas = reservaClient.obtenerAulasOcupadas(fecha, horaInicio, horaFin);
+            if (ocupadas != null && ocupadas.contains(aulaId)) {
+                return "ERROR: El aula '" + nombreAula + "' ya está ocupada el " + fecha
+                        + " de " + horaInicio + " a " + horaFin
+                        + ". INSTRUCCIÓN PARA EL ASISTENTE: Informa al usuario que esta aula NO está disponible."
+                        + " NO busques otra aula automáticamente. NO hagas otra reserva."
+                        + " Pregunta al usuario si quiere buscar otra aula o elegir otro horario.";
+            }
+        } catch (FeignException e) {
+            System.err.println("[reservarAulaTool] Error verificando disponibilidad: " + e.getMessage());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            System.err.println("[reservarAulaTool] Error inesperado verificando disponibilidad: " + e.getMessage());
+            return MSG_ERROR_GENERICO;
+        }
+
+        // ── 5. Construir payload y llamar al reserva-service ─────────────────
+        try {
+            String horaInicioISO = fecha + "T" + horaInicio + ":00";
+            String horaFinISO = fecha + "T" + horaFin + ":00";
+
+            Map<String, Object> payload = new java.util.LinkedHashMap<>();
+            payload.put("aulaId", aulaId);     // PK de la base de datos
+            payload.put("horaInicio", horaInicioISO);
+            payload.put("horaFin", horaFinISO);
+            payload.put("estado", "CONFIRMADA");
+            payload.put("idSolicitante", idSolicitante);
+            payload.put("rolSolicitante", rolStr.toUpperCase()); // Normalizar a mayúsculas para compatibilidad con enum
+            payload.put("nombreUsuarioResponsable", nombreUsuario);
+            payload.put("titulo", motivo);
+            if (codigoPrograma != null && !codigoPrograma.isBlank()) {
+                payload.put("codigoPrograma", codigoPrograma);
+            }
+
+            log.info("[reservarAulaTool] Payload: {}", payload);
+            Map<String, Object> respuesta = reservaClient.crearReserva(payload);
+
+            // Determinar estado final de la reserva
+            String estadoFinal = "CONFIRMADA";
+            Object reservaCreada = respuesta != null ? respuesta.get("reserva") : null;
+            if (reservaCreada instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> reservaMap = (Map<String, Object>) reservaCreada;
+                Object estadoObj = reservaMap.get("estado");
+                if (estadoObj != null) {
+                    estadoFinal = estadoObj.toString();
+                }
+            }
+
+            if ("PENDIENTE".equalsIgnoreCase(estadoFinal)) {
+                return "Tu reserva para el aula '" + nombreAula
+                        + "' fue creada y quedó **PENDIENTE de autorización**. "
+                        + "Motivo: " + motivo + ". "
+                        + "El administrador debe aprobarla. Te notificaremos cuando sea revisada. "
+                        + "Fecha: " + fecha + " de " + horaInicio + " a " + horaFin + ".";
+            } else {
+                return "¡Tu reserva fue **CONFIRMADA** exitosamente! El aula '" + nombreAula
+                        + "' ha sido reservada el " + fecha
+                        + " de " + horaInicio + " a " + horaFin
+                        + " para: " + motivo + ".";
+            }
+
+        } catch (FeignException.BadRequest e) {
+            log.error("[reservarAulaTool] Error 400 al crear reserva. Body: {}", e.contentUTF8());
+            return "Error en los datos de la reserva: " + e.contentUTF8();
+        } catch (FeignException e) {
+            log.error("[reservarAulaTool] Error de comunicación al crear reserva: {} | Status: {} | Body: {}", e.getMessage(), e.status(), e.contentUTF8());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            log.error("[reservarAulaTool] Error inesperado al crear reserva: {}", e.getMessage());
+            return MSG_ERROR_GENERICO;
+        }
+    }
+
+    @Tool(name = "consultarHorariosAula", description = "Consulta horarios ocupados y disponibles de un aula.")
+    public String consultarHorariosAula(
+            @ToolParam(description = "Nombre del aula") String nombreAula,
+            @ToolParam(description = "Fecha yyyy-MM-dd") String fecha
+    ) {
+        System.out.println("=== [consultarHorariosAula] INICIO ===");
+        System.out.println("Aula: " + nombreAula + " | Fecha: " + fecha);
+
+        try {
+            // 1. Resolver aulaId (PK)
+            ResponseAulaDTO response = aulaClient.buscarAulasPorNombre(nombreAula);
+            if (response == null || response.aulas() == null || response.aulas().isEmpty()) {
+                return "No encontré ninguna aula con el nombre '" + nombreAula + "'. Verifica el nombre e intenta de nuevo.";
+            }
+            Long aulaId = response.aulas().get(0).id();
+            String nombreReal = response.aulas().get(0).nombreAula();
+            System.out.println("Aula resuelta: " + nombreReal + " (aulaId=" + aulaId + ")");
+
+            // 2. Obtener reservas del aula (AulaSmart + SIGA)
+            Map<String, Object> respuestaReservas = reservaClient.obtenerReservasPorAula(aulaId);
+            List<Map<String, Object>> reservas = extraerReservas(respuestaReservas);
+
+            // 3. Filtrar reservas por fecha
+            java.time.LocalDate fechaConsulta = java.time.LocalDate.parse(fecha);
+            List<String[]> ocupados = new ArrayList<>();
+
+            for (Map<String, Object> reserva : reservas) {
+                String inicioStr = String.valueOf(reserva.get("horaInicio"));
+                String finStr = String.valueOf(reserva.get("horaFin"));
+                if (inicioStr == null || finStr == null || "null".equals(inicioStr)) continue;
+
+                java.time.LocalDateTime inicio = parsearFechaHora(inicioStr);
+                java.time.LocalDateTime fin = parsearFechaHora(finStr);
+
+                if (inicio != null && fin != null && inicio.toLocalDate().equals(fechaConsulta)) {
+                    ocupados.add(new String[]{inicio.toLocalTime().toString(), fin.toLocalTime().toString()});
+                }
+            }
+
+            // 4. Construir respuesta
+            StringBuilder sb = new StringBuilder();
+            sb.append("Horarios del aula **").append(nombreReal).append("** el **").append(fecha).append("**:\n\n");
+
+            if (ocupados.isEmpty()) {
+                sb.append("✅ El aula está completamente libre ese día.\n");
+            } else {
+                sb.append("❌ **Horarios OCUPADOS:**\n");
+                for (String[] r : ocupados) {
+                    sb.append("  • ").append(r[0]).append(" - ").append(r[1]).append("\n");
+                }
+            }
+
+            // 5. Sugerir horarios libres (7am - 7pm en bloques de 2 horas)
+            sb.append("\n💡 **Horarios sugeridos (libres):**\n");
+            int[][] bloques = {{7,9},{9,11},{11,13},{13,15},{15,17},{17,19}};
+            for (int[] bloque : bloques) {
+                String hInicio = String.format("%02d:00", bloque[0]);
+                String hFin = String.format("%02d:00", bloque[1]);
+                if (!estaOcupado(hInicio, hFin, ocupados)) {
+                    sb.append("  • ").append(hInicio).append(" - ").append(hFin).append(" ✅\n");
+                } else {
+                    sb.append("  • ").append(hInicio).append(" - ").append(hFin).append(" ❌ Ocupado\n");
+                }
+            }
+
+            sb.append("\nSi quieres reservar uno de estos horarios, dímelo y lo agendo.");
+            return sb.toString();
+
+        } catch (FeignException e) {
+            System.err.println("[consultarHorariosAula] Error de comunicación: " + e.getMessage());
+            return MSG_ERROR_RED;
+        } catch (Exception e) {
+            System.err.println("[consultarHorariosAula] Error inesperado: " + e.getMessage());
+            e.printStackTrace();
+            return MSG_ERROR_GENERICO;
+        }
+    }
+
+    // ── Helpers para consultarHorariosAula ─────────────────────────────────
+
+    @SuppressWarnings("unchecked")
+    private List<Map<String, Object>> extraerReservas(Map<String, Object> respuesta) {
+        if (respuesta == null) return List.of();
+        Object reservasObj = respuesta.get("reservas");
+        if (reservasObj instanceof List) {
+            return (List<Map<String, Object>>) reservasObj;
+        }
+        return List.of();
+    }
+
+    private java.time.LocalDateTime parsearFechaHora(String valor) {
+        try {
+            // Puede venir como "2026-05-14T08:00:00" o "2026-05-14 08:00:00"
+            String limpio = valor.replace(" ", "T");
+            if (limpio.contains(".")) {
+                limpio = limpio.substring(0, limpio.indexOf('.'));
+            }
+            return java.time.LocalDateTime.parse(limpio);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private boolean estaOcupado(String inicio, String fin, List<String[]> ocupados) {
+        java.time.LocalTime tInicio = java.time.LocalTime.parse(inicio);
+        java.time.LocalTime tFin = java.time.LocalTime.parse(fin);
+        for (String[] o : ocupados) {
+            java.time.LocalTime oInicio = java.time.LocalTime.parse(o[0]);
+            java.time.LocalTime oFin = java.time.LocalTime.parse(o[1]);
+            // Solapamiento: A.inicio < B.fin && A.fin > B.inicio
+            if (tInicio.isBefore(oFin) && tFin.isAfter(oInicio)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

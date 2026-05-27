@@ -1,8 +1,9 @@
 package co.edu.uceva.usuariosservice.Auth.controller;
 
 import co.edu.uceva.usuariosservice.Auth.service.AuthService;
-import lombok.RequiredArgsConstructor;
+import co.edu.uceva.usuariosservice.delivery.rest.ApiResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,20 +17,25 @@ public class AuthController {
         this.service = service;
     }
 
-    /*@PostMapping("/register")
-    public ResponseEntity<TokenResponse> register(@RequestBody final RegisterRequest request){
-        final TokenResponse token = service.register(request);
-        return ResponseEntity.ok(token);
-    }*/
-
     @PostMapping("/login")
-    public ResponseEntity<TokenResponse> authenticate(@RequestBody final LoginRequest request){
-        final TokenResponse token = service.login(request);
-        return ResponseEntity.ok(token);
+    public ResponseEntity<ApiResponse<TokenResponse>> authenticate(@RequestBody final LoginRequest request){
+        try {
+            final TokenResponse token = service.login(request);
+            return ResponseEntity.ok(ApiResponse.success("Login exitoso", token, HttpStatus.OK.value()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Error de autenticación", e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+        }
     }
 
     @PostMapping("/refresh")
-    public TokenResponse refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authHeader) {
-        return service.refreshToken(authHeader);
+    public ResponseEntity<ApiResponse<TokenResponse>> refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authHeader) {
+        try {
+            final TokenResponse token = service.refreshToken(authHeader);
+            return ResponseEntity.ok(ApiResponse.success("Token refrescado exitosamente", token, HttpStatus.OK.value()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("Error al refrescar token", e.getMessage(), HttpStatus.UNAUTHORIZED.value()));
+        }
     }
 }

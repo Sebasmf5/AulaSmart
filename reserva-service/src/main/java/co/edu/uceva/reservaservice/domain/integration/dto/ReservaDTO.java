@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 public class ReservaDTO {
     private String idReserva; 
-    private Long codigoAula;
+    private Long aulaId;
     private LocalDateTime horaInicio;
     private LocalDateTime horaFin;
     private EstadosReserva estado;
@@ -18,4 +18,6 @@ public class ReservaDTO {
     private String codigoPrograma;
     private String grupo;
     private String origen; // "AULASMART" o "SIGA"
+    private String nombreUsuarioResponsable;
+    private String titulo;
 }

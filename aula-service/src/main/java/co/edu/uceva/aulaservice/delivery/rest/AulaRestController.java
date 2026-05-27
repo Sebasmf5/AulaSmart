@@ -15,7 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import javax.swing.text.html.Option;
 
 
 @RestController
@@ -40,9 +44,13 @@ public class AulaRestController {
      */
     @PostMapping("/aulas")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
-    public ResponseEntity<Map<String, Object>> save(@Valid @RequestBody Aula aula, BindingResult result) {
+    public ResponseEntity<Map<String, Object>>  save(@Valid @RequestBody Aula aula, BindingResult result) {
         if (result.hasErrors()) {
             throw new ValidationException(result);
+        }
+        // Las aulas creadas manualmente por defecto no están en SIGA
+        if (aula.getSincronizadaConSiga() == null) {
+            aula.setSincronizadaConSiga(false);
         }
         Map<String, Object> response = new HashMap<>();
         Aula nuevoAula = aulaService.save(aula);
@@ -131,6 +139,15 @@ public class AulaRestController {
         return ResponseEntity.ok(tipoDeAula);
     }
 
+    @GetMapping("/aulas/siga/{codigo}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Long> getPasaporteSiga(@PathVariable Long codigo) {
+        Aula aula = aulaService.obtenerAula(codigo)
+                .orElseThrow(() -> new AulaCodigoNoEncontrada(codigo));
+        // Devolvemos el codigoAula (código SIGA) directamente.
+        return ResponseEntity.ok(aula.getCodigoAula());
+    }
+
     /*
     * Obtener si el aula debe pasar por el administrador para aprobar el aula
     * */
@@ -139,11 +156,10 @@ public class AulaRestController {
     public ResponseEntity<Boolean> getRequiereAutorizacion(@PathVariable Long codigo) {
         Aula aula = aulaService.obtenerAula(codigo)
                 .orElseThrow(() -> new AulaCodigoNoEncontrada(codigo));
-        Boolean isAutorizable = aula.getRequiereAutorizacion();
+        Boolean isAutorizable = aula.getTipoAula().getRequiereAutorizacion();
         // devolver el valor (true o false)
         return ResponseEntity.ok(isAutorizable);
     }
-
 
     /**
      * Listar todas las aulas.
@@ -175,4 +191,119 @@ public class AulaRestController {
         return ResponseEntity.ok(aulas);
     }
 
+    @GetMapping("/aulas/bloque/{bloqueId}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorBloque(@PathVariable Long bloqueId) {
+        List<Aula> aulas = aulaService.filtrarPorBloque(bloqueId);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para el bloque " + bloqueId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/aulas/facultad/{facultadId}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorFacultad(@PathVariable Long facultadId) {
+        List<Aula> aulas = aulaService.filtrarPorFacultad(facultadId);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para la facultad " + facultadId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/aulas/buscar/{nombreAula}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorNombre(@PathVariable String nombreAula) {
+        List<Aula> aulas = aulaService.filtrarPorNombre(nombreAula);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para la búsqueda: " + nombreAula);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/aulas/tipo-aula/{tipoAula}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> listarAulasPorTipoAula(@PathVariable String tipoAula) {
+        List<Aula> aulas = aulaService.filtrarPorTipoAula(tipoAula);
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, aulas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente para el tipo: " + tipoAula);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Devuelve todos los codigosAula registrados en el sistema.
+     */
+    @GetMapping("/aulas/codigos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<List<Long>> listarCodigosAula() {
+        List<Long> codigos = aulaService.findAll()
+                .stream()
+                .map(Aula::getCodigoAula)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(codigos);
+    }
+
+    /**
+     * Devuelve los codigosAula de aulas que están sincronizadas con SIGA.
+     * Solo estas aulas deben consultarse contra el sistema SIGA para verificar disponibilidad.
+     */
+    @GetMapping("/aulas/codigos-siga")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<List<Long>> listarCodigosAulaSiga() {
+        List<Long> codigos = aulaService.findAll()
+                .stream()
+                .filter(Aula::getSincronizadaConSiga)
+                .map(Aula::getCodigoAula)
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(codigos);
+    }
+
+    // ── Endpoints por ID de base de datos (PK) para uso interno entre microservicios ──
+
+    @GetMapping("/aulas/{id}/tipo")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<String> getTipoDeAulaById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        return ResponseEntity.ok(aula.getTipoAula().getCodigoTipoAula());
+    }
+
+    @GetMapping("/aulas/{id}/requiere-autorizacion")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Boolean> getRequiereAutorizacionById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        return ResponseEntity.ok(aula.getTipoAula().getRequiereAutorizacion());
+    }
+
+    @GetMapping("/aulas/{id}/codigo-siga")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Long> getCodigoSigaById(@PathVariable Long id) {
+        Aula aula = aulaService.findById(id)
+                .orElseThrow(() -> new AulaNoEncontradaException(id));
+        return ResponseEntity.ok(aula.getCodigoAula());
+    }
+
+    /**
+     * Devuelve las aulas sincronizadas con SIGA como lista de objetos {id, codigoAula}.
+     * Usado por reserva-service para mapear aulaId (PK) a codigoAula (pasaporte SIGA).
+     */
+    @GetMapping("/aulas/sincronizadas-siga")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<List<Map<String, Object>>> listarAulasSincronizadasSiga() {
+        List<Aula> aulas = aulaService.findAll()
+                .stream()
+                .filter(a -> Boolean.TRUE.equals(a.getSincronizadaConSiga()))
+                .toList();
+        List<Map<String, Object>> resultado = aulas.stream()
+                .map(a -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", a.getId());
+                    map.put("codigoAula", a.getCodigoAula());
+                    return map;
+                })
+                .collect(java.util.stream.Collectors.toList());
+        return ResponseEntity.ok(resultado);
+    }
 }

@@ -1,18 +1,45 @@
 server:
-  port: 8084
+  port: 8086
 
 spring:
   application:
     name: chat-service
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openaisdk.autoconfigure.OpenAiSdkImageAutoConfiguration
   ai:
     openai:
-      api-key: ${GROQ_API_KEY}
-      base-url: https://api.groq.com/openai/v1
+      api-key: ${SPRING_AI_OPENAI_API_KEY}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://opencode.ai/zen/go/v1}
       chat:
         options:
-          model: llama-3.3-70b-versatile
+          model: ${SPRING_AI_OPENAI_MODEL:kimi-k2.6}
           temperature: 0.0
+  cloud:
+    openfeign:
+      client:
+        config:
+          default:
+            connectTimeout: 5000
+            readTimeout: 60000
 
-app:
-  reserva-service:
-    url: http://localhost:8083
+chat:
+  system-prompt: >
+    Eres AulaBot, asistente de reservas de aulas de UCEVA.
+    Solo respondes sobre aulas y reservas.
+    Para consultas de disponibilidad o reservas, DEBES usar tus tools.
+    No inventes datos. Usa el contexto de la conversación para follow-ups.
+    Antes de reservar, pide el motivo/título si no lo tiene.
+    También pregunta el código del programa académico si el usuario no lo ha proporcionado y parece relevante.
+    La fecha de hoy se te proporcionará en cada conversación.
+  cache:
+    enabled: ${CHAT_CACHE_ENABLED:true}
+
+conexion:
+  servicios:
+    aula-service:
+      url: ${URL_SERVICIO_ASISTENCIA:http://aula-service:8083}
+    reserva-service:
+      url: ${URL_SERVICIO_RESERVA:http://reserva-service:8080}
+
+

@@ -1,7 +1,9 @@
 package co.edu.uceva.usuariosservice.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuarios")
@@ -26,7 +28,7 @@ public class Usuario {
     @Column(nullable = false, unique = true) // Agregué unique para evitar correos duplicados
     private String email;
 
-    @NotEmpty(message = "La contraseña no puede estar vacía")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Size(min = 8, max = 255)
     @Pattern(
             regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[#$@!%&*-_?])[A-Za-z\\d#$@!%&*-_?]{8,}$",
@@ -35,13 +37,12 @@ public class Usuario {
     @Column(nullable = false)
     private String password;
 
-    @NotEmpty(message = "El rol no puede estar vacío")
-    @Pattern(
-            regexp = "^(Estudiante|Docente|Administrativo|Monitor)$",
-            message = "El rol debe ser uno de los siguientes: Estudiante, Docente, Coordinador, Administrativo, Decano, Rector, Monitor, Directivo o Administrador"
-    )
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String rol;
+    private RolUsuario rol;
+
+    @Column(name = "ultimo_inicio_sesion")
+    private LocalDateTime ultimoInicioSesion;
 
     // --- Getters y Setters ---
 
@@ -60,6 +61,9 @@ public class Usuario {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getRol() { return rol; }
-    public void setRol(String rol) { this.rol = rol; }
+    public RolUsuario getRol() { return rol; }
+    public void setRol(RolUsuario rol) { this.rol = rol; }
+
+    public LocalDateTime getUltimoInicioSesion() { return ultimoInicioSesion; }
+    public void setUltimoInicioSesion(LocalDateTime ultimoInicioSesion) { this.ultimoInicioSesion = ultimoInicioSesion; }
 }

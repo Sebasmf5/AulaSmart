@@ -11,7 +11,7 @@ public interface ChatGPTCartaService {
      * Genera una carta formal completa a partir de los puntos clave de la incidencia.
      *
      * @param descripcionBreve Descripción corta provista por el usuario (puntos clave).
-     * @param tipoIncidencia   Tipo de incidencia (QUEJA, RECLAMO, RECOMENDACION, DANO_FISICO).
+     * @param tipoIncidencia   Tipo de incidencia (HARDWARE, SOFTWARE, INFRAESTRUCTURA, OTRO).
      * @param codigoAula       Código del aula afectada.
      * @return Texto de la carta formal generada por OpenAI, o {@code null} si ocurre un error.
      */

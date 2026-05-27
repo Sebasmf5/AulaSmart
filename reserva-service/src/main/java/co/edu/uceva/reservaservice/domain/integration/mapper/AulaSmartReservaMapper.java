@@ -11,7 +11,7 @@ public class AulaSmartReservaMapper {
         ReservaDTO dto = new ReservaDTO();
         
         dto.setIdReserva(reserva.getIdReserva().toString());
-        dto.setCodigoAula(reserva.getCodigoAula());
+        dto.setAulaId(reserva.getAulaId());
         dto.setHoraInicio(reserva.getHoraInicio());
         dto.setHoraFin(reserva.getHoraFin());
         dto.setEstado(reserva.getEstado());
@@ -20,6 +20,8 @@ public class AulaSmartReservaMapper {
         dto.setCodigoPrograma(reserva.getCodigoPrograma());
         dto.setGrupo(reserva.getGrupo());
         dto.setOrigen("AULASMART");
+        dto.setNombreUsuarioResponsable(reserva.getNombreUsuarioResponsable());
+        dto.setTitulo(reserva.getTitulo());
         
         return dto;
     }

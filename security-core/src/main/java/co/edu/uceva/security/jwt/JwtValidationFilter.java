@@ -59,6 +59,8 @@ public class JwtValidationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             // Token inválido o espirado.
+            System.err.println("Error validando el token en JwtValidationFilter: " + e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);

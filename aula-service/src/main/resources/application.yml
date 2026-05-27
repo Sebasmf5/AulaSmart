@@ -30,6 +30,10 @@ app:
   api:
     version: v1
 
+siga:
+  api:
+    url: https://uceva.datasae.co/siga_new/web/app.php/publicomanejoespacios
+
 server:
   port: 8082
 
@@ -40,6 +44,14 @@ management:
     web:
       exposure:
         include: "*"
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
+      expiration: 86400000
+      refresh-token:
+        expiration: 604800000
 
 logging:
   level:

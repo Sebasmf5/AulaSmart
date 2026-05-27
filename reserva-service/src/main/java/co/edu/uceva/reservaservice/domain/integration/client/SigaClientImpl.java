@@ -28,7 +28,7 @@ public class SigaClientImpl implements ISigaClient {
 
     @Override
     public List<SigaReservaDTO> obtenerReservasPorAula(Long codigoAula) {
-        // Para obtener "todas", consultamos desde hoy hasta 6 meses en el futuro
+        // CONSULTAR desde hoy hasta 6 meses en el futuro
         String startDate = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         String endDate = LocalDate.now().plusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         return ejecutarConsultaSiga(codigoAula, startDate, endDate);

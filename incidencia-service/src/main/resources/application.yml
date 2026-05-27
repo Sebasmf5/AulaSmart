@@ -18,12 +18,13 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   main:
     allow-circular-references: true
+    allow-bean-definition-overriding: true
   ai:
     openai:
       api-key: ${API_KEY_GROQ}
@@ -33,10 +34,18 @@ spring:
           model: llama-3.1-8b-instant
           temperature: 0.3
 
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 app:
   version: 0.0.1
   api:
     version: v1
+  uploads:
+    incidencias: ${UPLOADS_DIR:/app/uploads/incidencias}
 
 server:
   port: 8087
@@ -48,6 +57,11 @@ management:
     web:
       exposure:
         include: "*"
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
 
 logging:
   level:

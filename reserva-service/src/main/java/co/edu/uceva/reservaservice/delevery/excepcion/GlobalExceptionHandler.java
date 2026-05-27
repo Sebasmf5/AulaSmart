@@ -110,4 +110,43 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(AccesoNoAutorizadoException.class)
+    public ResponseEntity<Map<String, Object>> handleAccesoNoAutorizadoException(AccesoNoAutorizadoException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getMessage());
+        response.put(STATUS, HttpStatus.FORBIDDEN.value());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        List<String> errores = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
+        response.put(MESSAGE, "Error de validación en los datos de la reserva.");
+        response.put("errores", errores);
+        response.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, "Error al leer los datos de la reserva. Verifica que los valores (estado, rol, fechas) sean válidos.");
+        response.put("detalle", ex.getMostSpecificCause().getMessage());
+        response.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, "Error interno del servidor al procesar la reserva.");
+        response.put("detalle", ex.getMessage());
+        response.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
 }

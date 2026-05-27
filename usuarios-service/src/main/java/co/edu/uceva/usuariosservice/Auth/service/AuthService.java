@@ -3,33 +3,25 @@ package co.edu.uceva.usuariosservice.Auth.service;
 import co.edu.uceva.usuariosservice.Auth.controller.AuthRequest;
 import co.edu.uceva.usuariosservice.Auth.controller.LoginRequest;
 import co.edu.uceva.usuariosservice.Auth.controller.TokenResponse;
-import co.edu.uceva.usuariosservice.Auth.repository.ITokenRepository;
-import co.edu.uceva.usuariosservice.Auth.repository.Token;
 import co.edu.uceva.usuariosservice.domain.excepcions.UsuarioNoEncontradoException;
 import co.edu.uceva.usuariosservice.domain.model.Usuario;
 import co.edu.uceva.usuariosservice.domain.repository.IUsuarioRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
-
 public class AuthService {
     private final IUsuarioRepository usuarioRepository;
-    private final ITokenRepository tokenRepository;
-    private final JwtService jwtService; // Al estar en el mismo paquete 'service', no necesita import completo
+    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthService(IUsuarioRepository usuarioRepository,
-                       ITokenRepository tokenRepository,
                        JwtService jwtService,
                        AuthenticationManager authenticationManager) {
         this.usuarioRepository = usuarioRepository;
-        this.tokenRepository = tokenRepository;
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }
@@ -47,10 +39,22 @@ public class AuthService {
         String jwtToken = jwtService.generateToken(usuario);
         String jwtRefreshToken = jwtService.generateRefreshToken(usuario);
 
-        revokeAllUsuarioTokens(usuario);
-        saveUsuarioToken(usuario, jwtToken);
+        usuario.setUltimoInicioSesion(LocalDateTime.now());
+        usuarioRepository.save(usuario);
 
-        return new TokenResponse(jwtToken, jwtRefreshToken);
+        return new TokenResponse(
+                jwtToken,
+                jwtRefreshToken,
+                "Bearer",
+                jwtService.getJwtExpiration(),
+                new TokenResponse.UserInfo(
+                        usuario.getCodigo(),
+                        usuario.getNombre() + " " + usuario.getApellido(),
+                        usuario.getEmail(),
+                        usuario.getRol().name(),
+                        usuario.getUltimoInicioSesion()
+                )
+        );
     }
 
     public TokenResponse refreshToken(final String authHeader) {
@@ -73,10 +77,20 @@ public class AuthService {
         }
 
         final String accessToken = jwtService.generateToken(usuario);
-        revokeAllUsuarioTokens(usuario);
-        saveUsuarioToken(usuario, accessToken);
 
-        return new TokenResponse(accessToken, refreshToken);
+        return new TokenResponse(
+                accessToken,
+                refreshToken,
+                "Bearer",
+                jwtService.getJwtExpiration(),
+                new TokenResponse.UserInfo(
+                        usuario.getCodigo(),
+                        usuario.getNombre() + " " + usuario.getApellido(),
+                        usuario.getEmail(),
+                        usuario.getRol().name(),
+                        usuario.getUltimoInicioSesion()
+                )
+        );
     }
 
     public TokenResponse authenticate(final AuthRequest request) {
@@ -92,33 +106,21 @@ public class AuthService {
         final String accessToken = jwtService.generateToken(usuario);
         final String refreshToken = jwtService.generateRefreshToken(usuario);
 
-        revokeAllUsuarioTokens(usuario);
-        saveUsuarioToken(usuario, accessToken);
+        usuario.setUltimoInicioSesion(LocalDateTime.now());
+        usuarioRepository.save(usuario);
 
-        return new TokenResponse(accessToken, refreshToken);
-    }
-
-    private void saveUsuarioToken(Usuario usuario, String jwtToken) {
-        Token token = new Token();
-        token.setUsuario(usuario);
-        token.setToken(jwtToken);
-        token.setTokenType(Token.TokenType.BEARER);
-        token.setExpired(false);
-        token.setRevoked(false);
-
-        tokenRepository.save(token);
-    }
-
-    private void revokeAllUsuarioTokens(final Usuario usuario) {
-        final List<Token> validUserTokens = tokenRepository
-                .findAllValidTokensByUser(usuario.getCodigo());
-
-        if (!validUserTokens.isEmpty()) {
-            validUserTokens.forEach(token -> {
-                token.setExpired(true);
-                token.setRevoked(true);
-            });
-            tokenRepository.saveAll(validUserTokens);
-        }
+        return new TokenResponse(
+                accessToken,
+                refreshToken,
+                "Bearer",
+                jwtService.getJwtExpiration(),
+                new TokenResponse.UserInfo(
+                        usuario.getCodigo(),
+                        usuario.getNombre() + " " + usuario.getApellido(),
+                        usuario.getEmail(),
+                        usuario.getRol().name(),
+                        usuario.getUltimoInicioSesion()
+                )
+        );
     }
 }

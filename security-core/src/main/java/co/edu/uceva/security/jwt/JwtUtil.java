@@ -13,7 +13,7 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${application.security.jwt.secret-key:eAbpUoiUYzAJOYBExi6S4ezTJZ8xblV2ZWbl2mafPkM}")
+    @Value("${application.security.jwt.secret-key}")
     private String secretKey;
 
     public String extractCodigo(final String token) {
@@ -22,6 +22,14 @@ public class JwtUtil {
 
     public String extractRol(final String token) {
         return getAllClaims(token).get("rol", String.class);
+    }
+
+    public String extractNombre(final String token) {
+        return getAllClaims(token).get("nombre", String.class);
+    }
+
+    public String extractCodigoPrograma(final String token) {
+        return getAllClaims(token).get("codigoPrograma", String.class);
     }
 
     public boolean isTokenValid(String token) {

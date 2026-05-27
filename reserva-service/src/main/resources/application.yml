@@ -49,11 +49,16 @@ management:
 
 url:
   servicio:
-    asistencia: http://localhost:8082
+    asistencia: ${URL_SERVICIO_ASISTENCIA:http://localhost:8083}
 
 siga:
   api:
     url: https://uceva.datasae.co/siga_new/web/app.php/publicomanejoespacios
+
+application:
+  security:
+    jwt:
+      secret-key: ${JWT_SECRET_KEY}
 
 logging:
   level:

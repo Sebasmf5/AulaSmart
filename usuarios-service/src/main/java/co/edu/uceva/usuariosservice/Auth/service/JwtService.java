@@ -23,6 +23,10 @@ public class JwtService {
     @Value("${application.security.jwt.refresh-token.expiration}")
     private long jwtRefreshExpiration;
 
+    public long getJwtExpiration() {
+        return jwtExpiration;
+    }
+
     // Extrae el código (ID) del usuario guardado en el ID del token
     public Long extractCodigo(final String token) {
         return Long.parseLong(getAllClaims(token).getId());
@@ -54,7 +58,7 @@ public class JwtService {
                 .id(usuario.getCodigo().toString()) // jti
                 .subject(usuario.getEmail())       // sub
                 .claim("nombre", usuario.getNombre() + " " + usuario.getApellido()) // claim personalizado
-                .claim("rol", usuario.getRol())                                     // claim personalizado
+                .claim("rol", usuario.getRol().name())                                     // claim personalizado
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSignInKey())
