@@ -49,7 +49,12 @@ public class UsuarioServiceImpl implements IUsuarioService{
 
     private void encodePasswordIfNeeded(Usuario usuario) {
         String password = usuario.getPassword();
-        if (password != null && !password.isBlank() && !password.startsWith("$2a$")) {
+        if (password == null || password.isBlank()) {
+            if (usuario.getCodigo() != null) {
+                repository.findById(usuario.getCodigo()).ifPresent(existing ->
+                    usuario.setPassword(existing.getPassword()));
+            }
+        } else if (!password.startsWith("$2a$")) {
             usuario.setPassword(passwordEncoder.encode(password));
         }
     }
