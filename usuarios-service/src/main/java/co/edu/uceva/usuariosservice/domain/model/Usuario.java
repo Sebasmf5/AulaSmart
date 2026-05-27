@@ -1,6 +1,6 @@
 package co.edu.uceva.usuariosservice.domain.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ public class Usuario {
     @Column(nullable = false, unique = true) // Agregué unique para evitar correos duplicados
     private String email;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @NotEmpty(message = "La contraseña no puede estar vacía")
     @Size(min = 8, max = 255)
     @Pattern(

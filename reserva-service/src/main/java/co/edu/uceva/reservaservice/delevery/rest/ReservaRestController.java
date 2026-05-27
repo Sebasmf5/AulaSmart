@@ -250,8 +250,9 @@ public class ReservaRestController {
      * Listar reservas pendientes de aprobación (solo administradores).
      */
     @GetMapping("/reservas/pendientes")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> getReservasPendientes() {
-        verificarRolAdministrador();
+
         List<Reserva> reservas = reservaService.findReservasPendientes();
         Map<String, Object> response = new HashMap<>();
         response.put(RESERVAS, reservas);
@@ -262,8 +263,8 @@ public class ReservaRestController {
      * Confirmar una reserva pendiente (solo administradores).
      */
     @PutMapping("/reservas/{id}/confirmar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> confirmarReserva(@PathVariable Long id) {
-        verificarRolAdministrador();
         Reserva reserva = reservaService.confirmarReserva(id);
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "La reserva ha sido confirmada con éxito.");
@@ -275,8 +276,8 @@ public class ReservaRestController {
      * Rechazar (cancelar) una reserva pendiente (solo administradores).
      */
     @PutMapping("/reservas/{id}/rechazar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO')")
     public ResponseEntity<Map<String, Object>> rechazarReserva(@PathVariable Long id) {
-        verificarRolAdministrador();
         Reserva reserva = reservaService.rechazarReserva(id);
         Map<String, Object> response = new HashMap<>();
         response.put(MENSAJE, "La reserva ha sido rechazada con éxito.");

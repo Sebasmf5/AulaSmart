@@ -30,9 +30,9 @@ public class EncryptionFilter implements Filter {
         String path = httpRequest.getRequestURI();
         String method = httpRequest.getMethod();
 
-        System.out.println("[EncryptionFilter] Request: " + method + " " + path);
+        System.out.println("[EncryptionFilter] === " + method + " " + path + " ===");
 
-        // Rutas publicas: nunca cifrar/descifrar, pasar directo
+        // Rutas publicas: nunca cifrar/descifrar
         if (path.contains("/auth/") || path.contains("/crypto/")) {
             System.out.println("[EncryptionFilter] Public route, passing through");
             chain.doFilter(request, response);
@@ -41,62 +41,62 @@ public class EncryptionFilter implements Filter {
 
         String sessionId = httpRequest.getHeader("x-session-id");
         if (sessionId == null || sessionId.isEmpty()) {
-            System.out.println("[EncryptionFilter] No x-session-id header, passing through");
+            System.out.println("[EncryptionFilter] No x-session-id, passing through");
             chain.doFilter(request, response);
             return;
         }
 
         CryptoSession session = sessionStore.getSession(sessionId);
         if (session == null) {
-            System.out.println("[EncryptionFilter] Session NOT found for id: " + sessionId + " | passing through");
+            System.out.println("[EncryptionFilter] Session NOT found: " + sessionId);
             chain.doFilter(request, response);
             return;
         }
-        System.out.println("[EncryptionFilter] Session found for id: " + sessionId + " | will process");
+        System.out.println("[EncryptionFilter] Session found: " + sessionId);
 
         String upperMethod = method.toUpperCase();
-
-        // NO procesar peticiones multipart (subida de archivos) ni form-urlencoded
         String contentType = httpRequest.getContentType();
         boolean isMultipart = contentType != null && contentType.toLowerCase().startsWith("multipart/");
         boolean isFormUrlEncoded = contentType != null && contentType.toLowerCase().startsWith("application/x-www-form-urlencoded");
 
         HttpServletRequest requestToUse = httpRequest;
 
-        // Para POST/PUT/PATCH, intentar descifrar body
+        // Solo descifrar body para POST/PUT/PATCH con contenido JSON
         if (!"GET".equals(upperMethod) && !"DELETE".equals(upperMethod) && !"OPTIONS".equals(upperMethod)
                 && !"HEAD".equals(upperMethod) && !isMultipart && !isFormUrlEncoded) {
 
-            String encryptedBody = readBodySafe(httpRequest);
-            System.out.println("[EncryptionFilter] Raw body read: " + encryptedBody.length() + " chars");
+            String encryptedBody = readBodyAsString(httpRequest);
+            System.out.println("[EncryptionFilter] Raw body (first 100 chars): " + encryptedBody.substring(0, Math.min(encryptedBody.length(), 100)));
 
             if (!encryptedBody.isBlank()) {
                 try {
                     String payload = extractPayload(encryptedBody);
                     CryptoService crypto = new CryptoService(session.getAesKey());
                     String plaintext = crypto.decrypt(payload);
-                    System.out.println("[EncryptionFilter] Decrypted body: " + plaintext);
+                    System.out.println("[EncryptionFilter] Decrypted: " + plaintext);
 
-                    requestToUse = new PlainTextRequestWrapper(httpRequest, plaintext.getBytes(StandardCharsets.UTF_8));
+                    byte[] plainBytes = plaintext.getBytes(StandardCharsets.UTF_8);
+                    requestToUse = new DecryptedRequestWrapper(httpRequest, plainBytes);
                 } catch (Exception e) {
-                    System.err.println("[EncryptionFilter] Decrypt failed: " + e.getMessage());
+                    System.err.println("[EncryptionFilter] Decrypt FAILED: " + e.getMessage());
                     httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                     httpResponse.setContentType("application/json");
                     httpResponse.getWriter().write("{\"error\":\"Payload invalido: " + escapeJson(e.getMessage()) + "\"}");
                     return;
                 }
             } else {
-                System.out.println("[EncryptionFilter] Body is blank, using original request");
+                System.out.println("[EncryptionFilter] Body is blank");
             }
         }
 
-        // Capturar respuesta para cifrarla
+        // Capturar respuesta para cifrar
         CaptureResponseWrapper captureResponse = new CaptureResponseWrapper(httpResponse);
         chain.doFilter(requestToUse, captureResponse);
 
+        int status = captureResponse.getStatus();
         byte[] responseBytes = captureResponse.getCapturedData();
         String responseBody = new String(responseBytes, StandardCharsets.UTF_8);
-        System.out.println("[EncryptionFilter] Response captured: " + responseBody.length() + " chars, status: " + captureResponse.getStatus());
+        System.out.println("[EncryptionFilter] Response status: " + status + ", body (first 100 chars): " + responseBody.substring(0, Math.min(responseBody.length(), 100)));
 
         try {
             CryptoService crypto = new CryptoService(session.getAesKey());
@@ -107,9 +107,9 @@ public class EncryptionFilter implements Filter {
             httpResponse.setContentLength(json.getBytes(StandardCharsets.UTF_8).length);
             httpResponse.getWriter().write(json);
             httpResponse.getWriter().flush();
-            System.out.println("[EncryptionFilter] Response encrypted and sent");
+            System.out.println("[EncryptionFilter] Response encrypted OK");
         } catch (Exception e) {
-            System.err.println("[EncryptionFilter] Encrypt response failed: " + e.getMessage());
+            System.err.println("[EncryptionFilter] Encrypt response FAILED: " + e.getMessage());
             httpResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             httpResponse.setContentType("application/json");
             httpResponse.getWriter().write("{\"error\":\"Error cifrando respuesta\"}");
@@ -117,26 +117,19 @@ public class EncryptionFilter implements Filter {
     }
 
     /**
-     * Lee el body del request SIN cerrar el InputStream original.
-     * Esto es crítico porque cerrar el stream del request puede causar
-     * que el contenedor servlet se bloquee o que filtros posteriores fallen.
+     * Lee el body del request como String SIN cerrar el InputStream original.
+     * Usa lectura byte-a-byte para evitar cualquier cierre de streams.
      */
-    private String readBodySafe(HttpServletRequest request) throws IOException {
-        StringBuilder sb = new StringBuilder();
+    private String readBodyAsString(HttpServletRequest request) throws IOException {
         InputStream is = request.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
-        BufferedReader reader = new BufferedReader(isr);
-        try {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line);
-            }
-        } finally {
-            // NO cerramos 'is' ni 'isr' para no afectar el request original.
-            // Solo cerramos el BufferedReader que es nuestro.
-            reader.close();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int nRead;
+        byte[] data = new byte[4096];
+        while ((nRead = is.read(data, 0, data.length)) != -1) {
+            buffer.write(data, 0, nRead);
         }
-        return sb.toString();
+        // NO cerramos 'is'
+        return buffer.toString(StandardCharsets.UTF_8.name());
     }
 
     private String extractPayload(String body) {
@@ -152,11 +145,15 @@ public class EncryptionFilter implements Filter {
         return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");
     }
 
-    private static class PlainTextRequestWrapper extends HttpServletRequestWrapper {
+    /**
+     * Wrapper que reemplaza completamente el body del request.
+     * IMPORTANTE: preserva el Content-Type original.
+     */
+    private static class DecryptedRequestWrapper extends HttpServletRequestWrapper {
         private final byte[] body;
         private final int contentLength;
 
-        public PlainTextRequestWrapper(HttpServletRequest request, byte[] body) {
+        public DecryptedRequestWrapper(HttpServletRequest request, byte[] body) {
             super(request);
             this.body = body;
             this.contentLength = body.length;
@@ -181,12 +178,14 @@ public class EncryptionFilter implements Filter {
         public long getContentLengthLong() {
             return contentLength;
         }
+
+        @Override
+        public String getHeader(String name) {
+            // Preservar Content-Type original para que Spring MVC sepa que es JSON
+            return super.getHeader(name);
+        }
     }
 
-    /**
-     * Implementación correcta de ServletInputStream sobre un byte array.
-     * isFinished() solo devuelve true cuando read() retorna -1 (EOF).
-     */
     private static class ByteArrayServletInputStream extends ServletInputStream {
         private final ByteArrayInputStream bais;
         private boolean finished = false;
@@ -216,7 +215,7 @@ public class EncryptionFilter implements Filter {
 
         @Override
         public void setReadListener(ReadListener readListener) {
-            // No-op: synchronous read
+            // synchronous
         }
     }
 
@@ -266,8 +265,6 @@ public class EncryptionFilter implements Filter {
 
         @Override
         public void flushBuffer() {
-            // No propagar flush al response original, pero sí hacer flush
-            // del writer interno si está siendo usado
             if (writerUsed && writer != null) {
                 writer.flush();
             }
