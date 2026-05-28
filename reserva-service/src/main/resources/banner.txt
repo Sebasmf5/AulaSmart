@@ -1,0 +1,23 @@
+${AnsiColor.CYAN}
+______                                 _____                 _
+| ___ \                               /  ___|               (_)
+| |_/ /___  ___  ___ _ ____   ____ _  \ `--.  ___ _ ____   ___  ___ ___
+|    // _ \/ __|/ _ \ '__\ \ / / _` |  `--. \/ _ \ '__\ \ / / |/ __/ _ \
+| |\ \  __/\__ \  __/ |   \ V / (_| | /\__/ /  __/ |   \ V /| | (_|  __/
+\_| \_\___||___/\___|_|    \_/ \__,_| \____/ \___|_|    \_/ |_|\___\___|
+
+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}
+
+
+${application.title} ${application.version}
+Powered by Spring Boot ${spring-boot.version}
+
+${AnsiColor.YELLOW}
+======================================================
+:: AulaSmart ::            RESERVA-SERVICE
+======================================================
+${AnsiColor.DEFAULT}
+Spring Boot Version: ${spring-boot.version}
+Application Name: ${spring.application.name}

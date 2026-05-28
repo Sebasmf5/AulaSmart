@@ -1,10 +1,12 @@
 package co.edu.uceva.reservaservice.delevery.excepcion;
 
 import co.edu.uceva.reservaservice.domain.excepcion.*;
+import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -63,5 +65,88 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 
+    @ExceptionHandler(ReservaModificadaException.class)
+    public ResponseEntity<Map<String, Object>> handleReservaModificadaException(ReservaModificadaException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getMessage());
+        response.put(STATUS, HttpStatus.CONFLICT.value());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    /**
+     * Maneja errores de restricción de tipo de aula o permisos (ResponseStatusException)
+     * Ejemplo: estudiante intenta reservar un tipo de aula no permitido → 400
+     */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getReason());
+        response.put(STATUS, ex.getStatusCode().value());
+        return ResponseEntity.status(ex.getStatusCode()).body(response);
+    }
+
+    /**
+     * Maneja errores de Feign cuando el aula-service no encuentra el aula
+     * Ejemplo: codigoAula no existe en la base de datos del aula-service
+     */
+    @ExceptionHandler(FeignException.class)
+    public ResponseEntity<Map<String, Object>> handleFeignException(FeignException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        if (ex.status() == 404) {
+            response.put(MESSAGE, "El aula consultada no existe en el sistema.");
+            response.put(STATUS, 404);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+        response.put(MESSAGE, "Error al comunicarse con el servicio de aulas: " + ex.getMessage());
+        response.put(STATUS, ex.status());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @ExceptionHandler(ReservaNoPermitidaException.class)
+    public ResponseEntity<Map<String, Object>> handleReservaNoPermitidaException(ReservaNoPermitidaException ex){
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getMessage());
+        response.put(STATUS, HttpStatus.CONFLICT.value());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(AccesoNoAutorizadoException.class)
+    public ResponseEntity<Map<String, Object>> handleAccesoNoAutorizadoException(AccesoNoAutorizadoException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, ex.getMessage());
+        response.put(STATUS, HttpStatus.FORBIDDEN.value());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, Object>> handleMethodArgumentNotValid(org.springframework.web.bind.MethodArgumentNotValidException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        List<String> errores = ex.getBindingResult().getFieldErrors()
+                .stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .toList();
+        response.put(MESSAGE, "Error de validación en los datos de la reserva.");
+        response.put("errores", errores);
+        response.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, "Error al leer los datos de la reserva. Verifica que los valores (estado, rol, fechas) sean válidos.");
+        response.put("detalle", ex.getMostSpecificCause().getMessage());
+        response.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
+        HashMap<String, Object> response = new HashMap<>();
+        response.put(MESSAGE, "Error interno del servidor al procesar la reserva.");
+        response.put("detalle", ex.getMessage());
+        response.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
 
 }

@@ -1,17 +1,26 @@
 package co.edu.uceva.reservaservice.domain.service;
 
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaModificadaException;
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoEncontradaException;
 import co.edu.uceva.reservaservice.domain.excepcion.ReservaSolapadaException;
+import co.edu.uceva.reservaservice.domain.excepcion.ReservaNoPermitidaException;
 import co.edu.uceva.reservaservice.domain.model.EstadosReserva;
 import co.edu.uceva.reservaservice.domain.model.Reserva;
+import co.edu.uceva.reservaservice.domain.model.RolUsuario;
 import co.edu.uceva.reservaservice.domain.repository.IReservaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import co.edu.uceva.reservaservice.domain.integration.service.AgregadorReservasService;
+import co.edu.uceva.reservaservice.domain.integration.dto.ReservaDTO;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @Service
 @RequiredArgsConstructor //esto inyecta el repo actomáticamente
@@ -19,25 +28,68 @@ public class ReservaServiceImp implements IReservaService{
 
     //inyectar la dependencia del repositorio
     private final IReservaRepository reservaRepository;
+    private final AgregadorReservasService agregadorReservasService;
+    private final IAulaClient aulaClient;
 
     @Override
     @Transactional
     public Reserva addReserva(Reserva reserva) {
-        // Usamos la consulta SQL para verificar si el aula está libre o se cruza
-        boolean estaOcupado = reservaRepository.existeCruceDeHorarios(
-                reserva.getCodigoAula(),
-                reserva.getHoraInicio(),
-                reserva.getHoraFin()
+        // Validar integridad de las fechas
+        if (reserva.getHoraInicio() == null || reserva.getHoraFin() == null || !reserva.getHoraInicio().isBefore(reserva.getHoraFin())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser estrictamente anterior a la hora de fin");
+        }
+
+        // Validar reglas de negocio para ESTUDIANTES
+        if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
+            String tipoAula = aulaClient.getTipoDeAula(reserva.getAulaId());
+            // Los estudiantes solo pueden reservar tipo 78 y 79
+            if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
+                throw new ReservaNoPermitidaException("Los estudiantes solo pueden reservar aulas interactivas y audiovisuales");
+            }
+        }
+
+        // Validar si el aula requiere autorización
+        Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getAulaId());
+        if (Boolean.TRUE.equals(requiereAutorizacion)) {
+            reserva.setEstado(EstadosReserva.PENDIENTE);
+        } else {
+            reserva.setEstado(EstadosReserva.CONFIRMADA);
+        }
+
+        // Validar solapamiento externo (SIGA) antes de intentar guardar
+        List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorAulaId(
+            reserva.getAulaId(),
+            reserva.getHoraInicio().toLocalDate()
         );
 
-        System.out.println(estaOcupado);
-        if(estaOcupado){
+        boolean solapamientoExterno = reservasSiga.stream().anyMatch(reservaSiga -> 
+            fechasSeSolapan(
+                reserva.getHoraInicio(), reserva.getHoraFin(),
+                reservaSiga.getHoraInicio(), reservaSiga.getHoraFin()
+            )
+        );
+
+        if (solapamientoExterno) {
             throw new ReservaSolapadaException();
         }
-        reserva.setEstado(EstadosReserva.CONFIRMADA);
-        return reservaRepository.save(reserva);
+
+        try {
+            return reservaRepository.saveAndFlush(reserva);
+        } catch (DataIntegrityViolationException e) {
+            String message = e.getMostSpecificCause().getMessage();
+            if (message != null && message.contains("no_solapamiento_reservas")) {
+                throw new ReservaSolapadaException();
+            }
+            throw e;
+        }
     }
 
+    private boolean fechasSeSolapan(LocalDateTime inicio1, LocalDateTime fin1, LocalDateTime inicio2, LocalDateTime fin2) {
+        return inicio1.isBefore(fin2) && fin1.isAfter(inicio2);
+    }
+
+
+        // Validar 
     @Override
     @Transactional (readOnly = true)
     public Optional<Reserva> findReservaById(Long id) {
@@ -47,24 +99,71 @@ public class ReservaServiceImp implements IReservaService{
     @Override
     @Transactional
     public Reserva updateReserva(Reserva reserva) {
-        boolean estaOcupado = reservaRepository.existeCruceDeHorariosUpdate(
-                reserva.getCodigoAula(),
-                reserva.getHoraInicio(),
-                reserva.getHoraFin(),
-                reserva.getIdReserva()
+        // Recuperar la reserva existente para validar su estado
+        Reserva existente = reservaRepository.findById(reserva.getIdReserva())
+                .orElseThrow(() -> new ReservaNoEncontradaException(reserva.getIdReserva()));
+
+        // Solo se permite modificar reservas en estado PENDIENTE
+        if (existente.getEstado() != EstadosReserva.PENDIENTE) {
+            throw new ReservaNoPermitidaException(
+                    "No se puede modificar una reserva que ya está " + existente.getEstado().name().toLowerCase()
+            );
+        }
+
+        // Validar integridad de las fechas
+        if (reserva.getHoraInicio() == null || reserva.getHoraFin() == null || !reserva.getHoraInicio().isBefore(reserva.getHoraFin())) {
+            throw new IllegalArgumentException("La hora de inicio debe ser estrictamente anterior a la hora de fin");
+        }
+
+        if (reserva.getRolSolicitante() == RolUsuario.ESTUDIANTE) {
+            String tipoAula = aulaClient.getTipoDeAula(reserva.getAulaId());
+            if (!"78".equals(tipoAula) && !"79".equals(tipoAula)) {
+                throw new ReservaNoPermitidaException("Los estudiantes solo pueden reservar aulas interactivas y audiovisuales (Tipos 78 y 79).");
+            }
+        }
+
+        // Validar si el aula requiere autorización
+        Boolean requiereAutorizacion = aulaClient.getRequiereAutorizacion(reserva.getAulaId());
+        if (Boolean.TRUE.equals(requiereAutorizacion)) {
+            reserva.setEstado(EstadosReserva.PENDIENTE);
+        }
+
+        // Validar solapamiento externo (SIGA) antes de intentar actualizar
+        List<ReservaDTO> reservasSiga = agregadorReservasService.obtenerReservasSigaPorAulaId(
+            reserva.getAulaId(),
+            reserva.getHoraInicio().toLocalDate()
         );
 
-        if(estaOcupado){
+        boolean solapamientoExterno = reservasSiga.stream().anyMatch(reservaSiga -> 
+            fechasSeSolapan(
+                reserva.getHoraInicio(), reserva.getHoraFin(),
+                reservaSiga.getHoraInicio(), reservaSiga.getHoraFin()
+            )
+        );
+
+        if (solapamientoExterno) {
             throw new ReservaSolapadaException();
         }
 
-        return reservaRepository.save(reserva);
+        try {
+            return reservaRepository.saveAndFlush(reserva);
+        } catch (DataIntegrityViolationException e) {
+            String message = e.getMostSpecificCause().getMessage();
+            if (message != null && message.contains("no_solapamiento_reservas")) {
+                throw new ReservaSolapadaException();
+            }
+            throw e;
+        }catch (ObjectOptimisticLockingFailureException e) {
+            // Alguien más modificó esta reserva antes que tú
+            throw new ReservaModificadaException(reserva.getIdReserva());
+        }
     }
 
     @Override
     @Transactional
     public void deleteReserva(Reserva reserva) {
-        reservaRepository.delete(reserva);
+        reserva.setEstado(EstadosReserva.CANCELADA);
+        reservaRepository.save(reserva);
     }
 
     @Override
@@ -77,5 +176,41 @@ public class ReservaServiceImp implements IReservaService{
     @Transactional (readOnly = true)
     public Page<Reserva> findAll(Pageable pageable) {
         return reservaRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> findAulasOcupadasEnRango(LocalDateTime horaInicio, LocalDateTime horaFin) {
+        return reservaRepository.findAulasOcupadasEnRango(horaInicio, horaFin);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> findByIdSolicitante(Long idSolicitante) {
+        return reservaRepository.findByIdSolicitante(idSolicitante);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Reserva> findReservasPendientes() {
+        return reservaRepository.findByEstado(EstadosReserva.PENDIENTE);
+    }
+
+    @Override
+    @Transactional
+    public Reserva confirmarReserva(Long idReserva) {
+        Reserva reserva = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new ReservaNoEncontradaException(idReserva));
+        reserva.setEstado(EstadosReserva.CONFIRMADA);
+        return reservaRepository.save(reserva);
+    }
+
+    @Override
+    @Transactional
+    public Reserva rechazarReserva(Long idReserva) {
+        Reserva reserva = reservaRepository.findById(idReserva)
+                .orElseThrow(() -> new ReservaNoEncontradaException(idReserva));
+        reserva.setEstado(EstadosReserva.CANCELADA);
+        return reservaRepository.save(reserva);
     }
 }

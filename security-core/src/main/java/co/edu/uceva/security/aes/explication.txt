@@ -1,0 +1,76 @@
+
+1. AES.java
+Función: Clase de alto nivel que coordina todo el cifrado y descifrado.
+Qué hace:
+Divide el mensaje en bloques de 16 bytes.
+Aplica padding para completar bloques.
+Llama a AESBlockCipher para cifrar/descifrar cada bloque.
+Devuelve el mensaje completo cifrado o descifrado.
+
+2. AESBlockCipher.java
+Función: Encargada de aplicar las transformaciones de AES a un bloque de 16 bytes.
+Qué hace:
+Para cifrado:
+SubBytes
+ShiftRows
+MixColumns (excepto última ronda)
+AddRoundKey
+Para descifrado, aplica las transformaciones inversas en orden inverso.
+
+3. AESKeyExpansion.java
+Función: Genera todas las subclaves de cada ronda a partir de la clave original.
+Qué hace:
+Implementa RotWord, SubWord, y la constante Rcon.
+Devuelve un arreglo de subclaves para que AESBlockCipher las use.
+
+4. Padding.java
+Función: Agrega y quita padding a los bloques para que siempre tengan 16 bytes.
+Qué hace:
+Implementa, por ejemplo, PKCS#7.
+Permite cifrar mensajes que no son múltiplo de 16 bytes.
+
+Paquete: transformaciones
+
+Estas clases aplican una sola transformación de AES a un bloque (una matriz 4x4 de bytes).
+
+5. SubBytes.java
+Función: Sustituye cada byte del bloque usando la S-box de AES.
+Qué hace:
+Transforma los bytes según la tabla S-box.
+Crea confusión (confuses relationship between plaintext and ciphertext).
+
+6. ShiftRows.java
+Función: Desplaza las filas de la matriz de bytes.
+Qué hace:
+Fila 0: no se mueve
+Fila 1: rota 1 byte a la izquierda
+Fila 2: rota 2 bytes a la izquierda
+Fila 3: rota 3 bytes a la izquierda
+Objetivo: Difundir los bytes en el bloque para seguridad (propagación de cambios).
+
+7. MixColumns.java
+Función: Mezcla los bytes de cada columna usando operaciones en GF(2^8).
+Qué hace:
+Multiplica la columna por una matriz fija.
+Propaga cambios de un byte a toda la columna.
+
+8. AddRoundKey.java
+Función: Aplica la subclave de la ronda al bloque mediante XOR.
+Qué hace:
+XOR byte a byte entre el bloque y la subclave.
+
+Flujo de trabajo de AES
+
+AES.encrypt(data, key)
+     |
+     v
+Divide en bloques -> Aplica padding
+     |
+     v
+AESBlockCipher.encryptBlock(block, expandedKeys)
+     |
+     v
+SubBytes -> ShiftRows -> MixColumns -> AddRoundKey (por ronda)
+     |
+     v
+Combina bloques cifrados -> return encryptedData

@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: aulasmart-db
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # PostgreSQL en PC vieja: 512MB es suficiente para 4 DBs pequeñas
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  usuarios-service:
+    build:
+      context: ./usuarios-service
+      dockerfile: Dockerfile
+    container_name: usuarios-service
+    restart: unless-stopped
+    ports:
+      - "8081:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/usuariosdb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JAVA_OPTS=-XX:MaxRAMPercentage=60.0 -XX:+UseSerialGC
+      - TZ=America/Bogota
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+
+  reserva-service:
+    build:
+      context: ./reserva-service
+      dockerfile: Dockerfile
+    container_name: reserva-service
+    restart: unless-stopped
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/reservadb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
+      - JAVA_OPTS=-XX:MaxRAMPercentage=60.0 -XX:+UseSerialGC
+      - TZ=America/Bogota
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+
+  aula-service:
+    build:
+      context: ./aula-service
+      dockerfile: Dockerfile
+    container_name: aula-service
+    restart: unless-stopped
+    ports:
+      - "8083:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/auladb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JAVA_OPTS=-XX:MaxRAMPercentage=60.0 -XX:+UseSerialGC
+      - TZ=America/Bogota
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+
+  incidencia-service:
+    build:
+      context: ./incidencia-service
+      dockerfile: Dockerfile
+    container_name: incidencia-service
+    restart: unless-stopped
+    ports:
+      - "8085:8087"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/incidenciadb
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - API_KEY_GROQ=${API_KEY_GROQ}
+      - JAVA_OPTS=-XX:MaxRAMPercentage=60.0 -XX:+UseSerialGC
+      - TZ=America/Bogota
+    volumes:
+      - incidencia-uploads:/app/uploads/incidencias
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+
+  chat-service:
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    container_name: chat-service
+    restart: unless-stopped
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
+      - URL_SERVICIO_RESERVA=http://reserva-service:8080
+      - SPRING_AI_OPENAI_API_KEY=${OPEN_CODE_API}
+      - SPRING_AI_OPENAI_BASE_URL=https://opencode.ai/zen/go/v1
+      - JAVA_OPTS=-XX:MaxRAMPercentage=60.0 -XX:+UseSerialGC
+      - TZ=America/Bogota
+    depends_on:
+      postgres:
+        condition: service_healthy
+      reserva-service:
+        condition: service_started
+      aula-service:
+        condition: service_started
+    networks:
+      - backend
+    deploy:
+      resources:
+        limits:
+          memory: 350M
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  pgdata:
+  incidencia-uploads:

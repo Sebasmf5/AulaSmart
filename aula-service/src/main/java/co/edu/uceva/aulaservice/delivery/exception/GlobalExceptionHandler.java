@@ -89,4 +89,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 
     }
+
+    @ExceptionHandler(AulaCodigoNoEncontrada.class)
+    public ResponseEntity<Map<String, Object>> handleAulaCodigoNoEncontrada(AulaCodigoNoEncontrada ex) {
+        Map<String, Object> response = new HashMap<>();
+        response.put(ERROR, ex.getMessage());
+        response.put(STATUS, HttpStatus.BAD_REQUEST.value());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 }
