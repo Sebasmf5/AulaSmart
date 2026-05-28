@@ -115,8 +115,10 @@ public class AgregadorReservasService {
         }
 
         // Para cada aula sincronizada con SIGA, consultamos la API externa con su codigoAula
-        // y si está ocupada, agregamos su aulaId a la lista
-        List<Long> ocupadasSiga = aulasSincronizadas.parallelStream()
+        // y si esta ocupada, agregamos su aulaId a la lista.
+        // NOTA: NO usar parallelStream. ForkJoinPool no hereda RequestContextHolder del hilo
+        // del request HTTP, lo que rompe la propagacion del JWT en FeignClientInterceptor.
+        List<Long> ocupadasSiga = aulasSincronizadas.stream()
                 .filter(map -> {
                     Object aulaIdObj = map.get("id");
                     return aulaIdObj != null && !ocupadas.contains(((Number) aulaIdObj).longValue());
