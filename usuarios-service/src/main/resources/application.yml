@@ -38,8 +38,6 @@ server:
   port: 8084
 
 management:
-  server:
-    port: 8085
   endpoints:
     web:
       exposure:

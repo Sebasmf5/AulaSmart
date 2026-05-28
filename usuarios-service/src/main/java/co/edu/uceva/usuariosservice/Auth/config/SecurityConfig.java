@@ -43,6 +43,7 @@ public class SecurityConfig {
                         req.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/api/v1/auth/**", "/api/v1/crypto/public-key", "/api/v1/crypto/handshake")
                                 .permitAll()
+                                .requestMatchers("/actuator/health").permitAll()
                                 .anyRequest()
                                 .authenticated()
                 )
