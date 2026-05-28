@@ -1,0 +1,27 @@
+server:
+  port: ${PORT:8086}
+
+spring:
+  ai:
+    openai:
+      api-key: ${SPRING_AI_OPENAI_API_KEY}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.groq.com/openai/v1}
+      chat:
+        options:
+          model: ${SPRING_AI_OPENAI_MODEL:openai/gpt-oss-120b}
+          temperature: 0.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    web: WARN
+    org.hibernate.SQL: WARN
+    com.zaxxer.hikari: WARN
+    org.hibernate: WARN
