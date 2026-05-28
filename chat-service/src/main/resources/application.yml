@@ -10,10 +10,10 @@ spring:
   ai:
     openai:
       api-key: ${SPRING_AI_OPENAI_API_KEY}
-      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://opencode.ai/zen/go/v1}
+      base-url: ${SPRING_AI_OPENAI_BASE_URL:https://api.groq.com/openai/v1}
       chat:
         options:
-          model: ${SPRING_AI_OPENAI_MODEL:kimi-k2.6}
+          model: ${SPRING_AI_OPENAI_MODEL:openai/gpt-oss-120b}
           temperature: 0.0
   cloud:
     openfeign:

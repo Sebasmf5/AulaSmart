@@ -116,8 +116,8 @@ services:
       - APPLICATION_SECURITY_JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - URL_SERVICIO_ASISTENCIA=http://aula-service:8082
       - URL_SERVICIO_RESERVA=http://reserva-service:8080
-      - SPRING_AI_OPENAI_API_KEY=${OPEN_CODE_API}
-      - SPRING_AI_OPENAI_BASE_URL=https://opencode.ai/zen/go/v1
+      - SPRING_AI_OPENAI_API_KEY=${GROQ_API_KEY_CHAT}
+      - SPRING_AI_OPENAI_BASE_URL=https://api.groq.com/openai/v1
       - TZ=America/Bogota
     depends_on:
       postgres:
