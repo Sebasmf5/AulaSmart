@@ -112,5 +112,10 @@ public class AulaServiceImpl  implements IAulaService {
     public List<Aula> filtrarPorTipoAulaId(Long tipoAulaId) {
         return repository.findByTipoAulaId(tipoAulaId);
     }
+
+    @Override
+    public List<Aula> findByIdIn(List<Long> ids) {
+        return repository.findAllById(ids);
+    }
 }
 

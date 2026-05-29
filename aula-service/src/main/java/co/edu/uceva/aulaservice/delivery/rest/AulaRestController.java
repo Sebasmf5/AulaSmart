@@ -306,4 +306,22 @@ public class AulaRestController {
                 .collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(resultado);
     }
+
+    /**
+     * Endpoint para el chat-service: devuelve las aulas cuyos IDs estan en la lista recibida.
+     * Usado internamente para obtener datos de aulas filtradas por disponibilidad.
+     */
+    @GetMapping("/aulas/disponibles")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'ADMINISTRATIVO', 'DOCENTE', 'ESTUDIANTE')")
+    public ResponseEntity<Map<String, Object>> getAulasDisponibles(
+            @RequestParam(required = false) String fecha,
+            @RequestParam(required = false) String horaInicio,
+            @RequestParam(required = false) String horaFin
+    ) {
+        List<Aula> todas = aulaService.findAll();
+        Map<String, Object> response = new HashMap<>();
+        response.put(AULAS, todas);
+        response.put(MENSAJE, "Aulas obtenidas correctamente");
+        return ResponseEntity.ok(response);
+    }
 }

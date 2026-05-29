@@ -21,24 +21,61 @@ spring:
         config:
           default:
             connectTimeout: 5000
-            readTimeout: 60000
+            readTimeout: 30000
+            loggerLevel: BASIC
+          aula-service:
+            connectTimeout: 5000
+            readTimeout: 30000
+          reserva-service:
+            connectTimeout: 5000
+            readTimeout: 30000
+      compression:
+        request:
+          enabled: true
+        response:
+          enabled: true
+
+logging:
+  level:
+    co.edu.uceva.chatservice: INFO
+    co.edu.uceva.chatservice.domain.config.ChatToolsConfig: INFO
+    co.edu.uceva.chatservice.domain.FeignClients: DEBUG
 
 chat:
   system-prompt: >
     Eres AulaBot, asistente de reservas de aulas de UCEVA.
-    Solo respondes sobre aulas y reservas.
-    Para consultas de disponibilidad o reservas, DEBES usar tus tools.
-    No inventes datos. Usa el contexto de la conversación para follow-ups.
-    Antes de reservar, pide el motivo/título si no lo tiene.
-    También pregunta el código del programa académico si el usuario no lo ha proporcionado y parece relevante.
-    La fecha de hoy se te proporcionará en cada conversación.
+    Solo respondes sobre aulas y reservas. No inventes datos NUNCA.
+    
+    TUS HERRAMIENTAS (DEBES USARLAS para consultas de disponibilidad):
+    1. listarAulasDisponibles - Para consultas generales como "aulas disponibles hoy"
+       o "que aulas hay libres?". Usala cuando el usuario NO especifica bloque ni tipo.
+    2. consultarPorBloque - Cuando el usuario menciona un bloque especifico.
+    3. consultarPorTipo - Cuando el usuario menciona un tipo de aula.
+    4. consultarPorNombreAula - Para verificar un aula especifica por nombre.
+    5. consultarHorariosAula - Para ver el horario completo de un aula.
+    6. reservarAulaTool - Para crear una reserva.
+    
+    REGLAS ESTRICTAS:
+    - Para CUALQUIER consulta de disponibilidad, DEBES llamar a una tool.
+    - NUNCA respondas con nombres de aulas sin haber llamado una tool.
+    - Si el usuario no especifica bloque ni tipo, USA listarAulasDisponibles.
+    - Si una tool falla, di "Error al consultar disponibilidad" y NO inventes datos.
+    - Antes de reservar, pide el motivo/titulo si no lo tiene.
+    - Pregunta el codigo del programa academico si es relevante.
+    - La fecha de hoy se te proporcionara en cada mensaje.
+    
+    ⚠️ FORMATO OBLIGATORIO PARA LISTAR AULAS:
+    | Bloque | Aula | Codigo | Capacidad |
+    |--------|------|--------|-----------|
+    
+    NO uses viñetas sueltas para listar aulas. Usa tabla.
   cache:
     enabled: ${CHAT_CACHE_ENABLED:true}
 
 conexion:
   servicios:
     aula-service:
-      url: ${URL_SERVICIO_ASISTENCIA:http://aula-service:8083}
+      url: ${URL_SERVICIO_ASISTENCIA:http://aula-service:8082}
     reserva-service:
       url: ${URL_SERVICIO_RESERVA:http://reserva-service:8080}
 

@@ -26,4 +26,5 @@ public interface IAulaService {
         List<Aula> filtrarPorNombre(String nombre);
         List<Aula> filtrarPorTipoAula(String tipoAula);
         List<Aula> filtrarPorTipoAulaId(Long tipoAulaId);
+        List<Aula> findByIdIn(List<Long> ids);
 }
