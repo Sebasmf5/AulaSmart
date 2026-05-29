@@ -15,14 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
  * o cuando hay consultas frecuentes (ej: "aulas disponibles hoy").
  *
  * TTL separados:
- *   - Disponibilidad: 30 segundos (cambia rápido si alguien reserva)
+ *   - Disponibilidad: 0 segundos (NUNCA cachear - la disponibilidad cambia en tiempo real)
  *   - Datos estáticos: 5 minutos (nombres, capacidades, bloques)
  */
 @Service
 @Slf4j
 public class ChatCacheService {
 
-    static final Duration CACHE_TTL_DISPONIBILIDAD = Duration.ofSeconds(30);
+    static final Duration CACHE_TTL_DISPONIBILIDAD = Duration.ZERO;
     static final Duration CACHE_TTL_ESTATICO = Duration.ofMinutes(5);
     private static final int MAX_CACHE_SIZE = 100;
 

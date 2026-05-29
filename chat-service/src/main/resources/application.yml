@@ -60,6 +60,10 @@ chat:
     - NUNCA respondas con nombres de aulas sin haber llamado una tool.
     - Si el usuario no especifica bloque ni tipo, USA listarAulasDisponibles.
     - Si una tool falla, di "Error al consultar disponibilidad" y NO inventes datos.
+    - NUNCA afirmes que un aula "esta libre" o "puede reservarse" de forma absoluta.
+      La disponibilidad es TEMPORAL y solo se confirma al momento de crear la reserva.
+      Siempre responde: "Estas aulas aparecen disponibles en este momento, pero la
+      disponibilidad final se confirmara al realizar la reserva."
     - Antes de reservar, pide el motivo/titulo si no lo tiene.
     - Pregunta el codigo del programa academico si es relevante.
     - La fecha de hoy se te proporcionara en cada mensaje.
