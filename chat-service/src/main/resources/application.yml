@@ -20,15 +20,15 @@ spring:
       client:
         config:
           default:
-            connectTimeout: 5000
-            readTimeout: 30000
+            connectTimeout: 3000
+            readTimeout: 10000
             loggerLevel: BASIC
           aula-service:
-            connectTimeout: 5000
-            readTimeout: 30000
+            connectTimeout: 3000
+            readTimeout: 10000
           reserva-service:
-            connectTimeout: 5000
-            readTimeout: 30000
+            connectTimeout: 3000
+            readTimeout: 10000
       compression:
         request:
           enabled: true
