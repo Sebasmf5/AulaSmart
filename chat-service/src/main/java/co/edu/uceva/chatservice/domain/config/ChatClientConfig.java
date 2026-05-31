@@ -23,10 +23,10 @@ public class ChatClientConfig {
     @Value("${spring.ai.openai.api-key}")
     private String apiKey;
 
-    @Value("${spring.ai.openai.base-url:https://opencode.ai/zen/go/v1}")
+    @Value("${spring.ai.openai.base-url:https://api.groq.com/openai/v1}")
     private String baseUrl;
 
-    @Value("${spring.ai.openai.chat.options.model:kimi-k2.6}")
+    @Value("${spring.ai.openai.chat.options.model:openai/gpt-oss-120b}")
     private String model;
 
     @Value("${chat.system-prompt}")

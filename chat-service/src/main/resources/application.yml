@@ -21,7 +21,18 @@ spring:
         config:
           default:
             connectTimeout: 5000
-            readTimeout: 60000
+            readTimeout: 90000
+          aula-service:
+            connectTimeout: 5000
+            readTimeout: 90000
+          reserva-service:
+            connectTimeout: 5000
+            readTimeout: 90000
+      compression:
+        request:
+          enabled: true
+        response:
+          enabled: true
 
 chat:
   system-prompt: >

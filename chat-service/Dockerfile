@@ -3,4 +3,8 @@ RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 WORKDIR /app
 COPY target/*.jar app.jar
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
+ENTRYPOINT ["java", \
+  "-Xms256m", "-Xmx512m", \
+  "-XX:+UseContainerSupport", \
+  "-Djava.security.egd=file:/dev/./urandom", \
+  "-jar", "app.jar"]
