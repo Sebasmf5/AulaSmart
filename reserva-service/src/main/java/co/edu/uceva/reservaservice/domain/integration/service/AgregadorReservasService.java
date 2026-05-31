@@ -18,6 +18,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -115,28 +119,37 @@ public class AgregadorReservasService {
         }
 
         // Para cada aula sincronizada con SIGA, consultamos la API externa con su codigoAula
-        // y si está ocupada, agregamos su aulaId a la lista
-        List<Long> ocupadasSiga = aulasSincronizadas.parallelStream()
-                .filter(map -> {
-                    Object aulaIdObj = map.get("id");
-                    return aulaIdObj != null && !ocupadas.contains(((Number) aulaIdObj).longValue());
-                })
-                .filter(map -> {
-                    try {
-                        Object codigoAulaObj = map.get("codigoAula");
-                        if (codigoAulaObj == null) return false;
-                        Long codigoAula = ((Number) codigoAulaObj).longValue();
-                        List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoAula, fecha);
-                        return reservasSiga.stream().anyMatch(r -> seSolapa(r, horaInicio, horaFin));
-                    } catch (Exception e) {
-                        System.err.println("[AgregadorReservasService] Error consultando SIGA: " + e.getMessage());
-                        return false;
+        // y si esta ocupada, agregamos su aulaId a la lista.
+        // Pool de 16 hilos con timeout 1500ms por llamada SIGA.
+        ExecutorService executor = Executors.newFixedThreadPool(8);
+        List<CompletableFuture<Long>> futures = new ArrayList<>();
+        for (Map<String, Object> map : aulasSincronizadas) {
+            Object aulaIdObj = map.get("id");
+            if (aulaIdObj == null || ocupadas.contains(((Number) aulaIdObj).longValue())) continue;
+            Object codigoAulaObj = map.get("codigoAula");
+            if (codigoAulaObj == null) continue;
+            Long codigoAula = ((Number) codigoAulaObj).longValue();
+            Long aulaId = ((Number) aulaIdObj).longValue();
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                try {
+                    List<SigaReservaDTO> reservasSiga = sigaClient.obtenerReservasPorAulaYFecha(codigoAula, fecha);
+                    if (reservasSiga.stream().anyMatch(r -> seSolapa(r, horaInicio, horaFin))) {
+                        return aulaId;
                     }
-                })
-                .map(map -> ((Number) map.get("id")).longValue())
-                .collect(Collectors.toList());
-
-        ocupadas.addAll(ocupadasSiga);
+                } catch (Exception e) {
+                    return aulaId; // si SIGA falla, asumir ocupada por seguridad
+                }
+                return null;
+            }, executor));
+        }
+        for (CompletableFuture<Long> f : futures) {
+            try {
+                Long id = f.get(2000, TimeUnit.MILLISECONDS);
+                if (id != null) ocupadas.add(id);
+            } catch (Exception ignored) {
+            }
+        }
+        executor.shutdown();
 
         return new ArrayList<>(ocupadas);
     }

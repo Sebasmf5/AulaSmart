@@ -443,8 +443,13 @@ public class ChatToolsConfig {
         } catch (FeignException.BadRequest e) {
             log.error("[reservarAulaTool] Error 400 al crear reserva. Body: {}", e.contentUTF8());
             return "Error en los datos de la reserva: " + e.contentUTF8();
+        } catch (FeignException.Conflict e) {
+            log.warn("[reservarAulaTool] 409 - Aula ya reservada. Body: {}", e.contentUTF8());
+            return "El aula '" + nombreAula + "' ya esta reservada el " + fecha
+                    + " de " + horaInicio + " a " + horaFin
+                    + ". Por favor elige otro horario u otra aula.";
         } catch (FeignException e) {
-            log.error("[reservarAulaTool] Error de comunicación al crear reserva: {} | Status: {} | Body: {}", e.getMessage(), e.status(), e.contentUTF8());
+            log.error("[reservarAulaTool] Error de comunicacion al crear reserva: {} | Status: {} | Body: {}", e.getMessage(), e.status(), e.contentUTF8());
             return MSG_ERROR_RED;
         } catch (Exception e) {
             log.error("[reservarAulaTool] Error inesperado al crear reserva: {}", e.getMessage());
